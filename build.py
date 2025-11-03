@@ -107,17 +107,24 @@ def get_git_tag():
 
 
 def get_auto_version():
-    """获取自动版本号（基于提交计数）"""
+    """获取自动版本号（基于提交计数，从0.0.0开始）"""
     # 获取总提交数
     returncode, stdout, stderr = run_command(['git', 'rev-list', '--count', 'HEAD'])
     if returncode == 0 and stdout:
-        commit_count = stdout.strip()
-        # 生成 1.0.{commit_count} 格式的版本号
-        return f"1.0.{commit_count}"
+        commit_count = int(stdout.strip())
+        
+        # 计算版本号组件 (从 0.0.0 开始)
+        major = commit_count // 1000  # 每1000个提交进1
+        minor = (commit_count % 1000) // 100  # 每100个提交进1
+        patch = commit_count % 100  # 每个提交进1
+        
+        version = f"{major}.{minor}.{patch}"
+        print_info(f"提交计数: {commit_count} -> 版本号: {version}")
+        return version
     
     # 如果 Git 命令失败，使用时间戳
     timestamp = datetime.now().strftime('%Y%m%d%H%M')
-    return f"1.0.{timestamp}"
+    return f"0.0.{timestamp}"
 
 
 def get_git_branch():
@@ -193,9 +200,11 @@ class Builder:
             # 使用指定的版本号
             self.version = args.version
         
-        # 如果状态是 dirty，在版本号后面加上标记（除非是自动版本）
-        if self.git_status == "dirty" and args.version != "auto":
+        # 如果状态是 dirty，在版本号后面加上标记
+        if self.git_status == "dirty":
             self.version += "-dirty"
+            print_warning(f"检测到未提交的更改，版本号标记为: {self.version}")
+            print_info("提交更改后重新编译可创建正式标签")
         
         # 初始化 swagger 工具
         self.swagger_available = False
@@ -238,10 +247,10 @@ class Builder:
         
         # 检查是否有未提交的更改
         if self.git_status == "dirty":
-            print_error("存在未提交的更改，无法创建标签")
-            print_info("请先提交所有更改，然后重新编译")
-            print_info("或使用 --no-tag 参数跳过标签创建")
-            return False
+            print_warning("存在未提交的更改，跳过标签创建和推送")
+            print_info("编译完成，但未创建Git标签")
+            print_info("提交更改后重新编译可创建正式标签并推送")
+            return True  # 返回True，不阻止编译完成
         
         # 检查是否在主分支或发布分支
         allowed_branches = ['main', 'master', 'release', 'develop']
