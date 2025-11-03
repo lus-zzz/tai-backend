@@ -192,14 +192,6 @@ class Builder:
         else:
             # 使用指定的版本号
             self.version = args.version
-            
-            # 如果有 Git 标签且未明确指定版本，使用 Git 标签
-            if self.git_tag and args.version == "1.0.0":
-                # 移除 'v' 前缀
-                tag_version = self.git_tag
-                if tag_version.startswith('v'):
-                    tag_version = tag_version[1:]
-                self.version = tag_version
         
         # 如果状态是 dirty，在版本号后面加上标记（除非是自动版本）
         if self.git_status == "dirty" and args.version != "auto":
@@ -490,8 +482,8 @@ class Builder:
 
 def main():
     parser = argparse.ArgumentParser(description='Chat Backend 编译脚本')
-    parser.add_argument('-v', '--version', default='1.0.0', 
-                        help='版本号 (默认: 1.0.0, 使用 "auto" 自动生成版本号)')
+    parser.add_argument('-v', '--version', default='auto', 
+                        help='版本号 (默认: auto - 自动生成版本号)')
     parser.add_argument('-o', '--output', default='release', help='输出目录 (默认: release)')
     parser.add_argument('-p', '--platform', choices=['all', 'windows', 'linux', 'darwin', 'current'], 
                         default='current', help='编译平台 (默认: current)')
