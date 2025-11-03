@@ -1276,7 +1276,8 @@
           "description": "知识库ID列表",
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "integer",
+            "format": "int64"
           },
           "x-go-name": "KnowledgeBaseIDs"
         },
@@ -1453,7 +1454,8 @@
           "description": "知识库ID列表",
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "integer",
+            "format": "int64"
           },
           "x-go-name": "KnowledgeBaseIDs"
         },
@@ -1556,7 +1558,8 @@
           "description": "知识库ID列表",
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "integer",
+            "format": "int64"
           },
           "x-go-name": "KnowledgeBaseIDs"
         },
@@ -2739,7 +2742,7 @@
       "x-go-package": "flowy-sdk/services/agent"
     },
     "VersionInfo": {
-      "description": "VersionInfo 版本信息响应结构",
+      "description": "VersionInfo 版本信息结构（用于响应）",
       "type": "object",
       "required": [
         "version",
@@ -2775,7 +2778,7 @@
           "x-go-name": "Version"
         }
       },
-      "x-go-package": "chat-backend/handlers"
+      "x-go-package": "chat-backend/models"
     },
     "WebSocketMessage": {
       "description": "WebSocketMessage WebSocket消息",
