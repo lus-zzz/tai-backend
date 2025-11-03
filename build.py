@@ -121,6 +121,38 @@ def get_git_status():
     return "clean"
 
 
+def create_git_tag(tag_name, message=None):
+    """创建 Git 标签"""
+    if message is None:
+        message = f"Release {tag_name}"
+    
+    # 检查标签是否已存在
+    returncode, stdout, stderr = run_command(['git', 'tag', '-l', tag_name])
+    if returncode == 0 and stdout.strip():
+        print_warning(f"标签 {tag_name} 已存在")
+        return False
+    
+    # 创建标签
+    returncode, stdout, stderr = run_command(['git', 'tag', '-a', tag_name, '-m', message])
+    if returncode != 0:
+        print_error(f"创建标签失败: {stderr}")
+        return False
+    
+    print_success(f"已创建标签: {tag_name}")
+    return True
+
+
+def push_git_tag(tag_name):
+    """推送 Git 标签到远程仓库"""
+    returncode, stdout, stderr = run_command(['git', 'push', 'origin', tag_name])
+    if returncode != 0:
+        print_error(f"推送标签失败: {stderr}")
+        return False
+    
+    print_success(f"已推送标签到远程仓库: {tag_name}")
+    return True
+
+
 class Builder:
     """编译器类"""
 
@@ -179,6 +211,41 @@ class Builder:
         else:
             print_success(f"swagger 工具已就绪: {stdout}")
             self.swagger_available = True
+
+    def handle_git_tagging(self):
+        """处理 Git 标签"""
+        if not self.args.auto_tag:
+            return True
+        
+        # 检查是否有未提交的更改
+        if self.git_status == "dirty":
+            print_error("存在未提交的更改，无法创建标签")
+            print_info("请先提交所有更改，然后重新编译")
+            return False
+        
+        # 检查是否在主分支或发布分支
+        allowed_branches = ['main', 'master', 'release', 'develop']
+        if self.git_branch not in allowed_branches:
+            print_warning(f"当前分支 '{self.git_branch}' 不在推荐的发布分支列表中: {allowed_branches}")
+            if not self.args.force_tag:
+                print_info("使用 --force-tag 参数可强制在当前分支创建标签")
+                return False
+        
+        tag_name = f"v{self.version}"
+        
+        # 创建标签
+        if create_git_tag(tag_name, f"Release {self.version}"):
+            # 如果指定了推送标签，则推送到远程
+            if self.args.push_tag:
+                if not push_git_tag(tag_name):
+                    print_warning("标签创建成功但推送失败")
+                    return False
+            else:
+                print_info("标签已创建，使用 --push-tag 参数可自动推送到远程仓库")
+            return True
+        else:
+            print_error("标签创建失败")
+            return False
 
     def print_build_info(self):
         """打印编译信息"""
@@ -362,6 +429,12 @@ class Builder:
                 print_error("所有平台编译失败")
                 sys.exit(1)
             
+            # 编译成功后处理 Git 标签
+            if self.args.auto_tag:
+                print_info("开始处理 Git 标签...")
+                if not self.handle_git_tagging():
+                    print_warning("Git 标签处理失败，但编译已完成")
+            
             # 显示结果
             print(f"\n{Colors.BOLD}{'='*60}{Colors.ENDC}")
             print_success(f"编译完成! 成功 {success_count}/{total_count}")
@@ -398,7 +471,17 @@ def main():
     parser.add_argument('--skip-deps', action='store_true', help='跳过依赖下载')
     parser.add_argument('--skip-swagger', action='store_true', help='跳过 Swagger 文档生成')
     
+    # Git 标签相关参数
+    parser.add_argument('--auto-tag', action='store_true', help='编译成功后自动创建 Git 标签')
+    parser.add_argument('--push-tag', action='store_true', help='创建标签后自动推送到远程仓库 (需要与 --auto-tag 一起使用)')
+    parser.add_argument('--force-tag', action='store_true', help='强制在当前分支创建标签，忽略分支检查')
+    
     args = parser.parse_args()
+    
+    # 参数验证
+    if args.push_tag and not args.auto_tag:
+        print_error("--push-tag 参数必须与 --auto-tag 一起使用")
+        sys.exit(1)
     
     builder = Builder(args)
     builder.build()
