@@ -309,7 +309,7 @@ type ConversationSettings struct {
 	Stream bool `json:"stream"`
 	// 知识库ID列表
 	// required: true
-	KnowledgeBaseIDs []string `json:"knowledge_base_ids"`
+	KnowledgeBaseIDs []int `json:"knowledge_base_ids"`
 	// 上下文限制（消息数量）
 	// required: true
 	ContextLimit int `json:"contextLimit"`
@@ -320,7 +320,7 @@ func NewDefaultConversationSettings() *ConversationSettings {
 	return &ConversationSettings{
 		Name:             "",
 		Desc:             "",
-		KnowledgeBaseIDs: []string{},
+		KnowledgeBaseIDs: []int{},
 		Temperature:      1,
 		TopP:             1,
 		PresencePenalty:  0.0,

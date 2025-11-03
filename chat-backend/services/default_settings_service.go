@@ -47,17 +47,17 @@ func (s *DefaultSettingsService) getBuiltinDefaults() *models.DefaultSettings {
 			EmbeddingModelID: 1, // 默认嵌入模型ID（向量模型）
 		},
 		Conversation: models.DefaultConversationConfig{
-			Name:             "新对话",      // 默认对话名称
-			Desc:             "",         // 默认对话描述
-			ModelID:          2,          // 默认模型ID
-			Temperature:      1,          // 默认温度（多样性）
-			TopP:             1,          // 默认采样范围
-			FrequencyPenalty: 0.0,        // 默认重复控制
-			PresencePenalty:  0.0,        // 默认词汇控制
-			ResponseType:     "text",     // 默认响应类型
-			Stream:           true,       // 默认启用流式输出
-			KnowledgeBaseIDs: []string{}, // 默认不关联知识库
-			ContextLimit:     16,         // 默认上下文限制16条消息
+			Name:             "新对话",   // 默认对话名称
+			Desc:             "",      // 默认对话描述
+			ModelID:          2,       // 默认模型ID
+			Temperature:      1,       // 默认温度（多样性）
+			TopP:             1,       // 默认采样范围
+			FrequencyPenalty: 0.0,     // 默认重复控制
+			PresencePenalty:  0.0,     // 默认词汇控制
+			ResponseType:     "text",  // 默认响应类型
+			Stream:           true,    // 默认启用流式输出
+			KnowledgeBaseIDs: []int{}, // 默认不关联知识库
+			ContextLimit:     16,      // 默认上下文限制16条消息
 		},
 		KnowledgeBase: models.DefaultKnowledgeBaseConfig{
 			Name:          "默认知识库", // 默认知识库名称

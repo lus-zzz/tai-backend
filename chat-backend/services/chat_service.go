@@ -34,7 +34,7 @@ func (s *ChatService) CreateConversation(ctx context.Context, settings *models.C
 			Name:             "新对话",
 			ModelID:          defaultSettings.Models.ChatModelID,
 			Temperature:      defaultSettings.Conversation.Temperature,
-			KnowledgeBaseIDs: []string{},
+			KnowledgeBaseIDs: []int{},
 			TopP:             defaultSettings.Conversation.TopP,
 			FrequencyPenalty: defaultSettings.Conversation.FrequencyPenalty,
 			PresencePenalty:  defaultSettings.Conversation.PresencePenalty,
@@ -78,11 +78,8 @@ func (s *ChatService) CreateConversation(ctx context.Context, settings *models.C
 	enableKnowledge := false
 	if len(settings.KnowledgeBaseIDs) > 0 {
 		enableKnowledge = true
-		for _, kbIDStr := range settings.KnowledgeBaseIDs {
-			kbID, err := strconv.Atoi(kbIDStr)
-			if err == nil {
-				knowledgeIDs = append(knowledgeIDs, kbID)
-			}
+		for _, kbID := range settings.KnowledgeBaseIDs {
+			knowledgeIDs = append(knowledgeIDs, kbID)
 		}
 	}
 
@@ -212,9 +209,9 @@ func (s *ChatService) ListConversations(ctx context.Context, page, pageSize int)
 
 					// 提取知识库配置
 					if config.Chat.Plugin.Knowledge.Enable && len(config.Chat.Plugin.Knowledge.Knowledges) > 0 {
-						settings.KnowledgeBaseIDs = []string{}
+						settings.KnowledgeBaseIDs = []int{}
 						for _, kbID := range config.Chat.Plugin.Knowledge.Knowledges {
-							settings.KnowledgeBaseIDs = append(settings.KnowledgeBaseIDs, fmt.Sprintf("%d", kbID))
+							settings.KnowledgeBaseIDs = append(settings.KnowledgeBaseIDs, kbID)
 						}
 					}
 				}
@@ -370,11 +367,8 @@ func (s *ChatService) UpdateConversationSettings(ctx context.Context, conversati
 		if len(settings.KnowledgeBaseIDs) > 0 {
 			chatConfig.Plugin.Knowledge.Enable = true
 			chatConfig.Plugin.Knowledge.Knowledges = []int{}
-			for _, kbIDStr := range settings.KnowledgeBaseIDs {
-				kbID, err := strconv.Atoi(kbIDStr)
-				if err == nil {
-					chatConfig.Plugin.Knowledge.Knowledges = append(chatConfig.Plugin.Knowledge.Knowledges, kbID)
-				}
+			for _, kbID := range settings.KnowledgeBaseIDs {
+				chatConfig.Plugin.Knowledge.Knowledges = append(chatConfig.Plugin.Knowledge.Knowledges, kbID)
 			}
 		} else {
 			chatConfig.Plugin.Knowledge.Enable = false
@@ -412,11 +406,8 @@ func (s *ChatService) UpdateConversationSettings(ctx context.Context, conversati
 
 		// 设置知识库配置
 		if len(settings.KnowledgeBaseIDs) > 0 {
-			for _, kbIDStr := range settings.KnowledgeBaseIDs {
-				kbID, err := strconv.Atoi(kbIDStr)
-				if err == nil {
-					updateReq.Chat.Plugin.Knowledge.Knowledges = append(updateReq.Chat.Plugin.Knowledge.Knowledges, kbID)
-				}
+			for _, kbID := range settings.KnowledgeBaseIDs {
+				updateReq.Chat.Plugin.Knowledge.Knowledges = append(updateReq.Chat.Plugin.Knowledge.Knowledges, kbID)
 			}
 		}
 	}
@@ -498,9 +489,9 @@ func (s *ChatService) GetConversationSettings(ctx context.Context, conversationI
 
 		// 提取知识库配置
 		if sessionInfo.Config.Chat.Plugin.Knowledge.Enable && len(sessionInfo.Config.Chat.Plugin.Knowledge.Knowledges) > 0 {
-			settings.KnowledgeBaseIDs = []string{}
+			settings.KnowledgeBaseIDs = []int{}
 			for _, kbID := range sessionInfo.Config.Chat.Plugin.Knowledge.Knowledges {
-				settings.KnowledgeBaseIDs = append(settings.KnowledgeBaseIDs, fmt.Sprintf("%d", kbID))
+				settings.KnowledgeBaseIDs = append(settings.KnowledgeBaseIDs, kbID)
 			}
 		}
 	}
