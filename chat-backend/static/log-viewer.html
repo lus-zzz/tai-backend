@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日志查看器 - 实时监控</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary {
+            background: #49cc90;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3bb77e;
+        }
+
+        .btn-danger {
+            background: #f93e3e;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e02e2e;
+        }
+
+        .btn.active {
+            background: #fca130;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #252526;
+            border-right: 1px solid #3e3e42;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            background: #2d2d30;
+            border-bottom: 1px solid #3e3e42;
+            font-weight: bold;
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .file-item {
+            background: #2d2d30;
+            border-left: 3px solid #667eea;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .file-item:hover {
+            background: #37373d;
+            transform: translateX(3px);
+        }
+
+        .file-item.active {
+            background: #37373d;
+            border-left-color: #49cc90;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #cccccc;
+            margin-bottom: 5px;
+        }
+
+        .file-meta {
+            font-size: 0.85em;
+            color: #858585;
+        }
+
+        .viewer-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .controls {
+            background: #252526;
+            border-bottom: 1px solid #3e3e42;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .control-group label {
+            font-size: 0.9em;
+            color: #cccccc;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            background: #3c3c3c;
+            border: 1px solid #555;
+            color: #d4d4d4;
+            padding: 6px 10px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9em;
+            padding: 5px 10px;
+            background: #2d2d30;
+            border-radius: 3px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #858585;
+        }
+
+        .status-dot.live {
+            background: #49cc90;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .log-content {
+            flex: 1;
+            background: #1e1e1e;
+            overflow-y: auto;
+            padding: 15px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .log-line {
+            padding: 3px 0;
+            white-space: pre-wrap;
+            word-break: break-all;
+            border-left: 3px solid transparent;
+            padding-left: 10px;
+            margin-bottom: 2px;
+        }
+
+        .log-line:hover {
+            background: #2d2d30;
+        }
+
+        .log-line.ERROR {
+            color: #f48771;
+            border-left-color: #f48771;
+        }
+
+        .log-line.WARN {
+            color: #dcdcaa;
+            border-left-color: #dcdcaa;
+        }
+
+        .log-line.INFO {
+            color: #4ec9b0;
+            border-left-color: #4ec9b0;
+        }
+
+        .log-line.DEBUG {
+            color: #858585;
+            border-left-color: #858585;
+        }
+
+        .log-line-number {
+            display: inline-block;
+            width: 50px;
+            color: #858585;
+            user-select: none;
+            margin-right: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #858585;
+        }
+
+        .spinner {
+            border: 3px solid #3c3c3c;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #858585;
+        }
+
+        .error-message {
+            background: #5a1d1d;
+            color: #f48771;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #f48771;
+            margin: 20px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85em;
+            color: #858585;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #2d2d30;
+            border-top: 1px solid #3e3e42;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4e4e4e;
+        }
+
+        .highlight {
+            background: #fca13033;
+            border-radius: 2px;
+            padding: 0 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 实时日志查看器</h1>
+            <div class="header-actions">
+                <div class="status-indicator">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span id="statusText">就绪</span>
+                </div>
+                <a href="/api/v1" class="btn btn-back">← 返回</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-header">日志文件列表</div>
+                <div class="file-list" id="fileList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>加载中...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="viewer-panel">
+                <div class="controls">
+                    <div class="control-group">
+                        <label>模式:</label>
+                        <button class="btn btn-primary" id="btnHistorical" onclick="switchMode('historical')">历史</button>
+                        <button class="btn" id="btnLive" onclick="switchMode('live')">实时</button>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>日志级别:</label>
+                        <select id="levelFilter" onchange="applyFilters()">
+                            <option value="">全部</option>
+                            <option value="ERROR">ERROR</option>
+                            <option value="WARN">WARN</option>
+                            <option value="INFO">INFO</option>
+                            <option value="DEBUG">DEBUG</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>搜索:</label>
+                        <input type="text" id="keywordFilter" placeholder="输入关键词..." onkeyup="applyFilters()" style="width: 200px;">
+                    </div>
+
+                    <div class="control-group">
+                        <label>显示行数:</label>
+                        <input type="number" id="maxLines" value="1000" min="100" max="10000" step="100" onchange="applyFilters()" style="width: 80px;">
+                    </div>
+
+                    <div class="control-group">
+                        <button class="btn btn-primary" onclick="downloadLog()">⬇ 下载</button>
+                        <button class="btn btn-danger" onclick="clearLog()">🗑 清空</button>
+                    </div>
+                </div>
+
+                <div class="log-content" id="logContent">
+                    <div class="empty-state">
+                        <h3>👈 请从左侧选择日志文件</h3>
+                        <p>支持实时查看和历史查询</p>
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="stats">
+                        <span class="stat-item">📄 <span id="fileName">-</span></span>
+                        <span class="stat-item">📊 <span id="lineCount">0</span> 行</span>
+                        <span class="stat-item">⏱ <span id="lastUpdate">-</span></span>
+                    </div>
+                    <div>
+                        <button class="btn" onclick="scrollToTop()">↑ 顶部</button>
+                        <button class="btn" onclick="scrollToBottom()">↓ 底部</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFile = null;
+        let currentMode = 'historical';
+        let eventSource = null;
+        let autoScroll = true;
+        let lineNumber = 0;
+
+        // 加载文件列表
+        async function loadFileList() {
+            try {
+                const response = await fetch('/logs');
+                const result = await response.json();
+
+                const fileList = document.getElementById('fileList');
+
+                if (!result.success || !result.data || result.data.length === 0) {
+                    fileList.innerHTML = '<div class="empty-state"><p>暂无日志文件</p></div>';
+                    return;
+                }
+
+                fileList.innerHTML = result.data.map(file => `
+                    <div class="file-item" onclick="selectFile('${file.name}')" data-file="${file.name}">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-meta">
+                            ${formatFileSize(file.size)}<br>
+                            ${file.modified}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('加载文件列表失败:', error);
+            }
+        }
+
+        // 选择文件
+        function selectFile(filename) {
+            // 更新UI
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-file="${filename}"]`).classList.add('active');
+
+            currentFile = filename;
+            document.getElementById('fileName').textContent = filename;
+
+            // 根据当前模式加载日志
+            if (currentMode === 'historical') {
+                loadHistoricalLogs();
+            } else {
+                startLiveStream();
+            }
+        }
+
+        // 切换模式
+        function switchMode(mode) {
+            currentMode = mode;
+
+            document.getElementById('btnHistorical').classList.toggle('active', mode === 'historical');
+            document.getElementById('btnLive').classList.toggle('active', mode === 'live');
+
+            if (currentFile) {
+                if (mode === 'historical') {
+                    stopLiveStream();
+                    loadHistoricalLogs();
+                } else {
+                    startLiveStream();
+                }
+            }
+        }
+
+        // 加载历史日志
+        async function loadHistoricalLogs() {
+            if (!currentFile) return;
+
+            const logContent = document.getElementById('logContent');
+            logContent.innerHTML = '<div class="loading"><div class="spinner"></div><p>加载中...</p></div>';
+
+            updateStatus('loading', '加载中...');
+
+            const level = document.getElementById('levelFilter').value;
+            const keyword = document.getElementById('keywordFilter').value;
+            const maxLines = document.getElementById('maxLines').value;
+
+            const params = new URLSearchParams();
+            if (level) params.append('level', level);
+            if (keyword) params.append('keyword', keyword);
+            if (maxLines) params.append('lines', maxLines);
+
+            try {
+                const response = await fetch(`/logs/${currentFile}?${params}`);
+                const result = await response.json();
+
+                if (!result.success) {
+                    logContent.innerHTML = `<div class="error-message">${result.error}</div>`;
+                    updateStatus('error', '加载失败');
+                    return;
+                }
+
+                displayLogs(result.data.lines);
+                document.getElementById('lineCount').textContent = result.data.total;
+                updateStatus('ready', '就绪');
+                updateLastUpdate();
+            } catch (error) {
+                logContent.innerHTML = `<div class="error-message">网络错误: ${error.message}</div>`;
+                updateStatus('error', '错误');
+            }
+        }
+
+        // 开始实时流
+        function startLiveStream() {
+            if (!currentFile) return;
+
+            stopLiveStream();
+
+            const logContent = document.getElementById('logContent');
+            logContent.innerHTML = '';
+            lineNumber = 0;
+
+            const level = document.getElementById('levelFilter').value;
+            const keyword = document.getElementById('keywordFilter').value;
+
+            const params = new URLSearchParams();
+            if (level) params.append('level', level);
+            if (keyword) params.append('keyword', keyword);
+
+            const url = `/logs/${currentFile}/stream?${params}`;
+            eventSource = new EventSource(url);
+
+            eventSource.onmessage = function(event) {
+                appendLogLine(event.data);
+                updateLastUpdate();
+            };
+
+            eventSource.onerror = function(error) {
+                console.error('SSE错误:', error);
+                updateStatus('error', '连接断开');
+                setTimeout(() => {
+                    if (currentMode === 'live' && currentFile) {
+                        startLiveStream();
+                    }
+                }, 3000);
+            };
+
+            updateStatus('live', '实时监控中');
+        }
+
+        // 停止实时流
+        function stopLiveStream() {
+            if (eventSource) {
+                eventSource.close();
+                eventSource = null;
+            }
+        }
+
+        // 显示日志
+        function displayLogs(lines) {
+            const logContent = document.getElementById('logContent');
+            lineNumber = 0;
+
+            if (!lines || lines.length === 0) {
+                logContent.innerHTML = '<div class="empty-state"><p>没有匹配的日志</p></div>';
+                return;
+            }
+
+            const keyword = document.getElementById('keywordFilter').value.toLowerCase();
+            
+            logContent.innerHTML = lines.map(line => {
+                lineNumber++;
+                let level = 'INFO';
+                if (line.includes('level=ERROR') || /ERROR/i.test(line)) level = 'ERROR';
+                else if (line.includes('level=WARN') || /WARN/i.test(line)) level = 'WARN';
+                else if (line.includes('level=DEBUG') || /DEBUG/i.test(line)) level = 'DEBUG';
+
+                let displayLine = escapeHtml(line);
+                
+                // 高亮关键词
+                if (keyword) {
+                    const regex = new RegExp(`(${escapeRegex(keyword)})`, 'gi');
+                    displayLine = displayLine.replace(regex, '<span class="highlight">$1</span>');
+                }
+
+                return `<div class="log-line ${level}"><span class="log-line-number">${lineNumber}</span>${displayLine}</div>`;
+            }).join('');
+
+            if (autoScroll) {
+                scrollToBottom();
+            }
+        }
+
+        // 追加日志行
+        function appendLogLine(line) {
+            const logContent = document.getElementById('logContent');
+            
+            // 清空空状态
+            if (logContent.querySelector('.empty-state')) {
+                logContent.innerHTML = '';
+                lineNumber = 0;
+            }
+
+            lineNumber++;
+            
+            let level = 'INFO';
+            if (line.includes('level=ERROR') || /ERROR/i.test(line)) level = 'ERROR';
+            else if (line.includes('level=WARN') || /WARN/i.test(line)) level = 'WARN';
+            else if (line.includes('level=DEBUG') || /DEBUG/i.test(line)) level = 'DEBUG';
+
+            const keyword = document.getElementById('keywordFilter').value.toLowerCase();
+            let displayLine = escapeHtml(line);
+            
+            if (keyword) {
+                const regex = new RegExp(`(${escapeRegex(keyword)})`, 'gi');
+                displayLine = displayLine.replace(regex, '<span class="highlight">$1</span>');
+            }
+
+            const lineElement = document.createElement('div');
+            lineElement.className = `log-line ${level}`;
+            lineElement.innerHTML = `<span class="log-line-number">${lineNumber}</span>${displayLine}`;
+            logContent.appendChild(lineElement);
+
+            document.getElementById('lineCount').textContent = lineNumber;
+
+            if (autoScroll) {
+                scrollToBottom();
+            }
+        }
+
+        // 应用过滤器
+        function applyFilters() {
+            if (currentMode === 'historical') {
+                loadHistoricalLogs();
+            } else {
+                startLiveStream();
+            }
+        }
+
+        // 更新状态
+        function updateStatus(status, text) {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+
+            statusDot.className = 'status-dot';
+            if (status === 'live') {
+                statusDot.classList.add('live');
+            }
+
+            statusText.textContent = text;
+        }
+
+        // 更新最后更新时间
+        function updateLastUpdate() {
+            const now = new Date();
+            document.getElementById('lastUpdate').textContent = now.toLocaleTimeString('zh-CN');
+        }
+
+        // 下载日志
+        function downloadLog() {
+            if (!currentFile) {
+                alert('请先选择日志文件');
+                return;
+            }
+            window.open(`/logs/${currentFile}/download`, '_blank');
+        }
+
+        // 清空显示
+        function clearLog() {
+            document.getElementById('logContent').innerHTML = '<div class="empty-state"><p>已清空</p></div>';
+            lineNumber = 0;
+            document.getElementById('lineCount').textContent = '0';
+        }
+
+        // 滚动到顶部
+        function scrollToTop() {
+            document.getElementById('logContent').scrollTop = 0;
+            autoScroll = false;
+        }
+
+        // 滚动到底部
+        function scrollToBottom() {
+            const logContent = document.getElementById('logContent');
+            logContent.scrollTop = logContent.scrollHeight;
+            autoScroll = true;
+        }
+
+        // 工具函数
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function escapeRegex(text) {
+            return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // 初始化
+        loadFileList();
+        setInterval(loadFileList, 30000);
+
+        // 页面关闭时清理
+        window.addEventListener('beforeunload', () => {
+            stopLiveStream();
+        });
+
+        // 监听滚动
+        document.getElementById('logContent').addEventListener('scroll', (e) => {
+            const element = e.target;
+            const isAtBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 50;
+            autoScroll = isAtBottom;
+        });
+    </script>
+</body>
+</html>

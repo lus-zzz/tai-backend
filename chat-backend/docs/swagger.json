@@ -1,0 +1,2523 @@
+{
+  "swagger": "2.0",
+  "paths": {
+    "/api/v1/chat/conversations": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Returns a paginated list of conversations.",
+        "operationId": "getConversations",
+        "parameters": [
+          {
+            "type": "integer",
+            "default": 1,
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "default": 20,
+            "description": "Number of items per page",
+            "name": "page_size",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ConversationListResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Creates a new conversation with the given settings.",
+        "operationId": "createConversation",
+        "parameters": [
+          {
+            "description": "Conversation settings",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "Conversation settings",
+              "type": "object",
+              "$ref": "#/definitions/ConversationSettings"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ConversationResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/chat/conversations/{id}": {
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Deletes a conversation by its ID.",
+        "operationId": "deleteConversation",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Conversation ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "APIResponse",
+            "schema": {
+              "$ref": "#/definitions/APIResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/chat/conversations/{id}/history": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Gets the message history for a specific conversation.",
+        "operationId": "getConversationHistory",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Conversation ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ConversationHistoryResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/chat/conversations/{id}/settings": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Gets the settings for a specific conversation.",
+        "operationId": "getConversationSettings",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Conversation ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ConversationSettingsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Updates the settings for a specific conversation.",
+        "operationId": "updateConversationSettings",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Conversation ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Conversation settings",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "Conversation settings",
+              "type": "object",
+              "$ref": "#/definitions/ConversationSettings"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ConversationSettingsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/chat/messages": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "text/event-stream"
+        ],
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Sends a message to a conversation and returns an SSE stream.",
+        "operationId": "sendMessage",
+        "parameters": [
+          {
+            "description": "Chat message request",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "Chat message request",
+              "type": "object",
+              "$ref": "#/definitions/ChatRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "400": {
+            "description": ""
+          },
+          "500": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/v1/knowledge/bases": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Returns a list of all knowledge bases.",
+        "operationId": "listKnowledgeBases",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/KnowledgeBaseListResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Creates a new knowledge base.",
+        "operationId": "createKnowledgeBase",
+        "parameters": [
+          {
+            "description": "Knowledge base information",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "Knowledge base information",
+              "type": "object",
+              "$ref": "#/definitions/KnowledgeBaseCreateRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/KnowledgeBaseResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/knowledge/bases/{id}": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Updates a knowledge base.",
+        "operationId": "updateKnowledgeBase",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Knowledge base ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Knowledge base update information",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "Knowledge base update information",
+              "type": "object",
+              "$ref": "#/definitions/UpdateKnowledgeBaseRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/KnowledgeBaseResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Deletes a knowledge base.",
+        "operationId": "deleteKnowledgeBase",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Knowledge base ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "APIResponse",
+            "schema": {
+              "$ref": "#/definitions/APIResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/knowledge/bases/{id}/files": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Returns a list of files in a knowledge base.",
+        "operationId": "getKnowledgeBaseFiles",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Knowledge base ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/KnowledgeFileListResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Uploads a file to a knowledge base.",
+        "operationId": "uploadFile",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Knowledge base ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "object",
+            "description": "File to upload",
+            "name": "file",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/KnowledgeFileResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/knowledge/files/{file_id}": {
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Deletes a file from a knowledge base.",
+        "operationId": "deleteFile",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "File ID",
+            "name": "file_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "APIResponse",
+            "schema": {
+              "$ref": "#/definitions/APIResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/knowledge/files/{file_id}/toggle": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "Toggles the enabled state of a file.",
+        "operationId": "toggleFileEnable",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "File ID",
+            "name": "file_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Enable/disable request",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "Enable/disable request",
+              "type": "object",
+              "$ref": "#/definitions/FileToggleEnableRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "APIResponse",
+            "schema": {
+              "$ref": "#/definitions/APIResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/models": {
+      "post": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Models"
+        ],
+        "summary": "Saves a model.",
+        "operationId": "saveModel",
+        "parameters": [
+          {
+            "description": "Model information",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "Model information",
+              "type": "object",
+              "$ref": "#/definitions/ModelSaveRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/ModelSaveResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/models/available/all": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Models"
+        ],
+        "summary": "Returns a list of all available models.",
+        "operationId": "listAvailableAllModels",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/AvailableModelListResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/models/available/chat": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Models"
+        ],
+        "summary": "Returns a list of available chat models.",
+        "operationId": "listAvailableChatModels",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/AvailableModelListResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/models/available/vector": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Models"
+        ],
+        "summary": "Returns a list of available vector models.",
+        "operationId": "listAvailableVectorModels",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/AvailableModelListResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/models/supported/chat": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Models"
+        ],
+        "summary": "Returns a list of supported chat models.",
+        "operationId": "listSupportedChatModels",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/SupportedModelListResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/models/supported/vector": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Models"
+        ],
+        "summary": "Returns a list of supported vector models.",
+        "operationId": "listSupportedVectorModels",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/SupportedVectorModelListResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/models/{id}": {
+      "delete": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Models"
+        ],
+        "summary": "Deletes a model.",
+        "operationId": "deleteModel",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Model ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "APIResponse",
+            "schema": {
+              "$ref": "#/definitions/APIResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/models/{id}/status": {
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Models"
+        ],
+        "summary": "Sets the status of a model.",
+        "operationId": "setModelStatus",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Model ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Enable status",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "Enable status",
+              "type": "object",
+              "$ref": "#/definitions/ModelStatusEnableRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "APIResponse",
+            "schema": {
+              "$ref": "#/definitions/APIResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/settings/defaults": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Gets the default settings.",
+        "operationId": "getDefaultSettings",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/DefaultSettingsResponse"
+          }
+        }
+      },
+      "put": {
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Updates the default settings.",
+        "operationId": "updateDefaultSettings",
+        "parameters": [
+          {
+            "description": "Default settings",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "Default settings",
+              "type": "object",
+              "$ref": "#/definitions/DefaultSettings"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/DefaultSettingsResponse"
+          },
+          "400": {
+            "$ref": "#/responses/ErrorResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/settings/defaults/reset": {
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Resets the default settings.",
+        "operationId": "resetDefaultSettings",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/DefaultSettingsResponse"
+          },
+          "500": {
+            "$ref": "#/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/api/v1/version": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "System"
+        ],
+        "summary": "Returns the version information of the application.",
+        "operationId": "getVersion",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/VersionInfoResponse"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "APIResponse": {
+      "description": "APIResponse 通用API响应",
+      "type": "object",
+      "properties": {
+        "data": {
+          "x-go-name": "Data"
+        },
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "success": {
+          "type": "boolean",
+          "x-go-name": "Success"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "AsyncChatRequest": {
+      "description": "AsyncChatRequest 异步对话请求",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Files"
+        },
+        "requestId": {
+          "type": "string",
+          "x-go-name": "RequestID"
+        },
+        "sessionId": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SessionID"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/agent"
+    },
+    "ChatMessageRequest": {
+      "description": "ChatMessageRequest 聊天消息请求（用于Swagger文档）",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Files"
+        },
+        "requestId": {
+          "type": "string",
+          "x-go-name": "RequestID"
+        },
+        "sessionId": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SessionID"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "ChatRequest": {
+      "description": "ChatRequest 聊天请求 - 直接使用 SDK 的 AsyncChatRequest",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "Files"
+        },
+        "requestId": {
+          "type": "string",
+          "x-go-name": "RequestID"
+        },
+        "sessionId": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SessionID"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "ChatResponse": {
+      "description": "ChatResponse 聊天响应",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "conversation_id": {
+          "type": "string",
+          "x-go-name": "ConversationID"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Reference"
+          },
+          "x-go-name": "References"
+        },
+        "role": {
+          "type": "string",
+          "x-go-name": "Role"
+        },
+        "status": {
+          "type": "string",
+          "x-go-name": "Status"
+        },
+        "token_count": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TokenCount"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "Conversation": {
+      "description": "Conversation 对话信息",
+      "type": "object",
+      "properties": {
+        "contextLimit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ContextLimit"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "frequency_penalty": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "FrequencyPenalty"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "knowledge_base_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "KnowledgeBaseIDs"
+        },
+        "model_id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModelID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "presence_penalty": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "PresencePenalty"
+        },
+        "responseType": {
+          "type": "string",
+          "x-go-name": "ResponseType"
+        },
+        "stream": {
+          "type": "boolean",
+          "x-go-name": "Stream"
+        },
+        "temperature": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Temperature"
+        },
+        "top_p": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "TopP"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "ConversationHistoryResponse": {
+      "description": "ConversationHistoryResponse 对话历史响应",
+      "type": "object",
+      "properties": {
+        "conversation_id": {
+          "type": "string",
+          "x-go-name": "ConversationID"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SessionRecord"
+          },
+          "x-go-name": "Messages"
+        },
+        "total": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Total"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "ConversationListRequest": {
+      "description": "ConversationListRequest 对话列表请求",
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Page"
+        },
+        "page_size": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "PageSize"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "ConversationListResponse": {
+      "description": "ConversationListResponse 对话列表响应",
+      "type": "object",
+      "properties": {
+        "conversations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Conversation"
+          },
+          "x-go-name": "Conversations"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Page"
+        },
+        "page_size": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "PageSize"
+        },
+        "total": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Total"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "ConversationSettings": {
+      "description": "ConversationSettings 对话设置\n@Description 对话设置信息",
+      "type": "object",
+      "properties": {
+        "contextLimit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ContextLimit"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "frequency_penalty": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "FrequencyPenalty"
+        },
+        "knowledge_base_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "KnowledgeBaseIDs"
+        },
+        "model_id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModelID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "presence_penalty": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "PresencePenalty"
+        },
+        "responseType": {
+          "type": "string",
+          "x-go-name": "ResponseType"
+        },
+        "stream": {
+          "type": "boolean",
+          "x-go-name": "Stream"
+        },
+        "temperature": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Temperature"
+        },
+        "top_p": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "TopP"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "CredentialSchemaItem": {
+      "description": "CredentialSchemaItem 模型凭证配置项",
+      "type": "object",
+      "properties": {
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "value": {
+          "type": "string",
+          "x-go-name": "Value"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/model"
+    },
+    "DefaultConversationConfig": {
+      "description": "DefaultConversationConfig 默认对话配置",
+      "type": "object",
+      "properties": {
+        "contextLimit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ContextLimit"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "frequency_penalty": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "FrequencyPenalty"
+        },
+        "knowledge_base_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "KnowledgeBaseIDs"
+        },
+        "model_id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModelID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "presence_penalty": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "PresencePenalty"
+        },
+        "responseType": {
+          "type": "string",
+          "x-go-name": "ResponseType"
+        },
+        "stream": {
+          "type": "boolean",
+          "x-go-name": "Stream"
+        },
+        "temperature": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Temperature"
+        },
+        "top_p": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "TopP"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "DefaultKnowledgeBaseConfig": {
+      "description": "DefaultKnowledgeBaseConfig 默认知识库配置",
+      "type": "object",
+      "properties": {
+        "agentModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AgentModel"
+        },
+        "chunkSize": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ChunkSize"
+        },
+        "chunkStrategy": {
+          "type": "string",
+          "x-go-name": "ChunkStrategy"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "vectorModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "VectorModel"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "DefaultKnowledgeBaseSettings": {
+      "description": "DefaultKnowledgeBaseSettings 默认知识库设置（用于持久化）",
+      "type": "object",
+      "properties": {
+        "agentModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AgentModel"
+        },
+        "chunkSize": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ChunkSize"
+        },
+        "chunkStrategy": {
+          "type": "string",
+          "x-go-name": "ChunkStrategy"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "UpdatedAt"
+        },
+        "vectorModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "VectorModel"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "DefaultModelSettings": {
+      "description": "DefaultModelSettings 默认模型设置",
+      "type": "object",
+      "properties": {
+        "chat_model_id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ChatModelID"
+        },
+        "embedding_model_id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "EmbeddingModelID"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "DefaultSettings": {
+      "description": "DefaultSettings 统一的默认设置（用于持久化）",
+      "type": "object",
+      "properties": {
+        "conversation": {
+          "$ref": "#/definitions/DefaultConversationConfig"
+        },
+        "knowledge_base": {
+          "$ref": "#/definitions/DefaultKnowledgeBaseConfig"
+        },
+        "models": {
+          "$ref": "#/definitions/DefaultModelSettings"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "UpdatedAt"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "EmbeddingProperty": {
+      "description": "EmbeddingProperty 向量模型属性",
+      "type": "object",
+      "properties": {
+        "batchLimit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "BatchLimit"
+        },
+        "embeddingDimension": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "EmbeddingDimension"
+        },
+        "embeddingMaxLength": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "EmbeddingMaxLength"
+        },
+        "model": {
+          "type": "string",
+          "x-go-name": "Model"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/model"
+    },
+    "ExtraInfo": {
+      "description": "ExtraInfo 额外信息",
+      "type": "object",
+      "properties": {
+        "chartData": {
+          "x-go-name": "ChartData"
+        },
+        "tools": {
+          "type": "array",
+          "items": {},
+          "x-go-name": "Tools"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/agent"
+    },
+    "FileToggleEnableRequest": {
+      "description": "FileToggleEnableRequest 文件启用/禁用请求",
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "x-go-name": "Enable"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "KnowledgeBase": {
+      "description": "KnowledgeBase 知识库（列表返回）",
+      "type": "object",
+      "properties": {
+        "agentModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AgentModel"
+        },
+        "chunkSize": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ChunkSize"
+        },
+        "chunkStrategy": {
+          "type": "string",
+          "x-go-name": "ChunkStrategy"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "file_count": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "FileCount"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "vectorModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "VectorModel"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "KnowledgeBaseConfig": {
+      "description": "KnowledgeBaseConfig 知识库配置（公用字段）",
+      "type": "object",
+      "properties": {
+        "agentModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AgentModel"
+        },
+        "chunkSize": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ChunkSize"
+        },
+        "chunkStrategy": {
+          "type": "string",
+          "x-go-name": "ChunkStrategy"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "vectorModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "VectorModel"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "KnowledgeBaseCreateRequest": {
+      "description": "KnowledgeBaseCreateRequest 创建知识库请求",
+      "type": "object",
+      "properties": {
+        "agentModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AgentModel"
+        },
+        "chunkSize": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ChunkSize"
+        },
+        "chunkStrategy": {
+          "type": "string",
+          "x-go-name": "ChunkStrategy"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "vectorModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "VectorModel"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "KnowledgeBaseSettings": {
+      "description": "KnowledgeBaseSettings 知识库设置",
+      "type": "object",
+      "properties": {
+        "agentModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AgentModel"
+        },
+        "chunkSize": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ChunkSize"
+        },
+        "chunkStrategy": {
+          "type": "string",
+          "x-go-name": "ChunkStrategy"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "vectorModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "VectorModel"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "KnowledgeFile": {
+      "description": "KnowledgeFile 知识库文件",
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "x-go-name": "Enable"
+        },
+        "errorMessage": {
+          "type": "string",
+          "x-go-name": "ErrorMessage"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "index_percent": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "IndexPercent"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Size"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Status"
+        },
+        "uploaded_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "UploadedAt"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "LLMProperty": {
+      "description": "LLMProperty 聊天模型属性",
+      "type": "object",
+      "properties": {
+        "contextLength": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ContextLength"
+        },
+        "fixQwqThink": {
+          "type": "boolean",
+          "x-go-name": "FixQwqThink"
+        },
+        "maxToken": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxToken"
+        },
+        "model": {
+          "type": "string",
+          "x-go-name": "Model"
+        },
+        "stream": {
+          "type": "boolean",
+          "x-go-name": "Stream"
+        },
+        "supportTool": {
+          "type": "boolean",
+          "x-go-name": "SupportTool"
+        },
+        "tokenProportion": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TokenProportion"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/model"
+    },
+    "MessageRecord": {
+      "description": "MessageRecord 对话消息记录",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "role": {
+          "type": "string",
+          "x-go-name": "Role"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "ModelInfo": {
+      "description": "ModelInfo 模型信息",
+      "type": "object",
+      "properties": {
+        "credentials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CredentialSchemaItem"
+          },
+          "x-go-name": "Credentials"
+        },
+        "enable": {
+          "type": "boolean",
+          "x-go-name": "Enable"
+        },
+        "endpoint": {
+          "type": "string",
+          "x-go-name": "Endpoint"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "role": {
+          "type": "string",
+          "x-go-name": "Role"
+        },
+        "symbol": {
+          "type": "string",
+          "x-go-name": "Symbol"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/model"
+    },
+    "ModelStatusEnableRequest": {
+      "description": "ModelStatusEnableRequest 模型状态启用/禁用请求",
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "x-go-name": "Enable"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "MultiContentItem": {
+      "description": "MultiContentItem 多内容项",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "x-go-name": "Text"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/agent"
+    },
+    "PluginsInfo": {
+      "description": "PluginsInfo 插件信息",
+      "type": "object",
+      "properties": {
+        "file_analysis": {
+          "type": "array",
+          "items": {},
+          "x-go-name": "FileAnalysis"
+        },
+        "knowledge": {
+          "type": "array",
+          "items": {},
+          "x-go-name": "Knowledge"
+        },
+        "nl2sql": {
+          "type": "array",
+          "items": {},
+          "x-go-name": "NL2SQL"
+        },
+        "onlineSearch": {
+          "type": "array",
+          "items": {},
+          "x-go-name": "OnlineSearch"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/agent"
+    },
+    "Reference": {
+      "description": "Reference 引用信息",
+      "type": "object",
+      "properties": {
+        "chunk_index": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ChunkIndex"
+        },
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "document_id": {
+          "type": "string",
+          "x-go-name": "DocumentID"
+        },
+        "document_title": {
+          "type": "string",
+          "x-go-name": "DocumentTitle"
+        },
+        "similarity": {
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Similarity"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "SSEChatEvent": {
+      "description": "SSEChatEvent SSE聊天事件 - 直接使用 SDK 的 StreamEvent",
+      "type": "object",
+      "x-go-package": "chat-backend/models"
+    },
+    "SessionRecord": {
+      "description": "SessionRecord 对话记录",
+      "type": "object",
+      "properties": {
+        "agentId": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AgentID"
+        },
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "error": {
+          "type": "boolean",
+          "x-go-name": "Error"
+        },
+        "errorMessage": {
+          "type": "string",
+          "x-go-name": "ErrorMessage"
+        },
+        "extra": {
+          "$ref": "#/definitions/ExtraInfo"
+        },
+        "finishReason": {
+          "type": "string",
+          "x-go-name": "FinishReason"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "index": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Index"
+        },
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "multi_content": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/MultiContentItem"
+          },
+          "x-go-name": "MultiContent"
+        },
+        "pending": {
+          "type": "boolean",
+          "x-go-name": "Pending"
+        },
+        "plugins": {
+          "$ref": "#/definitions/PluginsInfo"
+        },
+        "question": {
+          "type": "string",
+          "x-go-name": "Question"
+        },
+        "requestId": {
+          "type": "string",
+          "x-go-name": "RequestID"
+        },
+        "role": {
+          "type": "string",
+          "x-go-name": "Role"
+        },
+        "sender": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Sender"
+        },
+        "sessionId": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SessionID"
+        },
+        "suggestedQuestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "SuggestedQuestions"
+        },
+        "tools": {
+          "x-go-name": "Tools"
+        },
+        "usage": {
+          "$ref": "#/definitions/UsageInfo"
+        },
+        "userData": {
+          "type": "object",
+          "additionalProperties": {},
+          "x-go-name": "UserData"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/agent"
+    },
+    "StreamChatResponse": {
+      "description": "StreamChatResponse 流式聊天响应",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "x-go-name": "Content"
+        },
+        "delta": {
+          "type": "string",
+          "x-go-name": "Delta"
+        },
+        "done": {
+          "type": "boolean",
+          "x-go-name": "Done"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "StreamEvent": {
+      "description": "StreamEvent SSE流事件",
+      "type": "object",
+      "properties": {
+        "agentId": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AgentID"
+        },
+        "chartData": {
+          "x-go-name": "ChartData"
+        },
+        "error": {
+          "type": "boolean",
+          "x-go-name": "Error"
+        },
+        "eventType": {
+          "type": "string",
+          "x-go-name": "EventType"
+        },
+        "finishReason": {
+          "type": "string",
+          "x-go-name": "FinishReason"
+        },
+        "index": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Index"
+        },
+        "message": {
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "pending": {
+          "type": "boolean",
+          "x-go-name": "Pending"
+        },
+        "plugins": {
+          "type": "object",
+          "additionalProperties": {},
+          "x-go-name": "Plugins"
+        },
+        "question": {
+          "type": "string",
+          "x-go-name": "Question"
+        },
+        "requestId": {
+          "type": "string",
+          "x-go-name": "RequestID"
+        },
+        "sessionId": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SessionID"
+        },
+        "settingId": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SettingID"
+        },
+        "shadowMessage": {
+          "type": "string",
+          "x-go-name": "ShadowMessage"
+        },
+        "structData": {
+          "$ref": "#/definitions/StructData"
+        },
+        "suggestedQuestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "SuggestedQuestions"
+        },
+        "tools": {
+          "type": "array",
+          "items": {},
+          "x-go-name": "Tools"
+        },
+        "usage": {
+          "$ref": "#/definitions/UsageInfo"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/agent"
+    },
+    "StructData": {
+      "description": "StructData 结构化数据",
+      "type": "object",
+      "properties": {
+        "code": {
+          "x-go-name": "Code"
+        },
+        "json": {
+          "x-go-name": "JSON"
+        },
+        "markMap": {
+          "x-go-name": "MarkMap"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/agent"
+    },
+    "SupportedChatModel": {
+      "description": "SupportedChatModel 支持的聊天模型",
+      "type": "object",
+      "properties": {
+        "OncurrencyLimit": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "credentialSchema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CredentialSchemaItem"
+          },
+          "x-go-name": "CredentialSchema"
+        },
+        "identify": {
+          "type": "string",
+          "x-go-name": "Identify"
+        },
+        "llmProperty": {
+          "$ref": "#/definitions/LLMProperty"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/model"
+    },
+    "SupportedVectorModel": {
+      "description": "SupportedVectorModel 支持的向量模型",
+      "type": "object",
+      "properties": {
+        "credentialSchema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CredentialSchemaItem"
+          },
+          "x-go-name": "CredentialSchema"
+        },
+        "identify": {
+          "type": "string",
+          "x-go-name": "Identify"
+        },
+        "llmProperty": {
+          "$ref": "#/definitions/EmbeddingProperty"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/model"
+    },
+    "UpdateKnowledgeBaseRequest": {
+      "description": "UpdateKnowledgeBaseRequest 更新知识库请求",
+      "type": "object",
+      "properties": {
+        "agentModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AgentModel"
+        },
+        "chunkSize": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ChunkSize"
+        },
+        "chunkStrategy": {
+          "type": "string",
+          "x-go-name": "ChunkStrategy"
+        },
+        "desc": {
+          "type": "string",
+          "x-go-name": "Desc"
+        },
+        "name": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "vectorModel": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "VectorModel"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "UsageInfo": {
+      "description": "UsageInfo 使用信息",
+      "type": "object",
+      "properties": {
+        "completionTokens": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CompletionTokens"
+        },
+        "duration": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Duration"
+        },
+        "promptTokens": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "PromptTokens"
+        },
+        "totalTokens": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TotalTokens"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/agent"
+    },
+    "VersionInfo": {
+      "description": "VersionInfo 版本信息响应结构",
+      "type": "object",
+      "properties": {
+        "build_time": {
+          "type": "string",
+          "x-go-name": "BuildTime"
+        },
+        "git_branch": {
+          "type": "string",
+          "x-go-name": "GitBranch"
+        },
+        "git_commit": {
+          "type": "string",
+          "x-go-name": "GitCommit"
+        },
+        "git_tag": {
+          "type": "string",
+          "x-go-name": "GitTag"
+        },
+        "version": {
+          "type": "string",
+          "x-go-name": "Version"
+        }
+      },
+      "x-go-package": "chat-backend/handlers"
+    },
+    "WebSocketMessage": {
+      "description": "WebSocketMessage WebSocket消息",
+      "type": "object",
+      "properties": {
+        "data": {
+          "x-go-name": "Data"
+        },
+        "error": {
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    }
+  },
+  "responses": {
+    "AvailableModelListResponse": {
+      "description": "AvailableModelListResponse represents an available model list response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/ModelInfo"
+            },
+            "x-go-name": "Data"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "ConversationHistoryResponse": {
+      "description": "conversationHistoryResponseWrapper represents a conversation history response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/ConversationHistoryResponse"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "ConversationListResponse": {
+      "description": "conversationListResponseWrapper represents a conversation list response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/ConversationListResponse"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "ConversationResponse": {
+      "description": "conversationResponseWrapper represents a conversation response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/Conversation"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "ConversationSettingsResponse": {
+      "description": "conversationSettingsResponseWrapper represents a conversation settings response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/ConversationSettings"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "DefaultSettingsResponse": {
+      "description": "defaultSettingsResponseWrapper represents a default settings response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/DefaultSettings"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "ErrorResponse": {
+      "description": "errorResponseWrapper represents an error response.",
+      "schema": {
+        "$ref": "#/definitions/APIResponse"
+      }
+    },
+    "KnowledgeBaseListResponse": {
+      "description": "knowledgeBaseListResponseWrapper represents a knowledge base list response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/KnowledgeBase"
+            },
+            "x-go-name": "Data"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "KnowledgeBaseResponse": {
+      "description": "knowledgeBaseResponseWrapper represents a knowledge base response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/KnowledgeBase"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "KnowledgeFileListResponse": {
+      "description": "knowledgeFileListResponseWrapper represents a knowledge file list response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/KnowledgeFile"
+            },
+            "x-go-name": "Data"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "KnowledgeFileResponse": {
+      "description": "knowledgeFileResponseWrapper represents a knowledge file response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/KnowledgeFile"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "ModelSaveResponse": {
+      "description": "modelSaveResponseWrapper represents a model save response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "format": "int64",
+                "x-go-name": "ID"
+              }
+            },
+            "x-go-name": "Data"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "SupportedModelListResponse": {
+      "description": "SupportedModelListResponse represents a model list response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/SupportedChatModel"
+            },
+            "x-go-name": "Data"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "SupportedVectorModelListResponse": {
+      "description": "SupportedVectorModelListResponse represents a vector model list response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/SupportedVectorModel"
+            },
+            "x-go-name": "Data"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    },
+    "VersionInfoResponse": {
+      "description": "versionInfoResponseWrapper represents a version info response.",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/VersionInfo"
+          },
+          "message": {
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "type": "boolean",
+            "x-go-name": "Success"
+          }
+        }
+      }
+    }
+  }
+}
