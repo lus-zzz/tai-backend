@@ -11,6 +11,7 @@ import subprocess
 import shutil
 import argparse
 import platform
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -105,6 +106,88 @@ def get_git_tag():
     return ""
 
 
+def get_latest_version_tag():
+    """获取最新的版本标签"""
+    returncode, stdout, stderr = run_command(['git', 'tag', '-l', '--sort=-version:refname'])
+    if returncode == 0 and stdout:
+        # 只返回符合版本格式的标签
+        for tag in stdout.split('\n'):
+            tag = tag.strip()
+            if tag and is_version_tag(tag):
+                return tag
+    return ""
+
+
+def is_version_tag(tag):
+    """检查是否是版本标签格式 (v1.2.3)"""
+    pattern = r'^v\d+\.\d+\.\d+$'
+    return bool(re.match(pattern, tag))
+
+
+def parse_version(version_str):
+    """解析版本字符串，返回 (major, minor, patch)"""
+    # 移除 'v' 前缀
+    if version_str.startswith('v'):
+        version_str = version_str[1:]
+    
+    try:
+        parts = version_str.split('.')
+        if len(parts) != 3:
+            raise ValueError("版本格式错误")
+        return tuple(int(part) for part in parts)
+    except (ValueError, IndexError):
+        raise ValueError(f"无效的版本格式: {version_str}")
+
+
+def increment_version(version_tuple, increment_type='patch'):
+    """递增版本号
+    Args:
+        version_tuple: (major, minor, patch)
+        increment_type: 'major', 'minor', 'patch'
+    Returns:
+        新的版本元组
+    """
+    major, minor, patch = version_tuple
+    
+    if increment_type == 'major':
+        return (major + 1, 0, 0)
+    elif increment_type == 'minor':
+        return (major, minor + 1, 0)
+    elif increment_type == 'patch':
+        return (major, minor, patch + 1)
+    else:
+        raise ValueError(f"不支持的递增类型: {increment_type}")
+
+
+def version_tuple_to_string(version_tuple):
+    """将版本元组转换为字符串"""
+    return '.'.join(str(part) for part in version_tuple)
+
+
+def get_auto_incremented_version(increment_type='patch'):
+    """获取自动递增的版本号"""
+    latest_tag = get_latest_version_tag()
+    
+    if not latest_tag:
+        # 如果没有版本标签，从 1.0.0 开始
+        print_info("未找到版本标签，从 v1.0.0 开始")
+        return "1.0.0"
+    
+    try:
+        current_version = parse_version(latest_tag)
+        new_version = increment_version(current_version, increment_type)
+        new_version_str = version_tuple_to_string(new_version)
+        
+        print_info(f"当前最新版本: {latest_tag}")
+        print_info(f"自动递增({increment_type}): v{new_version_str}")
+        
+        return new_version_str
+    except ValueError as e:
+        print_error(f"版本解析失败: {e}")
+        print_warning("使用默认版本 1.0.0")
+        return "1.0.0"
+
+
 def get_git_branch():
     """获取 Git 分支"""
     returncode, stdout, stderr = run_command(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
@@ -162,20 +245,35 @@ class Builder:
         self.chat_backend_dir = self.script_dir / 'chat-backend'  # chat-backend 子目录
         self.output_dir = self.script_dir / args.output  # 输出到项目根目录的 release 文件夹
         
-        # 版本信息
-        self.version = args.version
+        # 版本信息处理
         self.build_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         self.git_commit = get_git_commit()
         self.git_tag = get_git_tag()
         self.git_branch = get_git_branch()
         self.git_status = get_git_status()
         
-        # 如果有 Git 标签且未指定版本，使用 Git 标签
-        if self.git_tag and args.version == "1.0.0":
-            self.version = self.git_tag
+        # 处理版本号
+        if hasattr(args, 'auto_increment') and args.auto_increment:
+            # 自动递增版本
+            increment_type = getattr(args, 'increment_type', 'patch')
+            self.version = get_auto_incremented_version(increment_type)
+        elif args.version == "auto":
+            # 使用 "auto" 作为版本号时，自动递增 patch 版本
+            self.version = get_auto_incremented_version('patch')
+        else:
+            # 使用指定的版本号
+            self.version = args.version
+            
+            # 如果有 Git 标签且未明确指定版本，使用 Git 标签
+            if self.git_tag and args.version == "1.0.0":
+                # 移除 'v' 前缀
+                tag_version = self.git_tag
+                if tag_version.startswith('v'):
+                    tag_version = tag_version[1:]
+                self.version = tag_version
         
         # 如果状态是 dirty，在版本号后面加上标记
-        if self.git_status == "dirty":
+        if self.git_status == "dirty" and not (hasattr(args, 'auto_increment') and args.auto_increment):
             self.version += "-dirty"
         
         # 初始化 swagger 工具
@@ -463,13 +561,20 @@ class Builder:
 
 def main():
     parser = argparse.ArgumentParser(description='Chat Backend 编译脚本')
-    parser.add_argument('-v', '--version', default='1.0.0', help='版本号 (默认: 1.0.0, 如果有 Git 标签则使用标签)')
+    parser.add_argument('-v', '--version', default='1.0.0', 
+                        help='版本号 (默认: 1.0.0, 使用 "auto" 自动递增patch版本)')
     parser.add_argument('-o', '--output', default='release', help='输出目录 (默认: release)')
     parser.add_argument('-p', '--platform', choices=['all', 'windows', 'linux', 'darwin', 'current'], 
                         default='current', help='编译平台 (默认: current)')
     parser.add_argument('-c', '--clean', action='store_true', help='清理之前的构建')
     parser.add_argument('--skip-deps', action='store_true', help='跳过依赖下载')
     parser.add_argument('--skip-swagger', action='store_true', help='跳过 Swagger 文档生成')
+    
+    # 版本自动递增参数
+    parser.add_argument('--auto-increment', action='store_true', 
+                        help='自动递增版本号（基于最新的Git标签）')
+    parser.add_argument('--increment-type', choices=['major', 'minor', 'patch'], 
+                        default='patch', help='递增类型 (默认: patch)')
     
     # Git 标签相关参数
     parser.add_argument('--auto-tag', action='store_true', help='编译成功后自动创建 Git 标签')
@@ -481,6 +586,10 @@ def main():
     # 参数验证
     if args.push_tag and not args.auto_tag:
         print_error("--push-tag 参数必须与 --auto-tag 一起使用")
+        sys.exit(1)
+    
+    if args.auto_increment and args.version != "1.0.0":
+        print_error("--auto-increment 不能与指定的版本号一起使用")
         sys.exit(1)
     
     builder = Builder(args)
