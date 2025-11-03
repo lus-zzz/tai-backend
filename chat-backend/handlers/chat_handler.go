@@ -92,7 +92,7 @@ func NewChatHandler(chatService *services.ChatService, defaultSettingsService *s
 //
 // swagger:route POST /api/v1/chat/conversations Chat createConversation
 //
-// Creates a new conversation with the given settings.
+// 创建对话
 //
 // Consumes:
 // - application/json
@@ -103,7 +103,7 @@ func NewChatHandler(chatService *services.ChatService, defaultSettingsService *s
 // Parameters:
 //   - +name: body
 //     in: body
-//     description: Conversation settings
+//     description: 对话设置
 //     required: true
 //     type: ConversationSettings
 //
@@ -139,7 +139,7 @@ func (h *ChatHandler) CreateConversation(c *gin.Context) {
 //
 // swagger:route GET /api/v1/chat/conversations Chat getConversations
 //
-// Returns a paginated list of conversations.
+// 对话列表
 //
 // ---
 // produces:
@@ -147,13 +147,13 @@ func (h *ChatHandler) CreateConversation(c *gin.Context) {
 // parameters:
 //   - +name: page
 //     in: query
-//     description: Page number
+//     description: 页码
 //     required: false
 //     type: integer
 //     default: 1
 //   - +name: page_size
 //     in: query
-//     description: Number of items per page
+//     description: 每页数量
 //     required: false
 //     type: integer
 //     default: 20
@@ -195,7 +195,7 @@ func (h *ChatHandler) GetConversations(c *gin.Context) {
 //
 // swagger:route DELETE /api/v1/chat/conversations/{id} Chat deleteConversation
 //
-// Deletes a conversation by its ID.
+// 删除对话
 //
 // Produces:
 // - application/json
@@ -203,7 +203,7 @@ func (h *ChatHandler) GetConversations(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Conversation ID
+//     description: 对话ID
 //     required: true
 //     type: string
 //
@@ -237,7 +237,7 @@ func (h *ChatHandler) DeleteConversation(c *gin.Context) {
 //
 // swagger:route POST /api/v1/chat/messages Chat sendMessage
 //
-// Sends a message to a conversation and returns an SSE stream.
+// 发送消息
 //
 // Consumes:
 // - application/json
@@ -248,18 +248,18 @@ func (h *ChatHandler) DeleteConversation(c *gin.Context) {
 // Parameters:
 //   - +name: body
 //     in: body
-//     description: Chat message request
+//     description: 聊天请求
 //     required: true
 //     type: ChatRequest
 //
 // Responses:
 //
 //	200:
-//	  description: SSE stream
+//	  description: 数据流
 //	400:
-//	  description: Invalid request
+//	  description: 请求无效
 //	500:
-//	  description: Internal server error
+//	  description: 服务器错误
 func (h *ChatHandler) SendMessage(c *gin.Context) {
 	var req models.ChatRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -354,7 +354,7 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 //
 // swagger:route GET /api/v1/chat/conversations/{id}/settings Chat getConversationSettings
 //
-// Gets the settings for a specific conversation.
+// 获取设置
 //
 // Produces:
 // - application/json
@@ -362,7 +362,7 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Conversation ID
+//     description: 对话ID
 //     required: true
 //     type: string
 //
@@ -396,7 +396,7 @@ func (h *ChatHandler) GetConversationSettings(c *gin.Context) {
 //
 // swagger:route PUT /api/v1/chat/conversations/{id}/settings Chat updateConversationSettings
 //
-// Updates the settings for a specific conversation.
+// 更新设置
 //
 // Consumes:
 // - application/json
@@ -407,12 +407,12 @@ func (h *ChatHandler) GetConversationSettings(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Conversation ID
+//     description: 对话ID
 //     required: true
 //     type: string
 //   - +name: body
 //     in: body
-//     description: Conversation settings
+//     description: 对话设置
 //     required: true
 //     type: ConversationSettings
 //
@@ -454,7 +454,7 @@ func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) {
 //
 // swagger:route GET /api/v1/chat/conversations/{id}/history Chat getConversationHistory
 //
-// Gets the message history for a specific conversation.
+// 消息历史
 //
 // Produces:
 // - application/json
@@ -462,7 +462,7 @@ func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Conversation ID
+//     description: 对话ID
 //     required: true
 //     type: string
 //

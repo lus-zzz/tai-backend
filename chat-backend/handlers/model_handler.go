@@ -80,7 +80,7 @@ func NewModelHandler(modelService *services.ModelService) *ModelHandler {
 // ListSupportedChatModels 返回支持的聊天模型列表。
 //
 // swagger:route GET /api/v1/models/supported/chat Models listSupportedChatModels
-// Returns a list of supported chat models.
+// 聊天模型列表
 //
 // Produces:
 // - application/json
@@ -106,7 +106,7 @@ func (h *ModelHandler) ListSupportedChatModels(c *gin.Context) {
 // ListSupportedVectorModels 返回支持的向量模型列表。
 //
 // swagger:route GET /api/v1/models/supported/vector Models listSupportedVectorModels
-// Returns a list of supported vector models.
+// 向量模型列表
 //
 // Produces:
 // - application/json
@@ -132,7 +132,7 @@ func (h *ModelHandler) ListSupportedVectorModels(c *gin.Context) {
 // ListAvailableAllModels 返回所有可用模型的列表。
 //
 // swagger:route GET /api/v1/models/available/all Models listAvailableAllModels
-// Returns a list of all available models.
+// 全部可用模型
 //
 // Produces:
 // - application/json
@@ -158,7 +158,7 @@ func (h *ModelHandler) ListAvailableAllModels(c *gin.Context) {
 // ListAvailableChatModels 返回可用的聊天模型列表。
 //
 // swagger:route GET /api/v1/models/available/chat Models listAvailableChatModels
-// Returns a list of available chat models.
+// 可用聊天模型
 //
 // Produces:
 // - application/json
@@ -184,7 +184,7 @@ func (h *ModelHandler) ListAvailableChatModels(c *gin.Context) {
 // ListAvailableVectorModels 返回可用的向量模型列表。
 //
 // swagger:route GET /api/v1/models/available/vector Models listAvailableVectorModels
-// Returns a list of available vector models.
+// 可用向量模型
 //
 // Produces:
 // - application/json
@@ -210,7 +210,7 @@ func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) {
 // SaveModel 保存或更新模型配置。
 //
 // swagger:route POST /api/v1/models Models saveModel
-// Saves a model.
+// 保存模型
 //
 // Consumes:
 // - application/json
@@ -221,7 +221,7 @@ func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) {
 // Parameters:
 //   - +name: body
 //     in: body
-//     description: Model information
+//     description: 模型信息
 //     required: true
 //     type: ModelSaveRequest
 //
@@ -253,7 +253,7 @@ func (h *ModelHandler) SaveModel(c *gin.Context) {
 // DeleteModel 根据ID删除指定的模型。
 //
 // swagger:route DELETE /api/v1/models/{id} Models deleteModel
-// Deletes a model.
+// 删除模型
 //
 // Produces:
 // - application/json
@@ -261,7 +261,7 @@ func (h *ModelHandler) SaveModel(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Model ID
+//     description: 模型ID
 //     required: true
 //     type: integer
 //
@@ -295,7 +295,7 @@ func (h *ModelHandler) DeleteModel(c *gin.Context) {
 // SetModelStatus 设置模型的启用状态。
 //
 // swagger:route PUT /api/v1/models/{id}/status Models setModelStatus
-// Sets the status of a model.
+// 设置模型状态
 //
 // Consumes:
 // - application/json
@@ -306,12 +306,12 @@ func (h *ModelHandler) DeleteModel(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Model ID
+//     description: 模型ID
 //     required: true
 //     type: integer
 //   - +name: body
 //     in: body
-//     description: Enable status
+//     description: 状态设置
 //     required: true
 //     type: ModelStatusEnableRequest
 //

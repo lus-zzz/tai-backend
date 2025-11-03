@@ -38,7 +38,7 @@ func NewSettingsHandler(defaultSettingsService *services.DefaultSettingsService)
 //
 // swagger:route GET /api/v1/settings/defaults Settings getDefaultSettings
 //
-// Gets the default settings.
+// 获取默认设置
 //
 // Produces:
 // - application/json
@@ -55,7 +55,7 @@ func (h *SettingsHandler) GetDefaultSettings(c *gin.Context) {
 //
 // swagger:route PUT /api/v1/settings/defaults Settings updateDefaultSettings
 //
-// Updates the default settings.
+// 更新默认设置
 //
 // Consumes:
 // - application/json
@@ -66,7 +66,7 @@ func (h *SettingsHandler) GetDefaultSettings(c *gin.Context) {
 // Parameters:
 //   - +name: body
 //     in: body
-//     description: Default settings
+//     description: 默认设置
 //     required: true
 //     type: DefaultSettings
 //
@@ -100,7 +100,7 @@ func (h *SettingsHandler) UpdateDefaultSettings(c *gin.Context) {
 //
 // swagger:route POST /api/v1/settings/defaults/reset Settings resetDefaultSettings
 //
-// Resets the default settings.
+// 重置默认设置
 //
 // Produces:
 // - application/json

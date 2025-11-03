@@ -38,8 +38,8 @@ var (
 
 // @title Chat Backend API
 // @version 1.0
-// @description Flowy聊天后端服务API文档
-// @description 提供对话管理、知识库管理、模型管理等功能
+// @description 聊天后端服务
+// @description 对话知识模型管理
 
 // @contact.name API Support
 // @contact.email support@example.com
@@ -52,16 +52,16 @@ var (
 // @schemes http
 
 // @tag.name Chat
-// @tag.description 对话管理相关接口
+// @tag.description 对话管理
 
 // @tag.name Settings
-// @tag.description 默认配置管理相关接口
+// @tag.description 配置管理
 
 // @tag.name Knowledge
-// @tag.description 知识库管理相关接口
+// @tag.description 知识库管理
 
 // @tag.name Models
-// @tag.description 模型管理相关接口
+// @tag.description 模型管理
 
 // Server HTTP服务器结构
 type Server struct {

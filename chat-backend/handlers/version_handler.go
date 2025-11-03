@@ -52,7 +52,7 @@ type versionInfoResponseWrapper struct {
 //
 // swagger:route GET /api/v1/version System getVersion
 //
-// Returns the version information of the application.
+// 获取版本信息
 //
 // Produces:
 // - application/json

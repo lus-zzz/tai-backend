@@ -77,7 +77,7 @@ func NewKnowledgeHandler(knowledgeService *services.KnowledgeService) *Knowledge
 //
 // swagger:route GET /api/v1/knowledge/bases Knowledge listKnowledgeBases
 //
-// Returns a list of all knowledge bases.
+// 知识库列表
 //
 // Produces:
 // - application/json
@@ -104,7 +104,7 @@ func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) {
 //
 // swagger:route POST /api/v1/knowledge/bases Knowledge createKnowledgeBase
 //
-// Creates a new knowledge base.
+// 创建知识库
 //
 // Consumes:
 // - application/json
@@ -115,7 +115,7 @@ func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) {
 // Parameters:
 //   - +name: body
 //     in: body
-//     description: Knowledge base information
+//     description: 知识库信息
 //     required: true
 //     type: KnowledgeBaseCreateRequest
 //
@@ -156,7 +156,7 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) {
 //
 // swagger:route PUT /api/v1/knowledge/bases/{id} Knowledge updateKnowledgeBase
 //
-// Updates a knowledge base.
+// 更新知识库
 //
 // Consumes:
 // - application/json
@@ -167,12 +167,12 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Knowledge base ID
+//     description: 知识库ID
 //     required: true
 //     type: string
 //   - +name: body
 //     in: body
-//     description: Knowledge base update information
+//     description: 更新信息
 //     required: true
 //     type: UpdateKnowledgeBaseRequest
 //
@@ -220,7 +220,7 @@ func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
 //
 // swagger:route DELETE /api/v1/knowledge/bases/{id} Knowledge deleteKnowledgeBase
 //
-// Deletes a knowledge base.
+// 删除知识库
 //
 // Produces:
 // - application/json
@@ -228,7 +228,7 @@ func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Knowledge base ID
+//     description: 知识库ID
 //     required: true
 //     type: string
 //
@@ -262,7 +262,7 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
 //
 // swagger:route GET /api/v1/knowledge/bases/{id}/files Knowledge getKnowledgeBaseFiles
 //
-// Returns a list of files in a knowledge base.
+// 知识库文件
 //
 // Produces:
 // - application/json
@@ -270,7 +270,7 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Knowledge base ID
+//     description: 知识库ID
 //     required: true
 //     type: string
 //
@@ -304,7 +304,7 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
 //
 // swagger:route POST /api/v1/knowledge/bases/{id}/files Knowledge uploadFile
 //
-// Uploads a file to a knowledge base.
+// 上传文件
 //
 // Consumes:
 // - multipart/form-data
@@ -315,12 +315,12 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
 // Parameters:
 //   - +name: id
 //     in: path
-//     description: Knowledge base ID
+//     description: 知识库ID
 //     required: true
 //     type: string
 //   - +name: file
 //     in: formData
-//     description: File to upload
+//     description: 上传文件
 //     required: true
 //     type: file
 //
@@ -371,7 +371,7 @@ func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 //
 // swagger:route DELETE /api/v1/knowledge/files/{file_id} Knowledge deleteFile
 //
-// Deletes a file from a knowledge base.
+// 删除文件
 //
 // Produces:
 // - application/json
@@ -379,7 +379,7 @@ func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 // Parameters:
 //   - +name: file_id
 //     in: path
-//     description: File ID
+//     description: 文件ID
 //     required: true
 //     type: integer
 //
@@ -415,7 +415,7 @@ func (h *KnowledgeHandler) DeleteFile(c *gin.Context) {
 //
 // swagger:route PUT /api/v1/knowledge/files/{file_id}/toggle Knowledge toggleFileEnable
 //
-// Toggles the enabled state of a file.
+// 切换文件状态
 //
 // Consumes:
 // - application/json
@@ -426,12 +426,12 @@ func (h *KnowledgeHandler) DeleteFile(c *gin.Context) {
 // Parameters:
 //   - +name: file_id
 //     in: path
-//     description: File ID
+//     description: 文件ID
 //     required: true
 //     type: string
 //   - +name: body
 //     in: body
-//     description: Enable/disable request
+//     description: 状态切换
 //     required: true
 //     type: FileToggleEnableRequest
 //

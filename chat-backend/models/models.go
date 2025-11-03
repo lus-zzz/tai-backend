@@ -156,7 +156,7 @@ type StreamChatResponse struct {
 }
 
 // ConversationSettings 对话设置
-// @Description 对话设置信息
+// @Description 对话设置
 // swagger:model
 type ConversationSettings struct {
 	Name             string   `json:"name"`                   // 对话名称
