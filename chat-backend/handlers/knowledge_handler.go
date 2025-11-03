@@ -13,54 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// knowledgeBaseResponseWrapper represents a knowledge base response.
-//
-// swagger:response KnowledgeBaseResponse
-type knowledgeBaseResponseWrapper struct {
-	// in: body
-	Body struct {
-		Success bool                 `json:"success"`
-		Message string               `json:"message,omitempty"`
-		Data    models.KnowledgeBase `json:"data,omitempty"`
-	}
-}
-
-// knowledgeBaseListResponseWrapper represents a knowledge base list response.
-//
-// swagger:response KnowledgeBaseListResponse
-type knowledgeBaseListResponseWrapper struct {
-	// in: body
-	Body struct {
-		Success bool                   `json:"success"`
-		Message string                 `json:"message,omitempty"`
-		Data    []models.KnowledgeBase `json:"data,omitempty"`
-	}
-}
-
-// knowledgeFileResponseWrapper represents a knowledge file response.
-//
-// swagger:response KnowledgeFileResponse
-type knowledgeFileResponseWrapper struct {
-	// in: body
-	Body struct {
-		Success bool                 `json:"success"`
-		Message string               `json:"message,omitempty"`
-		Data    models.KnowledgeFile `json:"data,omitempty"`
-	}
-}
-
-// knowledgeFileListResponseWrapper represents a knowledge file list response.
-//
-// swagger:response KnowledgeFileListResponse
-type knowledgeFileListResponseWrapper struct {
-	// in: body
-	Body struct {
-		Success bool                   `json:"success"`
-		Message string                 `json:"message,omitempty"`
-		Data    []models.KnowledgeFile `json:"data,omitempty"`
-	}
-}
-
 // KnowledgeHandler 处理知识库相关的HTTP请求。
 type KnowledgeHandler struct {
 	knowledgeService *services.KnowledgeService
@@ -75,16 +27,18 @@ func NewKnowledgeHandler(knowledgeService *services.KnowledgeService) *Knowledge
 
 // ListKnowledgeBases 返回所有知识库的列表。
 //
-// swagger:route GET /api/v1/knowledge/bases Knowledge listKnowledgeBases
+// swagger:route GET /knowledge/bases Knowledge listKnowledgeBases
 //
-// 知识库列表
+// 获取知识库列表
+//
+// 获取系统中所有已创建的知识库列表，包括知识库基本信息
 //
 // Produces:
 // - application/json
 //
 // Responses:
 //
-//	200: KnowledgeBaseListResponse
+//	200: KnowledgeBaseListSuccessResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -102,9 +56,11 @@ func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) {
 
 // CreateKnowledgeBase 创建一个新的知识库。
 //
-// swagger:route POST /api/v1/knowledge/bases Knowledge createKnowledgeBase
+// swagger:route POST /knowledge/bases Knowledge createKnowledgeBase
 //
 // 创建知识库
+//
+// 创建一个新的知识库，用于存储和管理相关文档
 //
 // Consumes:
 // - application/json
@@ -121,7 +77,7 @@ func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) {
 //
 // Responses:
 //
-//	200: KnowledgeBaseResponse
+//	200: KnowledgeBaseSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) {
@@ -154,9 +110,11 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) {
 
 // UpdateKnowledgeBase 更新指定知识库的信息。
 //
-// swagger:route PUT /api/v1/knowledge/bases/{id} Knowledge updateKnowledgeBase
+// swagger:route PUT /knowledge/bases/{id} Knowledge updateKnowledgeBase
 //
 // 更新知识库
+//
+// 更新指定知识库的名称、描述等基本信息
 //
 // Consumes:
 // - application/json
@@ -178,7 +136,7 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) {
 //
 // Responses:
 //
-//	200: KnowledgeBaseResponse
+//	200: KnowledgeBaseSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
@@ -218,9 +176,11 @@ func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
 
 // DeleteKnowledgeBase 根据ID删除指定的知识库。
 //
-// swagger:route DELETE /api/v1/knowledge/bases/{id} Knowledge deleteKnowledgeBase
+// swagger:route DELETE /knowledge/bases/{id} Knowledge deleteKnowledgeBase
 //
 // 删除知识库
+//
+// 根据知识库ID删除指定的知识库及其所有相关文件
 //
 // Produces:
 // - application/json
@@ -234,7 +194,7 @@ func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
 //
 // Responses:
 //
-//	200: APIResponse
+//	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
@@ -260,9 +220,11 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
 
 // GetKnowledgeBaseFiles 返回指定知识库中的文件列表。
 //
-// swagger:route GET /api/v1/knowledge/bases/{id}/files Knowledge getKnowledgeBaseFiles
+// swagger:route GET /knowledge/bases/{id}/files Knowledge getKnowledgeBaseFiles
 //
-// 知识库文件
+// 获取知识库文件
+//
+// 获取指定知识库中所有已上传文件的列表和状态信息
 //
 // Produces:
 // - application/json
@@ -276,7 +238,7 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
 //
 // Responses:
 //
-//	200: KnowledgeFileListResponse
+//	200: KnowledgeFileListSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
@@ -302,9 +264,11 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
 
 // UploadFile 上传文件到指定的知识库。
 //
-// swagger:route POST /api/v1/knowledge/bases/{id}/files Knowledge uploadFile
+// swagger:route POST /knowledge/bases/{id}/files Knowledge uploadFile
 //
-// 上传文件
+// 上传文件到知识库
+//
+// 上传文件到指定的知识库，系统将自动处理文档向量化
 //
 // Consumes:
 // - multipart/form-data
@@ -326,7 +290,7 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
 //
 // Responses:
 //
-//	200: KnowledgeFileResponse
+//	200: KnowledgeFileSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
@@ -369,9 +333,11 @@ func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 
 // DeleteFile 从知识库中删除指定的文件。
 //
-// swagger:route DELETE /api/v1/knowledge/files/{file_id} Knowledge deleteFile
+// swagger:route DELETE /knowledge/files/{file_id} Knowledge deleteFile
 //
-// 删除文件
+// 删除知识库文件
+//
+// 从知识库中删除指定的文件及其向量数据
 //
 // Produces:
 // - application/json
@@ -385,7 +351,7 @@ func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 //
 // Responses:
 //
-//	200: APIResponse
+//	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) DeleteFile(c *gin.Context) {
@@ -413,9 +379,11 @@ func (h *KnowledgeHandler) DeleteFile(c *gin.Context) {
 
 // ToggleFileEnable 切换文件的启用状态。
 //
-// swagger:route PUT /api/v1/knowledge/files/{file_id}/toggle Knowledge toggleFileEnable
+// swagger:route PUT /knowledge/files/{file_id}/toggle Knowledge toggleFileEnable
 //
-// 切换文件状态
+// 切换文件启用状态
+//
+// 启用或禁用知识库中的指定文件，控制其是否参与问答检索
 //
 // Consumes:
 // - application/json
@@ -437,7 +405,7 @@ func (h *KnowledgeHandler) DeleteFile(c *gin.Context) {
 //
 // Responses:
 //
-//	200: APIResponse
+//	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) ToggleFileEnable(c *gin.Context) {

@@ -10,18 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// defaultSettingsResponseWrapper represents a default settings response.
-//
-// swagger:response DefaultSettingsResponse
-type defaultSettingsResponseWrapper struct {
-	// in: body
-	Body struct {
-		Success bool                   `json:"success"`
-		Message string                 `json:"message,omitempty"`
-		Data    models.DefaultSettings `json:"data,omitempty"`
-	}
-}
-
 // SettingsHandler 处理系统设置相关的HTTP请求。
 type SettingsHandler struct {
 	defaultSettingsService *services.DefaultSettingsService
@@ -36,16 +24,18 @@ func NewSettingsHandler(defaultSettingsService *services.DefaultSettingsService)
 
 // GetDefaultSettings 获取系统的默认设置。
 //
-// swagger:route GET /api/v1/settings/defaults Settings getDefaultSettings
+// swagger:route GET /settings/defaults Settings getDefaultSettings
 //
 // 获取默认设置
+//
+// 获取系统当前的默认配置信息，包括模型设置、聊天参数等
 //
 // Produces:
 // - application/json
 //
 // Responses:
 //
-//	200: DefaultSettingsResponse
+//	200: DefaultSettingsSuccessResponse
 func (h *SettingsHandler) GetDefaultSettings(c *gin.Context) {
 	settings := h.defaultSettingsService.GetDefaultSettings()
 	utils.RespondWithSuccess(c, settings, "获取默认配置成功")
@@ -53,9 +43,11 @@ func (h *SettingsHandler) GetDefaultSettings(c *gin.Context) {
 
 // UpdateDefaultSettings 更新系统的默认设置。
 //
-// swagger:route PUT /api/v1/settings/defaults Settings updateDefaultSettings
+// swagger:route PUT /settings/defaults Settings updateDefaultSettings
 //
 // 更新默认设置
+//
+// 更新系统的默认配置信息，新的设置将应用于后续创建的对话
 //
 // Consumes:
 // - application/json
@@ -72,7 +64,7 @@ func (h *SettingsHandler) GetDefaultSettings(c *gin.Context) {
 //
 // Responses:
 //
-//	200: DefaultSettingsResponse
+//	200: DefaultSettingsSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *SettingsHandler) UpdateDefaultSettings(c *gin.Context) {
@@ -98,16 +90,18 @@ func (h *SettingsHandler) UpdateDefaultSettings(c *gin.Context) {
 
 // ResetDefaultSettings 将系统设置重置为默认值。
 //
-// swagger:route POST /api/v1/settings/defaults/reset Settings resetDefaultSettings
+// swagger:route POST /settings/defaults/reset Settings resetDefaultSettings
 //
 // 重置默认设置
+//
+// 将系统配置重置为出厂默认值，恢复所有设置到初始状态
 //
 // Produces:
 // - application/json
 //
 // Responses:
 //
-//	200: DefaultSettingsResponse
+//	200: DefaultSettingsSuccessResponse
 //	500: ErrorResponse
 func (h *SettingsHandler) ResetDefaultSettings(c *gin.Context) {
 	err := h.defaultSettingsService.ResetToDefaults()

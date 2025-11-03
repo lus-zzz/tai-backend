@@ -36,33 +36,6 @@ var (
 	GitTag    = ""
 )
 
-// @title Chat Backend API
-// @version 1.0
-// @description 聊天后端服务
-// @description 对话知识模型管理
-
-// @contact.name API Support
-// @contact.email support@example.com
-
-// @license.name MIT
-// @license.url https://opensource.org/licenses/MIT
-
-// @host localhost:9090
-// @BasePath /api/v1
-// @schemes http
-
-// @tag.name Chat
-// @tag.description 对话管理
-
-// @tag.name Settings
-// @tag.description 配置管理
-
-// @tag.name Knowledge
-// @tag.description 知识库管理
-
-// @tag.name Models
-// @tag.description 模型管理
-
 // Server HTTP服务器结构
 type Server struct {
 	router           *routes.Router

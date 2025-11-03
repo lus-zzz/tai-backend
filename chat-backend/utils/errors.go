@@ -214,13 +214,23 @@ func GetMessage(code ErrorCode) string {
 }
 
 // ErrorResponse 错误响应结构
+// swagger:model
 type ErrorResponse struct {
-	Success   bool      `json:"success"`              // 请求是否成功
-	ErrorCode ErrorCode `json:"error_code"`           // 错误代码
-	Message   string    `json:"message"`              // 错误消息
-	Details   string    `json:"details,omitempty"`    // 错误详情
-	RequestID string    `json:"request_id,omitempty"` // 请求ID
-	Timestamp time.Time `json:"timestamp"`            // 时间戳
+	// 请求是否成功
+	// required: true
+	Success bool `json:"success"`
+	// 错误代码
+	// required: true
+	ErrorCode ErrorCode `json:"error_code"`
+	// 错误消息
+	// required: true
+	Message string `json:"message"`
+	// 错误详情
+	// required: true
+	Details string `json:"details"`
+	// 时间戳
+	// required: true
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // APIError 自定义错误类型
@@ -285,7 +295,6 @@ func RespondWithError(c *gin.Context, err *APIError) {
 		ErrorCode: err.Code,
 		Message:   message,
 		Details:   err.Details,
-		RequestID: c.GetString("request_id"),
 		Timestamp: time.Now(),
 	}
 

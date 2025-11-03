@@ -32,7 +32,6 @@ type FlowyError struct {
 	Message    string    `json:"message"`
 	Details    string    `json:"details,omitempty"`
 	StatusCode int       `json:"status_code,omitempty"`
-	RequestID  string    `json:"request_id,omitempty"`
 }
 
 // Error 实现 error 接口

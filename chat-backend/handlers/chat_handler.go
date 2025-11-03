@@ -15,62 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// errorResponseWrapper represents an error response.
-//
-// swagger:response ErrorResponse
-type errorResponseWrapper struct {
-	// in: body
-	Body models.APIResponse
-}
-
-// conversationResponseWrapper represents a conversation response.
-//
-// swagger:response ConversationResponse
-type ConversationResponse struct {
-	// in: body
-	Body struct {
-		Success bool                `json:"success"`
-		Message string              `json:"message,omitempty"`
-		Data    models.Conversation `json:"data,omitempty"`
-	}
-}
-
-// conversationListResponseWrapper represents a conversation list response.
-//
-// swagger:response ConversationListResponse
-type ConversationListResponse struct {
-	// in: body
-	Body struct {
-		Success bool                            `json:"success"`
-		Message string                          `json:"message,omitempty"`
-		Data    models.ConversationListResponse `json:"data,omitempty"`
-	}
-}
-
-// conversationSettingsResponseWrapper represents a conversation settings response.
-//
-// swagger:response ConversationSettingsResponse
-type ConversationSettingsResponse struct {
-	// in: body
-	Body struct {
-		Success bool                        `json:"success"`
-		Message string                      `json:"message,omitempty"`
-		Data    models.ConversationSettings `json:"data,omitempty"`
-	}
-}
-
-// conversationHistoryResponseWrapper represents a conversation history response.
-//
-// swagger:response ConversationHistoryResponse
-type ConversationHistoryResponse struct {
-	// in: body
-	Body struct {
-		Success bool                               `json:"success"`
-		Message string                             `json:"message,omitempty"`
-		Data    models.ConversationHistoryResponse `json:"data,omitempty"`
-	}
-}
-
 // ChatHandler 处理聊天相关的HTTP请求。
 type ChatHandler struct {
 	chatService            *services.ChatService
@@ -85,14 +29,11 @@ func NewChatHandler(chatService *services.ChatService, defaultSettingsService *s
 	}
 }
 
-// CreateConversation 处理创建新对话的HTTP请求。
-//
-// 该方法从请求体中解析 ConversationSettings,调用聊天服务创建对话,
-// 并返回创建的对话信息(包含ID和配置)。
-//
-// swagger:route POST /api/v1/chat/conversations Chat createConversation
+// swagger:route POST /chat/conversations Chat createConversation
 //
 // 创建对话
+//
+// 根据配置创建一个新的对话
 //
 // Consumes:
 // - application/json
@@ -100,7 +41,7 @@ func NewChatHandler(chatService *services.ChatService, defaultSettingsService *s
 // Produces:
 // - application/json
 //
-// Parameters:
+// parameters:
 //   - +name: body
 //     in: body
 //     description: 对话设置
@@ -109,7 +50,7 @@ func NewChatHandler(chatService *services.ChatService, defaultSettingsService *s
 //
 // Responses:
 //
-//	200: ConversationResponse
+//	200: ConversationSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ChatHandler) CreateConversation(c *gin.Context) {
@@ -137,11 +78,12 @@ func (h *ChatHandler) CreateConversation(c *gin.Context) {
 
 // GetConversations 返回分页的对话列表。
 //
-// swagger:route GET /api/v1/chat/conversations Chat getConversations
+// swagger:route GET /chat/conversations Chat getConversations
 //
-// 对话列表
+// 获取对话列表
 //
-// ---
+// 分页获取用户的对话列表，支持页码和每页数量参数
+//
 // produces:
 // - application/json
 // parameters:
@@ -160,7 +102,7 @@ func (h *ChatHandler) CreateConversation(c *gin.Context) {
 //
 // responses:
 //
-//	200: ConversationListResponse
+//	200: ConversationListSuccessResponse
 //	500: ErrorResponse
 func (h *ChatHandler) GetConversations(c *gin.Context) {
 	page := 1
@@ -193,9 +135,11 @@ func (h *ChatHandler) GetConversations(c *gin.Context) {
 
 // DeleteConversation 根据ID删除指定的对话。
 //
-// swagger:route DELETE /api/v1/chat/conversations/{id} Chat deleteConversation
+// swagger:route DELETE /chat/conversations/{id} Chat deleteConversation
 //
 // 删除对话
+//
+// 根据对话ID删除指定的对话记录和相关数据
 //
 // Produces:
 // - application/json
@@ -209,7 +153,7 @@ func (h *ChatHandler) GetConversations(c *gin.Context) {
 //
 // Responses:
 //
-//	200: APIResponse
+//	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ChatHandler) DeleteConversation(c *gin.Context) {
@@ -235,9 +179,11 @@ func (h *ChatHandler) DeleteConversation(c *gin.Context) {
 
 // SendMessage 向对话发送消息并返回SSE流式响应。
 //
-// swagger:route POST /api/v1/chat/messages Chat sendMessage
+// swagger:route POST /chat/messages Chat sendMessage
 //
 // 发送消息
+//
+// 向指定对话发送消息并以SSE流式方式返回AI响应
 //
 // Consumes:
 // - application/json
@@ -255,25 +201,23 @@ func (h *ChatHandler) DeleteConversation(c *gin.Context) {
 // Responses:
 //
 //	200:
-//	  description: 数据流
-//	400:
-//	  description: 请求无效
-//	500:
-//	  description: 服务器错误
+//	  description: SSE流式数据
+//	400: ErrorResponse
+//	500: ErrorResponse
 func (h *ChatHandler) SendMessage(c *gin.Context) {
 	var req models.ChatRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "请求数据解析失败"})
+		utils.RespondWithBadRequest(c, "请求数据解析失败")
 		return
 	}
 
 	if req.Content == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "消息内容不能为空"})
+		utils.RespondWithBadRequest(c, "消息内容不能为空")
 		return
 	}
 
 	if req.SessionID == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "会话ID不能为空"})
+		utils.RespondWithBadRequest(c, "会话ID不能为空")
 		return
 	}
 
@@ -305,7 +249,7 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 	// 发送SSE事件
 	flusher, ok := c.Writer.(http.Flusher)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "不支持流式响应"})
+		utils.RespondWithInternalError(c, "不支持流式响应")
 		return
 	}
 
@@ -352,9 +296,11 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 
 // GetConversationSettings 获取指定对话的设置信息。
 //
-// swagger:route GET /api/v1/chat/conversations/{id}/settings Chat getConversationSettings
+// swagger:route GET /chat/conversations/{id}/settings Chat getConversationSettings
 //
-// 获取设置
+// 获取对话设置
+//
+// 根据对话ID获取该对话的详细设置信息
 //
 // Produces:
 // - application/json
@@ -368,7 +314,7 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 //
 // Responses:
 //
-//	200: ConversationSettingsResponse
+//	200: ConversationSettingsSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ChatHandler) GetConversationSettings(c *gin.Context) {
@@ -394,9 +340,11 @@ func (h *ChatHandler) GetConversationSettings(c *gin.Context) {
 
 // UpdateConversationSettings 更新指定对话的设置信息。
 //
-// swagger:route PUT /api/v1/chat/conversations/{id}/settings Chat updateConversationSettings
+// swagger:route PUT /chat/conversations/{id}/settings Chat updateConversationSettings
 //
-// 更新设置
+// 更新对话设置
+//
+// 根据对话ID更新该对话的设置信息，如模型配置、参数等
 //
 // Consumes:
 // - application/json
@@ -418,7 +366,7 @@ func (h *ChatHandler) GetConversationSettings(c *gin.Context) {
 //
 // Responses:
 //
-//	200: ConversationSettingsResponse
+//	200: ConversationSettingsSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) {
@@ -452,9 +400,11 @@ func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) {
 
 // GetConversationHistory 获取指定对话的消息历史记录。
 //
-// swagger:route GET /api/v1/chat/conversations/{id}/history Chat getConversationHistory
+// swagger:route GET /chat/conversations/{id}/history Chat getConversationHistory
 //
-// 消息历史
+// 获取对话历史
+//
+// 根据对话ID获取该对话的完整消息历史记录
 //
 // Produces:
 // - application/json
@@ -468,7 +418,7 @@ func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) {
 //
 // Responses:
 //
-//	200: ConversationHistoryResponse
+//	200: ConversationHistorySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ChatHandler) GetConversationHistory(c *gin.Context) {

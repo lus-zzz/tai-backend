@@ -520,10 +520,18 @@ type SessionInfo struct {
 
 // AsyncChatRequest 异步对话请求
 type AsyncChatRequest struct {
-	SessionID int      `json:"sessionId"` // 会话ID
-	Content   string   `json:"content"`   // 消息内容
-	RequestID string   `json:"requestId"` // 请求ID (UUID)
-	Files     []string `json:"files"`     // 文件列表
+	// 会话ID
+	// required: true
+	SessionID int `json:"sessionId"`
+	// 消息内容
+	// required: true
+	Content string `json:"content"`
+	// 请求ID (UUID)
+	// required: true
+	RequestID string `json:"requestId"`
+	// 文件列表
+	// required: true
+	Files []string `json:"files"`
 }
 
 // SessionRecord 对话记录

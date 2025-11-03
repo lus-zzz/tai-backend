@@ -1,42 +1,72 @@
 {
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "schemes": [
+    "http"
+  ],
   "swagger": "2.0",
+  "info": {
+    "description": "聊天后端服务\n对话知识模型管理",
+    "title": "Chat Backend API",
+    "termsOfService": "there are no TOS at this moment, use at your own risk we take no responsibility",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "1.0.0"
+  },
+  "host": "localhost:9090",
+  "basePath": "/api/v1",
   "paths": {
-    "/api/v1/chat/conversations": {
+    "/chat/conversations": {
       "get": {
+        "description": "分页获取用户的对话列表，支持页码和每页数量参数",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Chat"
         ],
-        "summary": "Returns a paginated list of conversations.",
+        "summary": "获取对话列表",
         "operationId": "getConversations",
         "parameters": [
           {
             "type": "integer",
             "default": 1,
-            "description": "Page number",
+            "description": "页码",
             "name": "page",
             "in": "query"
           },
           {
             "type": "integer",
             "default": 20,
-            "description": "Number of items per page",
+            "description": "每页数量",
             "name": "page_size",
             "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationListResponse"
+            "$ref": "#/responses/ConversationListSuccessResponse"
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       },
       "post": {
+        "description": "根据配置创建一个新的对话",
         "consumes": [
           "application/json"
         ],
@@ -46,16 +76,16 @@
         "tags": [
           "Chat"
         ],
-        "summary": "Creates a new conversation with the given settings.",
+        "summary": "创建对话",
         "operationId": "createConversation",
         "parameters": [
           {
-            "description": "Conversation settings",
+            "description": "对话设置",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "description": "Conversation settings",
+              "description": "对话设置",
               "type": "object",
               "$ref": "#/definitions/ConversationSettings"
             }
@@ -63,31 +93,38 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationResponse"
+            "$ref": "#/responses/ConversationSuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/chat/conversations/{id}": {
+    "/chat/conversations/{id}": {
       "delete": {
+        "description": "根据对话ID删除指定的对话记录和相关数据",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Chat"
         ],
-        "summary": "Deletes a conversation by its ID.",
+        "summary": "删除对话",
         "operationId": "deleteConversation",
         "parameters": [
           {
             "type": "string",
-            "description": "Conversation ID",
+            "description": "对话ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -95,34 +132,38 @@
         ],
         "responses": {
           "200": {
-            "description": "APIResponse",
-            "schema": {
-              "$ref": "#/definitions/APIResponse"
-            }
+            "$ref": "#/responses/EmptySuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/chat/conversations/{id}/history": {
+    "/chat/conversations/{id}/history": {
       "get": {
+        "description": "根据对话ID获取该对话的完整消息历史记录",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Chat"
         ],
-        "summary": "Gets the message history for a specific conversation.",
+        "summary": "获取对话历史",
         "operationId": "getConversationHistory",
         "parameters": [
           {
             "type": "string",
-            "description": "Conversation ID",
+            "description": "对话ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -130,31 +171,38 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationHistoryResponse"
+            "$ref": "#/responses/ConversationHistorySuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/chat/conversations/{id}/settings": {
+    "/chat/conversations/{id}/settings": {
       "get": {
+        "description": "根据对话ID获取该对话的详细设置信息",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Chat"
         ],
-        "summary": "Gets the settings for a specific conversation.",
+        "summary": "获取对话设置",
         "operationId": "getConversationSettings",
         "parameters": [
           {
             "type": "string",
-            "description": "Conversation ID",
+            "description": "对话ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -162,17 +210,24 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationSettingsResponse"
+            "$ref": "#/responses/ConversationSettingsSuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       },
       "put": {
+        "description": "根据对话ID更新该对话的设置信息，如模型配置、参数等",
         "consumes": [
           "application/json"
         ],
@@ -182,23 +237,23 @@
         "tags": [
           "Chat"
         ],
-        "summary": "Updates the settings for a specific conversation.",
+        "summary": "更新对话设置",
         "operationId": "updateConversationSettings",
         "parameters": [
           {
             "type": "string",
-            "description": "Conversation ID",
+            "description": "对话ID",
             "name": "id",
             "in": "path",
             "required": true
           },
           {
-            "description": "Conversation settings",
+            "description": "对话设置",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "description": "Conversation settings",
+              "description": "对话设置",
               "type": "object",
               "$ref": "#/definitions/ConversationSettings"
             }
@@ -206,19 +261,26 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationSettingsResponse"
+            "$ref": "#/responses/ConversationSettingsSuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/chat/messages": {
+    "/chat/messages": {
       "post": {
+        "description": "向指定对话发送消息并以SSE流式方式返回AI响应",
         "consumes": [
           "application/json"
         ],
@@ -228,16 +290,16 @@
         "tags": [
           "Chat"
         ],
-        "summary": "Sends a message to a conversation and returns an SSE stream.",
+        "summary": "发送消息",
         "operationId": "sendMessage",
         "parameters": [
           {
-            "description": "Chat message request",
+            "description": "聊天请求",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "description": "Chat message request",
+              "description": "聊天请求",
               "type": "object",
               "$ref": "#/definitions/ChatRequest"
             }
@@ -248,34 +310,45 @@
             "description": ""
           },
           "400": {
-            "description": ""
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "description": ""
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/knowledge/bases": {
+    "/knowledge/bases": {
       "get": {
+        "description": "获取系统中所有已创建的知识库列表，包括知识库基本信息",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Knowledge"
         ],
-        "summary": "Returns a list of all knowledge bases.",
+        "summary": "获取知识库列表",
         "operationId": "listKnowledgeBases",
         "responses": {
           "200": {
-            "$ref": "#/responses/KnowledgeBaseListResponse"
+            "$ref": "#/responses/KnowledgeBaseListSuccessResponse"
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       },
       "post": {
+        "description": "创建一个新的知识库，用于存储和管理相关文档",
         "consumes": [
           "application/json"
         ],
@@ -285,16 +358,16 @@
         "tags": [
           "Knowledge"
         ],
-        "summary": "Creates a new knowledge base.",
+        "summary": "创建知识库",
         "operationId": "createKnowledgeBase",
         "parameters": [
           {
-            "description": "Knowledge base information",
+            "description": "知识库信息",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "description": "Knowledge base information",
+              "description": "知识库信息",
               "type": "object",
               "$ref": "#/definitions/KnowledgeBaseCreateRequest"
             }
@@ -302,19 +375,26 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/KnowledgeBaseResponse"
+            "$ref": "#/responses/KnowledgeBaseSuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/knowledge/bases/{id}": {
+    "/knowledge/bases/{id}": {
       "put": {
+        "description": "更新指定知识库的名称、描述等基本信息",
         "consumes": [
           "application/json"
         ],
@@ -324,23 +404,23 @@
         "tags": [
           "Knowledge"
         ],
-        "summary": "Updates a knowledge base.",
+        "summary": "更新知识库",
         "operationId": "updateKnowledgeBase",
         "parameters": [
           {
             "type": "string",
-            "description": "Knowledge base ID",
+            "description": "知识库ID",
             "name": "id",
             "in": "path",
             "required": true
           },
           {
-            "description": "Knowledge base update information",
+            "description": "更新信息",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "description": "Knowledge base update information",
+              "description": "更新信息",
               "type": "object",
               "$ref": "#/definitions/UpdateKnowledgeBaseRequest"
             }
@@ -348,29 +428,36 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/KnowledgeBaseResponse"
+            "$ref": "#/responses/KnowledgeBaseSuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       },
       "delete": {
+        "description": "根据知识库ID删除指定的知识库及其所有相关文件",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Knowledge"
         ],
-        "summary": "Deletes a knowledge base.",
+        "summary": "删除知识库",
         "operationId": "deleteKnowledgeBase",
         "parameters": [
           {
             "type": "string",
-            "description": "Knowledge base ID",
+            "description": "知识库ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -378,34 +465,38 @@
         ],
         "responses": {
           "200": {
-            "description": "APIResponse",
-            "schema": {
-              "$ref": "#/definitions/APIResponse"
-            }
+            "$ref": "#/responses/EmptySuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/knowledge/bases/{id}/files": {
+    "/knowledge/bases/{id}/files": {
       "get": {
+        "description": "获取指定知识库中所有已上传文件的列表和状态信息",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Knowledge"
         ],
-        "summary": "Returns a list of files in a knowledge base.",
+        "summary": "获取知识库文件",
         "operationId": "getKnowledgeBaseFiles",
         "parameters": [
           {
             "type": "string",
-            "description": "Knowledge base ID",
+            "description": "知识库ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -413,17 +504,24 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/KnowledgeFileListResponse"
+            "$ref": "#/responses/KnowledgeFileListSuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       },
       "post": {
+        "description": "上传文件到指定的知识库，系统将自动处理文档向量化",
         "consumes": [
           "multipart/form-data"
         ],
@@ -433,50 +531,57 @@
         "tags": [
           "Knowledge"
         ],
-        "summary": "Uploads a file to a knowledge base.",
+        "summary": "上传文件到知识库",
         "operationId": "uploadFile",
         "parameters": [
           {
             "type": "string",
-            "description": "Knowledge base ID",
+            "description": "知识库ID",
             "name": "id",
             "in": "path",
             "required": true
           },
           {
             "type": "object",
-            "description": "File to upload",
+            "description": "上传文件",
             "name": "file",
             "required": true
           }
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/KnowledgeFileResponse"
+            "$ref": "#/responses/KnowledgeFileSuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/knowledge/files/{file_id}": {
+    "/knowledge/files/{file_id}": {
       "delete": {
+        "description": "从知识库中删除指定的文件及其向量数据",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Knowledge"
         ],
-        "summary": "Deletes a file from a knowledge base.",
+        "summary": "删除知识库文件",
         "operationId": "deleteFile",
         "parameters": [
           {
             "type": "integer",
-            "description": "File ID",
+            "description": "文件ID",
             "name": "file_id",
             "in": "path",
             "required": true
@@ -484,22 +589,26 @@
         ],
         "responses": {
           "200": {
-            "description": "APIResponse",
-            "schema": {
-              "$ref": "#/definitions/APIResponse"
-            }
+            "$ref": "#/responses/EmptySuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/knowledge/files/{file_id}/toggle": {
+    "/knowledge/files/{file_id}/toggle": {
       "put": {
+        "description": "启用或禁用知识库中的指定文件，控制其是否参与问答检索",
         "consumes": [
           "application/json"
         ],
@@ -509,23 +618,23 @@
         "tags": [
           "Knowledge"
         ],
-        "summary": "Toggles the enabled state of a file.",
+        "summary": "切换文件启用状态",
         "operationId": "toggleFileEnable",
         "parameters": [
           {
             "type": "string",
-            "description": "File ID",
+            "description": "文件ID",
             "name": "file_id",
             "in": "path",
             "required": true
           },
           {
-            "description": "Enable/disable request",
+            "description": "状态切换",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "description": "Enable/disable request",
+              "description": "状态切换",
               "type": "object",
               "$ref": "#/definitions/FileToggleEnableRequest"
             }
@@ -533,22 +642,26 @@
         ],
         "responses": {
           "200": {
-            "description": "APIResponse",
-            "schema": {
-              "$ref": "#/definitions/APIResponse"
-            }
+            "$ref": "#/responses/EmptySuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/models": {
+    "/models": {
       "post": {
+        "description": "保存或更新模型的配置信息，包括API密钥、端点等设置",
         "consumes": [
           "application/json"
         ],
@@ -558,16 +671,16 @@
         "tags": [
           "Models"
         ],
-        "summary": "Saves a model.",
+        "summary": "保存模型配置",
         "operationId": "saveModel",
         "parameters": [
           {
-            "description": "Model information",
+            "description": "模型信息",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "description": "Model information",
+              "description": "模型信息",
               "type": "object",
               "$ref": "#/definitions/ModelSaveRequest"
             }
@@ -575,131 +688,158 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ModelSaveResponse"
+            "$ref": "#/responses/ModelSaveSuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/models/available/all": {
+    "/models/available/all": {
       "get": {
+        "description": "获取当前系统中所有可用的模型列表，包括聊天模型和向量模型",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Models"
         ],
-        "summary": "Returns a list of all available models.",
+        "summary": "获取所有可用模型",
         "operationId": "listAvailableAllModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/AvailableModelListResponse"
+            "$ref": "#/responses/ModelListSuccessResponse"
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/models/available/chat": {
+    "/models/available/chat": {
       "get": {
+        "description": "获取当前系统中可用的聊天模型列表，仅包含已配置且可用的聊天模型",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Models"
         ],
-        "summary": "Returns a list of available chat models.",
+        "summary": "获取可用聊天模型",
         "operationId": "listAvailableChatModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/AvailableModelListResponse"
+            "$ref": "#/responses/ModelListSuccessResponse"
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/models/available/vector": {
+    "/models/available/vector": {
       "get": {
+        "description": "获取当前系统中可用的向量模型列表，用于知识库文档向量化",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Models"
         ],
-        "summary": "Returns a list of available vector models.",
+        "summary": "获取可用向量模型",
         "operationId": "listAvailableVectorModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/AvailableModelListResponse"
+            "$ref": "#/responses/ModelListSuccessResponse"
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/models/supported/chat": {
+    "/models/supported/chat": {
       "get": {
+        "description": "获取系统支持的所有聊天模型列表，包括模型名称、类型等信息",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Models"
         ],
-        "summary": "Returns a list of supported chat models.",
+        "summary": "获取支持的聊天模型",
         "operationId": "listSupportedChatModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/SupportedModelListResponse"
+            "$ref": "#/responses/SupportedChatModelListSuccessResponse"
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/models/supported/vector": {
+    "/models/supported/vector": {
       "get": {
+        "description": "获取系统支持的所有向量模型列表，用于知识库向量化处理",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Models"
         ],
-        "summary": "Returns a list of supported vector models.",
+        "summary": "获取支持的向量模型",
         "operationId": "listSupportedVectorModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/SupportedVectorModelListResponse"
+            "$ref": "#/responses/SupportedVectorModelListSuccessResponse"
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/models/{id}": {
+    "/models/{id}": {
       "delete": {
+        "description": "根据模型ID删除指定的模型配置信息",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Models"
         ],
-        "summary": "Deletes a model.",
+        "summary": "删除模型配置",
         "operationId": "deleteModel",
         "parameters": [
           {
             "type": "integer",
-            "description": "Model ID",
+            "description": "模型ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -707,22 +847,26 @@
         ],
         "responses": {
           "200": {
-            "description": "APIResponse",
-            "schema": {
-              "$ref": "#/definitions/APIResponse"
-            }
+            "$ref": "#/responses/EmptySuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/models/{id}/status": {
+    "/models/{id}/status": {
       "put": {
+        "description": "启用或禁用指定的模型，控制模型是否可用于对话",
         "consumes": [
           "application/json"
         ],
@@ -732,23 +876,23 @@
         "tags": [
           "Models"
         ],
-        "summary": "Sets the status of a model.",
+        "summary": "设置模型状态",
         "operationId": "setModelStatus",
         "parameters": [
           {
             "type": "integer",
-            "description": "Model ID",
+            "description": "模型ID",
             "name": "id",
             "in": "path",
             "required": true
           },
           {
-            "description": "Enable status",
+            "description": "状态设置",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "description": "Enable status",
+              "description": "状态设置",
               "type": "object",
               "$ref": "#/definitions/ModelStatusEnableRequest"
             }
@@ -756,37 +900,42 @@
         ],
         "responses": {
           "200": {
-            "description": "APIResponse",
-            "schema": {
-              "$ref": "#/definitions/APIResponse"
-            }
+            "$ref": "#/responses/EmptySuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/settings/defaults": {
+    "/settings/defaults": {
       "get": {
+        "description": "获取系统当前的默认配置信息，包括模型设置、聊天参数等",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Settings"
         ],
-        "summary": "Gets the default settings.",
+        "summary": "获取默认设置",
         "operationId": "getDefaultSettings",
         "responses": {
           "200": {
-            "$ref": "#/responses/DefaultSettingsResponse"
+            "$ref": "#/responses/DefaultSettingsSuccessResponse"
           }
         }
       },
       "put": {
+        "description": "更新系统的默认配置信息，新的设置将应用于后续创建的对话",
         "consumes": [
           "application/json"
         ],
@@ -796,16 +945,16 @@
         "tags": [
           "Settings"
         ],
-        "summary": "Updates the default settings.",
+        "summary": "更新默认设置",
         "operationId": "updateDefaultSettings",
         "parameters": [
           {
-            "description": "Default settings",
+            "description": "默认设置",
             "name": "body",
             "in": "body",
             "required": true,
             "schema": {
-              "description": "Default settings",
+              "description": "默认设置",
               "type": "object",
               "$ref": "#/definitions/DefaultSettings"
             }
@@ -813,50 +962,61 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/DefaultSettingsResponse"
+            "$ref": "#/responses/DefaultSettingsSuccessResponse"
           },
           "400": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/settings/defaults/reset": {
+    "/settings/defaults/reset": {
       "post": {
+        "description": "将系统配置重置为出厂默认值，恢复所有设置到初始状态",
         "produces": [
           "application/json"
         ],
         "tags": [
           "Settings"
         ],
-        "summary": "Resets the default settings.",
+        "summary": "重置默认设置",
         "operationId": "resetDefaultSettings",
         "responses": {
           "200": {
-            "$ref": "#/responses/DefaultSettingsResponse"
+            "$ref": "#/responses/DefaultSettingsSuccessResponse"
           },
           "500": {
-            "$ref": "#/responses/ErrorResponse"
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
           }
         }
       }
     },
-    "/api/v1/version": {
+    "/version": {
       "get": {
+        "description": "返回应用程序的详细版本信息，包括版本号、构建时间和Git信息",
         "produces": [
           "application/json"
         ],
         "tags": [
           "System"
         ],
-        "summary": "Returns the version information of the application.",
+        "summary": "获取版本信息",
         "operationId": "getVersion",
         "responses": {
           "200": {
-            "$ref": "#/responses/VersionInfoResponse"
+            "$ref": "#/responses/VersionInfoSuccessResponse"
           }
         }
       }
@@ -864,23 +1024,42 @@
   },
   "definitions": {
     "APIResponse": {
-      "description": "APIResponse 通用API响应",
+      "description": "APIResponse 通用API响应（成功和错误都使用这个结构）",
       "type": "object",
+      "required": [
+        "success",
+        "message",
+        "timestamp"
+      ],
       "properties": {
         "data": {
+          "description": "响应数据（成功时有值，失败时为null）",
           "x-go-name": "Data"
         },
-        "error": {
+        "details": {
+          "description": "错误详情（失败时有值）",
           "type": "string",
-          "x-go-name": "Error"
+          "x-go-name": "Details"
+        },
+        "error_code": {
+          "description": "错误代码（失败时有值）",
+          "type": "string",
+          "x-go-name": "ErrorCode"
         },
         "message": {
+          "description": "响应消息",
           "type": "string",
           "x-go-name": "Message"
         },
         "success": {
+          "description": "请求是否成功",
           "type": "boolean",
           "x-go-name": "Success"
+        },
+        "timestamp": {
+          "description": "时间戳",
+          "type": "string",
+          "x-go-name": "Timestamp"
         }
       },
       "x-go-package": "chat-backend/models"
@@ -888,12 +1067,20 @@
     "AsyncChatRequest": {
       "description": "AsyncChatRequest 异步对话请求",
       "type": "object",
+      "required": [
+        "sessionId",
+        "content",
+        "requestId",
+        "files"
+      ],
       "properties": {
         "content": {
+          "description": "消息内容",
           "type": "string",
           "x-go-name": "Content"
         },
         "files": {
+          "description": "文件列表",
           "type": "array",
           "items": {
             "type": "string"
@@ -901,10 +1088,12 @@
           "x-go-name": "Files"
         },
         "requestId": {
+          "description": "请求ID (UUID)",
           "type": "string",
           "x-go-name": "RequestID"
         },
         "sessionId": {
+          "description": "会话ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "SessionID"
@@ -915,23 +1104,27 @@
     "ChatMessageRequest": {
       "description": "ChatMessageRequest 聊天消息请求（用于Swagger文档）",
       "type": "object",
+      "required": [
+        "sessionId",
+        "content",
+        "files"
+      ],
       "properties": {
         "content": {
+          "description": "消息内容",
           "type": "string",
           "x-go-name": "Content"
         },
         "files": {
+          "description": "文件列表（可选）",
           "type": "array",
           "items": {
             "type": "string"
           },
           "x-go-name": "Files"
         },
-        "requestId": {
-          "type": "string",
-          "x-go-name": "RequestID"
-        },
         "sessionId": {
+          "description": "会话ID/对话ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "SessionID"
@@ -942,12 +1135,20 @@
     "ChatRequest": {
       "description": "ChatRequest 聊天请求 - 直接使用 SDK 的 AsyncChatRequest",
       "type": "object",
+      "required": [
+        "sessionId",
+        "content",
+        "requestId",
+        "files"
+      ],
       "properties": {
         "content": {
+          "description": "消息内容",
           "type": "string",
           "x-go-name": "Content"
         },
         "files": {
+          "description": "文件列表",
           "type": "array",
           "items": {
             "type": "string"
@@ -955,10 +1156,12 @@
           "x-go-name": "Files"
         },
         "requestId": {
+          "description": "请求ID (UUID)",
           "type": "string",
           "x-go-name": "RequestID"
         },
         "sessionId": {
+          "description": "会话ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "SessionID"
@@ -969,25 +1172,40 @@
     "ChatResponse": {
       "description": "ChatResponse 聊天响应",
       "type": "object",
+      "required": [
+        "id",
+        "conversation_id",
+        "content",
+        "role",
+        "status",
+        "references",
+        "token_count",
+        "created_at"
+      ],
       "properties": {
         "content": {
+          "description": "消息内容",
           "type": "string",
           "x-go-name": "Content"
         },
         "conversation_id": {
+          "description": "对话ID",
           "type": "string",
           "x-go-name": "ConversationID"
         },
         "created_at": {
+          "description": "创建时间",
           "type": "string",
           "format": "date-time",
           "x-go-name": "CreatedAt"
         },
         "id": {
+          "description": "消息ID",
           "type": "string",
           "x-go-name": "ID"
         },
         "references": {
+          "description": "引用信息列表",
           "type": "array",
           "items": {
             "$ref": "#/definitions/Reference"
@@ -995,14 +1213,17 @@
           "x-go-name": "References"
         },
         "role": {
+          "description": "角色: user/assistant",
           "type": "string",
           "x-go-name": "Role"
         },
         "status": {
+          "description": "状态",
           "type": "string",
           "x-go-name": "Status"
         },
         "token_count": {
+          "description": "Token数量",
           "type": "integer",
           "format": "int64",
           "x-go-name": "TokenCount"
@@ -1013,27 +1234,46 @@
     "Conversation": {
       "description": "Conversation 对话信息",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "model_id",
+        "temperature",
+        "top_p",
+        "presence_penalty",
+        "frequency_penalty",
+        "responseType",
+        "stream",
+        "knowledge_base_ids",
+        "contextLimit",
+        "id"
+      ],
       "properties": {
         "contextLimit": {
+          "description": "上下文限制（消息数量）",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ContextLimit"
         },
         "desc": {
+          "description": "对话描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "frequency_penalty": {
+          "description": "重复控制",
           "type": "number",
           "format": "double",
           "x-go-name": "FrequencyPenalty"
         },
         "id": {
+          "description": "对话ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ID"
         },
         "knowledge_base_ids": {
+          "description": "知识库ID列表",
           "type": "array",
           "items": {
             "type": "string"
@@ -1041,33 +1281,40 @@
           "x-go-name": "KnowledgeBaseIDs"
         },
         "model_id": {
+          "description": "模型ID（数字）",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ModelID"
         },
         "name": {
+          "description": "对话名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "presence_penalty": {
+          "description": "词汇控制",
           "type": "number",
           "format": "double",
           "x-go-name": "PresencePenalty"
         },
         "responseType": {
+          "description": "响应类型  text/json",
           "type": "string",
           "x-go-name": "ResponseType"
         },
         "stream": {
+          "description": "对话输出模式 true=流式输出, false=非流式输出",
           "type": "boolean",
           "x-go-name": "Stream"
         },
         "temperature": {
+          "description": "多样性",
           "type": "number",
           "format": "double",
           "x-go-name": "Temperature"
         },
         "top_p": {
+          "description": "采样范围",
           "type": "number",
           "format": "double",
           "x-go-name": "TopP"
@@ -1078,12 +1325,19 @@
     "ConversationHistoryResponse": {
       "description": "ConversationHistoryResponse 对话历史响应",
       "type": "object",
+      "required": [
+        "conversation_id",
+        "messages",
+        "total"
+      ],
       "properties": {
         "conversation_id": {
+          "description": "对话ID",
           "type": "string",
           "x-go-name": "ConversationID"
         },
         "messages": {
+          "description": "消息列表",
           "type": "array",
           "items": {
             "$ref": "#/definitions/SessionRecord"
@@ -1091,6 +1345,7 @@
           "x-go-name": "Messages"
         },
         "total": {
+          "description": "消息总数",
           "type": "integer",
           "format": "int64",
           "x-go-name": "Total"
@@ -1101,13 +1356,19 @@
     "ConversationListRequest": {
       "description": "ConversationListRequest 对话列表请求",
       "type": "object",
+      "required": [
+        "page",
+        "page_size"
+      ],
       "properties": {
         "page": {
+          "description": "页码",
           "type": "integer",
           "format": "int64",
           "x-go-name": "Page"
         },
         "page_size": {
+          "description": "每页数量",
           "type": "integer",
           "format": "int64",
           "x-go-name": "PageSize"
@@ -1118,8 +1379,15 @@
     "ConversationListResponse": {
       "description": "ConversationListResponse 对话列表响应",
       "type": "object",
+      "required": [
+        "conversations",
+        "total",
+        "page",
+        "page_size"
+      ],
       "properties": {
         "conversations": {
+          "description": "对话列表",
           "type": "array",
           "items": {
             "$ref": "#/definitions/Conversation"
@@ -1127,16 +1395,19 @@
           "x-go-name": "Conversations"
         },
         "page": {
+          "description": "当前页码",
           "type": "integer",
           "format": "int64",
           "x-go-name": "Page"
         },
         "page_size": {
+          "description": "每页数量",
           "type": "integer",
           "format": "int64",
           "x-go-name": "PageSize"
         },
         "total": {
+          "description": "总数",
           "type": "integer",
           "format": "int64",
           "x-go-name": "Total"
@@ -1145,24 +1416,41 @@
       "x-go-package": "chat-backend/models"
     },
     "ConversationSettings": {
-      "description": "ConversationSettings 对话设置\n@Description 对话设置信息",
+      "description": "ConversationSettings 对话设置",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "model_id",
+        "temperature",
+        "top_p",
+        "presence_penalty",
+        "frequency_penalty",
+        "responseType",
+        "stream",
+        "knowledge_base_ids",
+        "contextLimit"
+      ],
       "properties": {
         "contextLimit": {
+          "description": "上下文限制（消息数量）",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ContextLimit"
         },
         "desc": {
+          "description": "对话描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "frequency_penalty": {
+          "description": "重复控制",
           "type": "number",
           "format": "double",
           "x-go-name": "FrequencyPenalty"
         },
         "knowledge_base_ids": {
+          "description": "知识库ID列表",
           "type": "array",
           "items": {
             "type": "string"
@@ -1170,33 +1458,40 @@
           "x-go-name": "KnowledgeBaseIDs"
         },
         "model_id": {
+          "description": "模型ID（数字）",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ModelID"
         },
         "name": {
+          "description": "对话名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "presence_penalty": {
+          "description": "词汇控制",
           "type": "number",
           "format": "double",
           "x-go-name": "PresencePenalty"
         },
         "responseType": {
+          "description": "响应类型  text/json",
           "type": "string",
           "x-go-name": "ResponseType"
         },
         "stream": {
+          "description": "对话输出模式 true=流式输出, false=非流式输出",
           "type": "boolean",
           "x-go-name": "Stream"
         },
         "temperature": {
+          "description": "多样性",
           "type": "number",
           "format": "double",
           "x-go-name": "Temperature"
         },
         "top_p": {
+          "description": "采样范围",
           "type": "number",
           "format": "double",
           "x-go-name": "TopP"
@@ -1226,22 +1521,39 @@
     "DefaultConversationConfig": {
       "description": "DefaultConversationConfig 默认对话配置",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "model_id",
+        "temperature",
+        "top_p",
+        "presence_penalty",
+        "frequency_penalty",
+        "responseType",
+        "stream",
+        "knowledge_base_ids",
+        "contextLimit"
+      ],
       "properties": {
         "contextLimit": {
+          "description": "上下文限制（消息数量）",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ContextLimit"
         },
         "desc": {
+          "description": "对话描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "frequency_penalty": {
+          "description": "重复控制",
           "type": "number",
           "format": "double",
           "x-go-name": "FrequencyPenalty"
         },
         "knowledge_base_ids": {
+          "description": "知识库ID列表",
           "type": "array",
           "items": {
             "type": "string"
@@ -1249,33 +1561,40 @@
           "x-go-name": "KnowledgeBaseIDs"
         },
         "model_id": {
+          "description": "模型ID（数字）",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ModelID"
         },
         "name": {
+          "description": "对话名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "presence_penalty": {
+          "description": "词汇控制",
           "type": "number",
           "format": "double",
           "x-go-name": "PresencePenalty"
         },
         "responseType": {
+          "description": "响应类型  text/json",
           "type": "string",
           "x-go-name": "ResponseType"
         },
         "stream": {
+          "description": "对话输出模式 true=流式输出, false=非流式输出",
           "type": "boolean",
           "x-go-name": "Stream"
         },
         "temperature": {
+          "description": "多样性",
           "type": "number",
           "format": "double",
           "x-go-name": "Temperature"
         },
         "top_p": {
+          "description": "采样范围",
           "type": "number",
           "format": "double",
           "x-go-name": "TopP"
@@ -1286,30 +1605,44 @@
     "DefaultKnowledgeBaseConfig": {
       "description": "DefaultKnowledgeBaseConfig 默认知识库配置",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "vectorModel",
+        "agentModel",
+        "chunkStrategy",
+        "chunkSize"
+      ],
       "properties": {
         "agentModel": {
+          "description": "对话模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "AgentModel"
         },
         "chunkSize": {
+          "description": "切片大小",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ChunkSize"
         },
         "chunkStrategy": {
+          "description": "切片策略",
           "type": "string",
           "x-go-name": "ChunkStrategy"
         },
         "desc": {
+          "description": "知识库描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "name": {
+          "description": "知识库名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "vectorModel": {
+          "description": "向量模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "VectorModel"
@@ -1320,35 +1653,51 @@
     "DefaultKnowledgeBaseSettings": {
       "description": "DefaultKnowledgeBaseSettings 默认知识库设置（用于持久化）",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "vectorModel",
+        "agentModel",
+        "chunkStrategy",
+        "chunkSize",
+        "updated_at"
+      ],
       "properties": {
         "agentModel": {
+          "description": "对话模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "AgentModel"
         },
         "chunkSize": {
+          "description": "切片大小",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ChunkSize"
         },
         "chunkStrategy": {
+          "description": "切片策略",
           "type": "string",
           "x-go-name": "ChunkStrategy"
         },
         "desc": {
+          "description": "知识库描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "name": {
+          "description": "知识库名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "updated_at": {
+          "description": "更新时间",
           "type": "string",
           "format": "date-time",
           "x-go-name": "UpdatedAt"
         },
         "vectorModel": {
+          "description": "向量模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "VectorModel"
@@ -1359,13 +1708,19 @@
     "DefaultModelSettings": {
       "description": "DefaultModelSettings 默认模型设置",
       "type": "object",
+      "required": [
+        "chat_model_id",
+        "embedding_model_id"
+      ],
       "properties": {
         "chat_model_id": {
+          "description": "默认对话模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ChatModelID"
         },
         "embedding_model_id": {
+          "description": "默认向量模型ID（嵌入模型）",
           "type": "integer",
           "format": "int64",
           "x-go-name": "EmbeddingModelID"
@@ -1376,6 +1731,12 @@
     "DefaultSettings": {
       "description": "DefaultSettings 统一的默认设置（用于持久化）",
       "type": "object",
+      "required": [
+        "models",
+        "conversation",
+        "knowledge_base",
+        "updated_at"
+      ],
       "properties": {
         "conversation": {
           "$ref": "#/definitions/DefaultConversationConfig"
@@ -1387,6 +1748,7 @@
           "$ref": "#/definitions/DefaultModelSettings"
         },
         "updated_at": {
+          "description": "更新时间",
           "type": "string",
           "format": "date-time",
           "x-go-name": "UpdatedAt"
@@ -1420,6 +1782,49 @@
       },
       "x-go-package": "flowy-sdk/services/model"
     },
+    "ErrorCode": {
+      "description": "ErrorCode 错误代码类型",
+      "type": "string",
+      "x-go-package": "chat-backend/utils"
+    },
+    "ErrorResponse": {
+      "description": "ErrorResponse 错误响应结构",
+      "type": "object",
+      "required": [
+        "success",
+        "error_code",
+        "message",
+        "details",
+        "timestamp"
+      ],
+      "properties": {
+        "details": {
+          "description": "错误详情",
+          "type": "string",
+          "x-go-name": "Details"
+        },
+        "error_code": {
+          "$ref": "#/definitions/ErrorCode"
+        },
+        "message": {
+          "description": "错误消息",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "success": {
+          "description": "请求是否成功",
+          "type": "boolean",
+          "x-go-name": "Success"
+        },
+        "timestamp": {
+          "description": "时间戳",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Timestamp"
+        }
+      },
+      "x-go-package": "chat-backend/utils"
+    },
     "ExtraInfo": {
       "description": "ExtraInfo 额外信息",
       "type": "object",
@@ -1438,8 +1843,12 @@
     "FileToggleEnableRequest": {
       "description": "FileToggleEnableRequest 文件启用/禁用请求",
       "type": "object",
+      "required": [
+        "enable"
+      ],
       "properties": {
         "enable": {
+          "description": "true=启用, false=禁用",
           "type": "boolean",
           "x-go-name": "Enable"
         }
@@ -1449,40 +1858,58 @@
     "KnowledgeBase": {
       "description": "KnowledgeBase 知识库（列表返回）",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "vectorModel",
+        "agentModel",
+        "chunkStrategy",
+        "chunkSize",
+        "id",
+        "file_count"
+      ],
       "properties": {
         "agentModel": {
+          "description": "对话模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "AgentModel"
         },
         "chunkSize": {
+          "description": "切片大小",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ChunkSize"
         },
         "chunkStrategy": {
+          "description": "切片策略 固定尺寸:fixed  自然句:period   自然段落:paragraph",
           "type": "string",
           "x-go-name": "ChunkStrategy"
         },
         "desc": {
+          "description": "知识库描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "file_count": {
+          "description": "文件数量",
           "type": "integer",
           "format": "int64",
           "x-go-name": "FileCount"
         },
         "id": {
+          "description": "知识库ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ID"
         },
         "name": {
+          "description": "知识库名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "vectorModel": {
+          "description": "向量模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "VectorModel"
@@ -1493,30 +1920,44 @@
     "KnowledgeBaseConfig": {
       "description": "KnowledgeBaseConfig 知识库配置（公用字段）",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "vectorModel",
+        "agentModel",
+        "chunkStrategy",
+        "chunkSize"
+      ],
       "properties": {
         "agentModel": {
+          "description": "对话模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "AgentModel"
         },
         "chunkSize": {
+          "description": "切片大小",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ChunkSize"
         },
         "chunkStrategy": {
+          "description": "切片策略 固定尺寸:fixed  自然句:period   自然段落:paragraph",
           "type": "string",
           "x-go-name": "ChunkStrategy"
         },
         "desc": {
+          "description": "知识库描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "name": {
+          "description": "知识库名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "vectorModel": {
+          "description": "向量模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "VectorModel"
@@ -1527,30 +1968,44 @@
     "KnowledgeBaseCreateRequest": {
       "description": "KnowledgeBaseCreateRequest 创建知识库请求",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "vectorModel",
+        "agentModel",
+        "chunkStrategy",
+        "chunkSize"
+      ],
       "properties": {
         "agentModel": {
+          "description": "对话模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "AgentModel"
         },
         "chunkSize": {
+          "description": "切片大小",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ChunkSize"
         },
         "chunkStrategy": {
+          "description": "切片策略 固定尺寸:fixed  自然句:period   自然段落:paragraph",
           "type": "string",
           "x-go-name": "ChunkStrategy"
         },
         "desc": {
+          "description": "知识库描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "name": {
+          "description": "知识库名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "vectorModel": {
+          "description": "向量模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "VectorModel"
@@ -1561,30 +2016,44 @@
     "KnowledgeBaseSettings": {
       "description": "KnowledgeBaseSettings 知识库设置",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "vectorModel",
+        "agentModel",
+        "chunkStrategy",
+        "chunkSize"
+      ],
       "properties": {
         "agentModel": {
+          "description": "对话模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "AgentModel"
         },
         "chunkSize": {
+          "description": "切片大小",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ChunkSize"
         },
         "chunkStrategy": {
+          "description": "切片策略",
           "type": "string",
           "x-go-name": "ChunkStrategy"
         },
         "desc": {
+          "description": "知识库描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "name": {
+          "description": "知识库名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "vectorModel": {
+          "description": "向量模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "VectorModel"
@@ -1595,40 +2064,58 @@
     "KnowledgeFile": {
       "description": "KnowledgeFile 知识库文件",
       "type": "object",
+      "required": [
+        "id",
+        "name",
+        "size",
+        "enable",
+        "status",
+        "uploaded_at",
+        "index_percent",
+        "errorMessage"
+      ],
       "properties": {
         "enable": {
+          "description": "启用状态: true=启用, false=禁用",
           "type": "boolean",
           "x-go-name": "Enable"
         },
         "errorMessage": {
+          "description": "错误信息，空字符串表示无错误",
           "type": "string",
           "x-go-name": "ErrorMessage"
         },
         "id": {
+          "description": "文件ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ID"
         },
         "index_percent": {
+          "description": "索引进度百分比",
           "type": "integer",
           "format": "int64",
           "x-go-name": "IndexPercent"
         },
         "name": {
+          "description": "文件名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "size": {
+          "description": "文件大小（字节）",
           "type": "integer",
           "format": "int64",
           "x-go-name": "Size"
         },
         "status": {
+          "description": "索引状态: 0=构建中, 1=完成, 2=失败",
           "type": "integer",
           "format": "int64",
           "x-go-name": "Status"
         },
         "uploaded_at": {
+          "description": "上传时间",
           "type": "string",
           "format": "date-time",
           "x-go-name": "UploadedAt"
@@ -1677,22 +2164,32 @@
     "MessageRecord": {
       "description": "MessageRecord 对话消息记录",
       "type": "object",
+      "required": [
+        "id",
+        "role",
+        "content",
+        "created_at"
+      ],
       "properties": {
         "content": {
+          "description": "消息内容",
           "type": "string",
           "x-go-name": "Content"
         },
         "created_at": {
+          "description": "创建时间",
           "type": "string",
           "format": "date-time",
           "x-go-name": "CreatedAt"
         },
         "id": {
+          "description": "消息ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ID"
         },
         "role": {
+          "description": "角色: user/assistant",
           "type": "string",
           "x-go-name": "Role"
         }
@@ -1746,8 +2243,12 @@
     "ModelStatusEnableRequest": {
       "description": "ModelStatusEnableRequest 模型状态启用/禁用请求",
       "type": "object",
+      "required": [
+        "enable"
+      ],
       "properties": {
         "enable": {
+          "description": "true=启用, false=禁用",
           "type": "boolean",
           "x-go-name": "Enable"
         }
@@ -1799,25 +2300,37 @@
     "Reference": {
       "description": "Reference 引用信息",
       "type": "object",
+      "required": [
+        "document_id",
+        "document_title",
+        "content",
+        "similarity",
+        "chunk_index"
+      ],
       "properties": {
         "chunk_index": {
+          "description": "分块索引",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ChunkIndex"
         },
         "content": {
+          "description": "引用内容",
           "type": "string",
           "x-go-name": "Content"
         },
         "document_id": {
+          "description": "文档ID",
           "type": "string",
           "x-go-name": "DocumentID"
         },
         "document_title": {
+          "description": "文档标题",
           "type": "string",
           "x-go-name": "DocumentTitle"
         },
         "similarity": {
+          "description": "相似度",
           "type": "number",
           "format": "double",
           "x-go-name": "Similarity"
@@ -1932,20 +2445,30 @@
     "StreamChatResponse": {
       "description": "StreamChatResponse 流式聊天响应",
       "type": "object",
+      "required": [
+        "id",
+        "content",
+        "delta",
+        "done"
+      ],
       "properties": {
         "content": {
+          "description": "完整内容",
           "type": "string",
           "x-go-name": "Content"
         },
         "delta": {
+          "description": "增量内容",
           "type": "string",
           "x-go-name": "Delta"
         },
         "done": {
+          "description": "是否完成",
           "type": "boolean",
           "x-go-name": "Done"
         },
         "id": {
+          "description": "消息ID",
           "type": "string",
           "x-go-name": "ID"
         }
@@ -2053,6 +2576,39 @@
       },
       "x-go-package": "flowy-sdk/services/agent"
     },
+    "SuccessResponse": {
+      "description": "SuccessResponse 统一成功响应结构",
+      "type": "object",
+      "required": [
+        "success",
+        "message",
+        "data",
+        "timestamp"
+      ],
+      "properties": {
+        "data": {
+          "description": "响应数据",
+          "x-go-name": "Data"
+        },
+        "message": {
+          "description": "响应消息",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "success": {
+          "description": "请求是否成功",
+          "type": "boolean",
+          "x-go-name": "Success"
+        },
+        "timestamp": {
+          "description": "时间戳",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "Timestamp"
+        }
+      },
+      "x-go-package": "chat-backend/utils"
+    },
     "SupportedChatModel": {
       "description": "SupportedChatModel 支持的聊天模型",
       "type": "object",
@@ -2110,30 +2666,44 @@
     "UpdateKnowledgeBaseRequest": {
       "description": "UpdateKnowledgeBaseRequest 更新知识库请求",
       "type": "object",
+      "required": [
+        "name",
+        "desc",
+        "vectorModel",
+        "agentModel",
+        "chunkStrategy",
+        "chunkSize"
+      ],
       "properties": {
         "agentModel": {
+          "description": "对话模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "AgentModel"
         },
         "chunkSize": {
+          "description": "切片大小",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ChunkSize"
         },
         "chunkStrategy": {
+          "description": "切片策略 固定尺寸:fixed  自然句:period   自然段落:paragraph",
           "type": "string",
           "x-go-name": "ChunkStrategy"
         },
         "desc": {
+          "description": "知识库描述",
           "type": "string",
           "x-go-name": "Desc"
         },
         "name": {
+          "description": "知识库名称",
           "type": "string",
           "x-go-name": "Name"
         },
         "vectorModel": {
+          "description": "向量模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "VectorModel"
@@ -2171,24 +2741,36 @@
     "VersionInfo": {
       "description": "VersionInfo 版本信息响应结构",
       "type": "object",
+      "required": [
+        "version",
+        "build_time",
+        "git_commit",
+        "git_branch",
+        "git_tag"
+      ],
       "properties": {
         "build_time": {
+          "description": "构建时间",
           "type": "string",
           "x-go-name": "BuildTime"
         },
         "git_branch": {
+          "description": "Git分支",
           "type": "string",
           "x-go-name": "GitBranch"
         },
         "git_commit": {
+          "description": "Git提交哈希",
           "type": "string",
           "x-go-name": "GitCommit"
         },
         "git_tag": {
+          "description": "Git标签",
           "type": "string",
           "x-go-name": "GitTag"
         },
         "version": {
+          "description": "版本号",
           "type": "string",
           "x-go-name": "Version"
         }
@@ -2198,19 +2780,29 @@
     "WebSocketMessage": {
       "description": "WebSocketMessage WebSocket消息",
       "type": "object",
+      "required": [
+        "type",
+        "data",
+        "id",
+        "error"
+      ],
       "properties": {
         "data": {
+          "description": "消息数据",
           "x-go-name": "Data"
         },
         "error": {
+          "description": "错误信息",
           "type": "string",
           "x-go-name": "Error"
         },
         "id": {
+          "description": "消息ID",
           "type": "string",
           "x-go-name": "ID"
         },
         "type": {
+          "description": "消息类型",
           "type": "string",
           "x-go-name": "Type"
         }
@@ -2219,136 +2811,211 @@
     }
   },
   "responses": {
-    "AvailableModelListResponse": {
-      "description": "AvailableModelListResponse represents an available model list response.",
+    "ConversationHistorySuccessResponse": {
+      "description": "ConversationHistorySuccessResponse 对话历史成功响应",
       "schema": {
         "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/definitions/ModelInfo"
-            },
-            "x-go-name": "Data"
-          },
-          "message": {
-            "type": "string",
-            "x-go-name": "Message"
-          },
-          "success": {
-            "type": "boolean",
-            "x-go-name": "Success"
-          }
-        }
-      }
-    },
-    "ConversationHistoryResponse": {
-      "description": "conversationHistoryResponseWrapper represents a conversation history response.",
-      "schema": {
-        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
             "$ref": "#/definitions/ConversationHistoryResponse"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "ConversationListResponse": {
-      "description": "conversationListResponseWrapper represents a conversation list response.",
+    "ConversationListSuccessResponse": {
+      "description": "ConversationListSuccessResponse 对话列表获取成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
             "$ref": "#/definitions/ConversationListResponse"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
-          }
-        }
-      }
-    },
-    "ConversationResponse": {
-      "description": "conversationResponseWrapper represents a conversation response.",
-      "schema": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/definitions/Conversation"
           },
-          "message": {
+          "timestamp": {
+            "description": "时间戳",
             "type": "string",
-            "x-go-name": "Message"
-          },
-          "success": {
-            "type": "boolean",
-            "x-go-name": "Success"
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "ConversationSettingsResponse": {
-      "description": "conversationSettingsResponseWrapper represents a conversation settings response.",
+    "ConversationSettingsSuccessResponse": {
+      "description": "ConversationSettingsSuccessResponse 对话设置成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
             "$ref": "#/definitions/ConversationSettings"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "DefaultSettingsResponse": {
-      "description": "defaultSettingsResponseWrapper represents a default settings response.",
+    "ConversationSuccessResponse": {
+      "description": "ConversationSuccessResponse 对话创建成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/Conversation"
+          },
+          "message": {
+            "description": "响应消息",
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "description": "请求是否成功",
+            "type": "boolean",
+            "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
+          }
+        }
+      }
+    },
+    "DefaultSettingsSuccessResponse": {
+      "description": "DefaultSettingsSuccessResponse 默认设置成功响应",
+      "schema": {
+        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
             "$ref": "#/definitions/DefaultSettings"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "ErrorResponse": {
-      "description": "errorResponseWrapper represents an error response.",
-      "schema": {
-        "$ref": "#/definitions/APIResponse"
-      }
-    },
-    "KnowledgeBaseListResponse": {
-      "description": "knowledgeBaseListResponseWrapper represents a knowledge base list response.",
+    "EmptySuccessResponse": {
+      "description": "EmptySuccessResponse 空数据成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "timestamp"
+        ],
         "properties": {
           "data": {
+            "description": "空数据",
+            "x-go-name": "Data"
+          },
+          "message": {
+            "description": "响应消息",
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "description": "请求是否成功",
+            "type": "boolean",
+            "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
+          }
+        }
+      }
+    },
+    "KnowledgeBaseListSuccessResponse": {
+      "description": "KnowledgeBaseListSuccessResponse 知识库列表成功响应",
+      "schema": {
+        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
+        "properties": {
+          "data": {
+            "description": "知识库列表数据",
             "type": "array",
             "items": {
               "$ref": "#/definitions/KnowledgeBase"
@@ -2356,41 +3023,68 @@
             "x-go-name": "Data"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "KnowledgeBaseResponse": {
-      "description": "knowledgeBaseResponseWrapper represents a knowledge base response.",
+    "KnowledgeBaseSuccessResponse": {
+      "description": "KnowledgeBaseSuccessResponse 知识库成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
             "$ref": "#/definitions/KnowledgeBase"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "KnowledgeFileListResponse": {
-      "description": "knowledgeFileListResponseWrapper represents a knowledge file list response.",
+    "KnowledgeFileListSuccessResponse": {
+      "description": "KnowledgeFileListSuccessResponse 知识库文件列表成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
+            "description": "知识库文件列表数据",
             "type": "array",
             "items": {
               "$ref": "#/definitions/KnowledgeFile"
@@ -2398,68 +3092,140 @@
             "x-go-name": "Data"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "KnowledgeFileResponse": {
-      "description": "knowledgeFileResponseWrapper represents a knowledge file response.",
+    "KnowledgeFileSuccessResponse": {
+      "description": "KnowledgeFileSuccessResponse 知识库文件成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
             "$ref": "#/definitions/KnowledgeFile"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "ModelSaveResponse": {
-      "description": "modelSaveResponseWrapper represents a model save response.",
+    "ModelListSuccessResponse": {
+      "description": "ModelListSuccessResponse 模型列表成功响应 (通用)",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "integer",
-                "format": "int64",
-                "x-go-name": "ID"
-              }
+            "description": "模型列表数据",
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/ModelInfo"
             },
             "x-go-name": "Data"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "SupportedModelListResponse": {
-      "description": "SupportedModelListResponse represents a model list response.",
+    "ModelSaveSuccessResponse": {
+      "description": "ModelSaveSuccessResponse 模型保存成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
+            "description": "模型ID数据",
+            "type": "object",
+            "additionalProperties": {},
+            "x-go-name": "Data"
+          },
+          "message": {
+            "description": "响应消息",
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "description": "请求是否成功",
+            "type": "boolean",
+            "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
+          }
+        }
+      }
+    },
+    "SupportedChatModelListSuccessResponse": {
+      "description": "SupportedChatModelListSuccessResponse 支持的聊天模型列表成功响应",
+      "schema": {
+        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
+        "properties": {
+          "data": {
+            "description": "支持的聊天模型列表数据",
             "type": "array",
             "items": {
               "$ref": "#/definitions/SupportedChatModel"
@@ -2467,22 +3233,36 @@
             "x-go-name": "Data"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "SupportedVectorModelListResponse": {
-      "description": "SupportedVectorModelListResponse represents a vector model list response.",
+    "SupportedVectorModelListSuccessResponse": {
+      "description": "SupportedVectorModelListSuccessResponse 支持的向量模型列表成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
+            "description": "支持的向量模型列表数据",
             "type": "array",
             "items": {
               "$ref": "#/definitions/SupportedVectorModel"
@@ -2490,31 +3270,51 @@
             "x-go-name": "Data"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }
     },
-    "VersionInfoResponse": {
-      "description": "versionInfoResponseWrapper represents a version info response.",
+    "VersionInfoSuccessResponse": {
+      "description": "VersionInfoSuccessResponse 版本信息成功响应",
       "schema": {
         "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
         "properties": {
           "data": {
             "$ref": "#/definitions/VersionInfo"
           },
           "message": {
+            "description": "响应消息",
             "type": "string",
             "x-go-name": "Message"
           },
           "success": {
+            "description": "请求是否成功",
             "type": "boolean",
             "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
           }
         }
       }

@@ -15,56 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SupportedModelListResponse represents a model list response.
-//
-// swagger:response SupportedModelListResponse
-type SupportedModelListResponse struct {
-	// in: body
-	Body struct {
-		Success bool                          `json:"success"`
-		Message string                        `json:"message,omitempty"`
-		Data    []modelSvc.SupportedChatModel `json:"data,omitempty"`
-	}
-}
-
-// SupportedVectorModelListResponse represents a vector model list response.
-//
-// swagger:response SupportedVectorModelListResponse
-type SupportedVectorModelListResponse struct {
-	// in: body
-	Body struct {
-		Success bool                            `json:"success"`
-		Message string                          `json:"message,omitempty"`
-		Data    []modelSvc.SupportedVectorModel `json:"data,omitempty"`
-	}
-}
-
-// AvailableModelListResponse represents an available model list response.
-//
-// swagger:response AvailableModelListResponse
-type AvailableModelListResponse struct {
-	// in: body
-	Body struct {
-		Success bool                 `json:"success"`
-		Message string               `json:"message,omitempty"`
-		Data    []modelSvc.ModelInfo `json:"data,omitempty"`
-	}
-}
-
-// modelSaveResponseWrapper represents a model save response.
-//
-// swagger:response ModelSaveResponse
-type modelSaveResponseWrapper struct {
-	// in: body
-	Body struct {
-		Success bool   `json:"success"`
-		Message string `json:"message,omitempty"`
-		Data    struct {
-			ID int `json:"id"`
-		} `json:"data,omitempty"`
-	}
-}
-
 // ModelHandler 处理模型相关的HTTP请求。
 type ModelHandler struct {
 	modelService *services.ModelService
@@ -79,15 +29,18 @@ func NewModelHandler(modelService *services.ModelService) *ModelHandler {
 
 // ListSupportedChatModels 返回支持的聊天模型列表。
 //
-// swagger:route GET /api/v1/models/supported/chat Models listSupportedChatModels
-// 聊天模型列表
+// swagger:route GET /models/supported/chat Models listSupportedChatModels
+//
+// 获取支持的聊天模型
+//
+// 获取系统支持的所有聊天模型列表，包括模型名称、类型等信息
 //
 // Produces:
 // - application/json
 //
 // Responses:
 //
-//	200: SupportedModelListResponse
+//	200: SupportedChatModelListSuccessResponse
 //	500: ErrorResponse
 func (h *ModelHandler) ListSupportedChatModels(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
@@ -105,15 +58,18 @@ func (h *ModelHandler) ListSupportedChatModels(c *gin.Context) {
 
 // ListSupportedVectorModels 返回支持的向量模型列表。
 //
-// swagger:route GET /api/v1/models/supported/vector Models listSupportedVectorModels
-// 向量模型列表
+// swagger:route GET /models/supported/vector Models listSupportedVectorModels
+//
+// 获取支持的向量模型
+//
+// 获取系统支持的所有向量模型列表，用于知识库向量化处理
 //
 // Produces:
 // - application/json
 //
 // Responses:
 //
-//	200: SupportedVectorModelListResponse
+//	200: SupportedVectorModelListSuccessResponse
 //	500: ErrorResponse
 func (h *ModelHandler) ListSupportedVectorModels(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
@@ -131,15 +87,18 @@ func (h *ModelHandler) ListSupportedVectorModels(c *gin.Context) {
 
 // ListAvailableAllModels 返回所有可用模型的列表。
 //
-// swagger:route GET /api/v1/models/available/all Models listAvailableAllModels
-// 全部可用模型
+// swagger:route GET /models/available/all Models listAvailableAllModels
+//
+// 获取所有可用模型
+//
+// 获取当前系统中所有可用的模型列表，包括聊天模型和向量模型
 //
 // Produces:
 // - application/json
 //
 // Responses:
 //
-//	200: AvailableModelListResponse
+//	200: ModelListSuccessResponse
 //	500: ErrorResponse
 func (h *ModelHandler) ListAvailableAllModels(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
@@ -157,15 +116,18 @@ func (h *ModelHandler) ListAvailableAllModels(c *gin.Context) {
 
 // ListAvailableChatModels 返回可用的聊天模型列表。
 //
-// swagger:route GET /api/v1/models/available/chat Models listAvailableChatModels
-// 可用聊天模型
+// swagger:route GET /models/available/chat Models listAvailableChatModels
+//
+// 获取可用聊天模型
+//
+// 获取当前系统中可用的聊天模型列表，仅包含已配置且可用的聊天模型
 //
 // Produces:
 // - application/json
 //
 // Responses:
 //
-//	200: AvailableModelListResponse
+//	200: ModelListSuccessResponse
 //	500: ErrorResponse
 func (h *ModelHandler) ListAvailableChatModels(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
@@ -183,15 +145,18 @@ func (h *ModelHandler) ListAvailableChatModels(c *gin.Context) {
 
 // ListAvailableVectorModels 返回可用的向量模型列表。
 //
-// swagger:route GET /api/v1/models/available/vector Models listAvailableVectorModels
-// 可用向量模型
+// swagger:route GET /models/available/vector Models listAvailableVectorModels
+//
+// 获取可用向量模型
+//
+// 获取当前系统中可用的向量模型列表，用于知识库文档向量化
 //
 // Produces:
 // - application/json
 //
 // Responses:
 //
-//	200: AvailableModelListResponse
+//	200: ModelListSuccessResponse
 //	500: ErrorResponse
 func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
@@ -209,8 +174,11 @@ func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) {
 
 // SaveModel 保存或更新模型配置。
 //
-// swagger:route POST /api/v1/models Models saveModel
-// 保存模型
+// swagger:route POST /models Models saveModel
+//
+// 保存模型配置
+//
+// 保存或更新模型的配置信息，包括API密钥、端点等设置
 //
 // Consumes:
 // - application/json
@@ -227,7 +195,7 @@ func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) {
 //
 // Responses:
 //
-//	200: ModelSaveResponse
+//	200: ModelSaveSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ModelHandler) SaveModel(c *gin.Context) {
@@ -252,8 +220,11 @@ func (h *ModelHandler) SaveModel(c *gin.Context) {
 
 // DeleteModel 根据ID删除指定的模型。
 //
-// swagger:route DELETE /api/v1/models/{id} Models deleteModel
-// 删除模型
+// swagger:route DELETE /models/{id} Models deleteModel
+//
+// 删除模型配置
+//
+// 根据模型ID删除指定的模型配置信息
 //
 // Produces:
 // - application/json
@@ -267,7 +238,7 @@ func (h *ModelHandler) SaveModel(c *gin.Context) {
 //
 // Responses:
 //
-//	200: APIResponse
+//	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ModelHandler) DeleteModel(c *gin.Context) {
@@ -294,8 +265,11 @@ func (h *ModelHandler) DeleteModel(c *gin.Context) {
 
 // SetModelStatus 设置模型的启用状态。
 //
-// swagger:route PUT /api/v1/models/{id}/status Models setModelStatus
+// swagger:route PUT /models/{id}/status Models setModelStatus
+//
 // 设置模型状态
+//
+// 启用或禁用指定的模型，控制模型是否可用于对话
 //
 // Consumes:
 // - application/json
@@ -317,7 +291,7 @@ func (h *ModelHandler) DeleteModel(c *gin.Context) {
 //
 // Responses:
 //
-//	200: APIResponse
+//	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ModelHandler) SetModelStatus(c *gin.Context) {

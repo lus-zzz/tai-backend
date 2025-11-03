@@ -4,6 +4,7 @@ import (
 	"time"
 
 	agentSvc "flowy-sdk/services/agent"
+	modelSvc "flowy-sdk/services/model"
 )
 
 // ChatRequest 聊天请求 - 直接使用 SDK 的 AsyncChatRequest
@@ -15,10 +16,15 @@ type ChatRequest struct {
 // ChatMessageRequest 聊天消息请求（用于Swagger文档）
 // swagger:model
 type ChatMessageRequest struct {
-	SessionID int      `json:"sessionId" example:"123"`                                  // 会话ID/对话ID
-	Content   string   `json:"content" example:"你好"`                                     // 消息内容
-	RequestID string   `json:"requestId" example:"550e8400-e29b-41d4-a716-446655440000"` // 请求ID (UUID)
-	Files     []string `json:"files" example:"[]"`                                       // 文件列表（可选）
+	// 会话ID/对话ID
+	// required: true
+	SessionID int `json:"sessionId" example:"123"`
+	// 消息内容
+	// required: true
+	Content string `json:"content" example:"你好"`
+	// 文件列表（可选）
+	// required: true
+	Files []string `json:"files" example:"[]"`
 }
 
 // SSEChatEvent SSE聊天事件 - 直接使用 SDK 的 StreamEvent
@@ -28,82 +34,152 @@ type SSEChatEvent = agentSvc.StreamEvent
 // ChatResponse 聊天响应
 // swagger:model
 type ChatResponse struct {
-	ID             string      `json:"id"`                   // 消息ID
-	ConversationID string      `json:"conversation_id"`      // 对话ID
-	Content        string      `json:"content"`              // 消息内容
-	Role           string      `json:"role"`                 // 角色: user/assistant
-	Status         string      `json:"status"`               // 状态
-	References     []Reference `json:"references,omitempty"` // 引用信息列表
-	TokenCount     int         `json:"token_count"`          // Token数量
-	CreatedAt      time.Time   `json:"created_at"`           // 创建时间
+	// 消息ID
+	// required: true
+	ID string `json:"id"`
+	// 对话ID
+	// required: true
+	ConversationID string `json:"conversation_id"`
+	// 消息内容
+	// required: true
+	Content string `json:"content"`
+	// 角色: user/assistant
+	// required: true
+	Role string `json:"role"`
+	// 状态
+	// required: true
+	Status string `json:"status"`
+	// 引用信息列表
+	// required: true
+	References []Reference `json:"references"`
+	// Token数量
+	// required: true
+	TokenCount int `json:"token_count"`
+	// 创建时间
+	// required: true
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // Reference 引用信息
 // swagger:model
 type Reference struct {
-	DocumentID    string  `json:"document_id"`    // 文档ID
-	DocumentTitle string  `json:"document_title"` // 文档标题
-	Content       string  `json:"content"`        // 引用内容
-	Similarity    float64 `json:"similarity"`     // 相似度
-	ChunkIndex    int     `json:"chunk_index"`    // 分块索引
+	// 文档ID
+	// required: true
+	DocumentID string `json:"document_id"`
+	// 文档标题
+	// required: true
+	DocumentTitle string `json:"document_title"`
+	// 引用内容
+	// required: true
+	Content string `json:"content"`
+	// 相似度
+	// required: true
+	Similarity float64 `json:"similarity"`
+	// 分块索引
+	// required: true
+	ChunkIndex int `json:"chunk_index"`
 }
 
 // MessageRecord 对话消息记录
 // swagger:model
 type MessageRecord struct {
-	ID        int       `json:"id"`         // 消息ID
-	Role      string    `json:"role"`       // 角色: user/assistant
-	Content   string    `json:"content"`    // 消息内容
-	CreatedAt time.Time `json:"created_at"` // 创建时间
+	// 消息ID
+	// required: true
+	ID int `json:"id"`
+	// 角色: user/assistant
+	// required: true
+	Role string `json:"role"`
+	// 消息内容
+	// required: true
+	Content string `json:"content"`
+	// 创建时间
+	// required: true
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // ConversationHistoryResponse 对话历史响应
 // swagger:model
 type ConversationHistoryResponse struct {
-	ConversationID string                   `json:"conversation_id"` // 对话ID
-	Messages       []agentSvc.SessionRecord `json:"messages"`        // 消息列表
-	Total          int                      `json:"total"`           // 消息总数
+	// 对话ID
+	// required: true
+	ConversationID string `json:"conversation_id"`
+	// 消息列表
+	// required: true
+	Messages []agentSvc.SessionRecord `json:"messages"`
+	// 消息总数
+	// required: true
+	Total int `json:"total"`
 }
 
 // Conversation 对话信息
 // swagger:model
 type Conversation struct {
-	ID                   int `json:"id"` // 对话ID
+	// 对话ID
+	// required: true
+	ID                   int `json:"id"`
 	ConversationSettings     // 嵌入对话配置
 }
 
 // ConversationListRequest 对话列表请求
 // swagger:model
 type ConversationListRequest struct {
-	Page     int `json:"page" form:"page"`           // 页码
-	PageSize int `json:"page_size" form:"page_size"` // 每页数量
+	// 页码
+	// required: true
+	Page int `json:"page" form:"page"`
+	// 每页数量
+	// required: true
+	PageSize int `json:"page_size" form:"page_size"`
 }
 
 // ConversationListResponse 对话列表响应
 // swagger:model
 type ConversationListResponse struct {
-	Conversations []Conversation `json:"conversations"` // 对话列表
-	Total         int            `json:"total"`         // 总数
-	Page          int            `json:"page"`          // 当前页码
-	PageSize      int            `json:"page_size"`     // 每页数量
+	// 对话列表
+	// required: true
+	Conversations []Conversation `json:"conversations"`
+	// 总数
+	// required: true
+	Total int `json:"total"`
+	// 当前页码
+	// required: true
+	Page int `json:"page"`
+	// 每页数量
+	// required: true
+	PageSize int `json:"page_size"`
 }
 
 // KnowledgeBaseConfig 知识库配置（公用字段）
 // swagger:model
 type KnowledgeBaseConfig struct {
-	Name          string `json:"name"`          // 知识库名称
-	Desc          string `json:"desc"`          // 知识库描述
-	VectorModel   int    `json:"vectorModel"`   // 向量模型ID
-	AgentModel    int    `json:"agentModel"`    // 对话模型ID
-	ChunkStrategy string `json:"chunkStrategy"` // 切片策略 固定尺寸:fixed  自然句:period   自然段落:paragraph
-	ChunkSize     int    `json:"chunkSize"`     // 切片大小
+	// 知识库名称
+	// required: true
+	Name string `json:"name"`
+	// 知识库描述
+	// required: true
+	Desc string `json:"desc"`
+	// 向量模型ID
+	// required: true
+	VectorModel int `json:"vectorModel"`
+	// 对话模型ID
+	// required: true
+	AgentModel int `json:"agentModel"`
+	// 切片策略 固定尺寸:fixed  自然句:period   自然段落:paragraph
+	// required: true
+	ChunkStrategy string `json:"chunkStrategy"`
+	// 切片大小
+	// required: true
+	ChunkSize int `json:"chunkSize"`
 }
 
 // KnowledgeBase 知识库（列表返回）
 // swagger:model
 type KnowledgeBase struct {
+	// 知识库ID
+	// required: true
 	ID int `json:"id"`
 	KnowledgeBaseConfig
+	// 文件数量
+	// required: true
 	FileCount int `json:"file_count"`
 }
 
@@ -118,58 +194,125 @@ type UpdateKnowledgeBaseRequest = KnowledgeBaseConfig
 // KnowledgeFile 知识库文件
 // swagger:model
 type KnowledgeFile struct {
-	ID           int       `json:"id"`            // 文件ID
-	Name         string    `json:"name"`          // 文件名称
-	Size         int       `json:"size"`          // 文件大小（字节）
-	Enable       bool      `json:"enable"`        // 启用状态: true=启用, false=禁用
-	Status       int       `json:"status"`        // 索引状态: 0=构建中, 1=完成, 2=失败
-	UploadedAt   time.Time `json:"uploaded_at"`   // 上传时间
-	IndexPercent int       `json:"index_percent"` // 索引进度百分比
-	ErrorMessage string    `json:"errorMessage"`  // 错误信息，空字符串表示无错误
+	// 文件ID
+	// required: true
+	ID int `json:"id"`
+	// 文件名称
+	// required: true
+	Name string `json:"name"`
+	// 文件大小（字节）
+	// required: true
+	Size int `json:"size"`
+	// 启用状态: true=启用, false=禁用
+	// required: true
+	Enable bool `json:"enable"`
+	// 索引状态: 0=构建中, 1=完成, 2=失败
+	// required: true
+	Status int `json:"status"`
+	// 上传时间
+	// required: true
+	UploadedAt time.Time `json:"uploaded_at"`
+	// 索引进度百分比
+	// required: true
+	IndexPercent int `json:"index_percent"`
+	// 错误信息，空字符串表示无错误
+	// required: true
+	ErrorMessage string `json:"errorMessage"`
 }
 
-// APIResponse 通用API响应
+// APIResponse 通用API响应（成功和错误都使用这个结构）
 // swagger:model
 type APIResponse struct {
-	Success bool        `json:"success"`           // 请求是否成功
-	Message string      `json:"message,omitempty"` // 响应消息
-	Data    interface{} `json:"data,omitempty"`    // 响应数据
-	Error   string      `json:"error,omitempty"`   // 错误信息
+	// 请求是否成功
+	// required: true
+	Success bool `json:"success"`
+	// 响应消息
+	// required: true
+	Message string `json:"message"`
+	// 响应数据（成功时有值，失败时为null）
+	// required: false
+	Data interface{} `json:"data,omitempty"`
+	// 错误代码（失败时有值）
+	// required: false
+	ErrorCode string `json:"error_code,omitempty"`
+	// 错误详情（失败时有值）
+	// required: false
+	Details string `json:"details,omitempty"`
+	// 时间戳
+	// required: true
+	Timestamp string `json:"timestamp"`
 }
 
 // WebSocketMessage WebSocket消息
 // swagger:model
 type WebSocketMessage struct {
-	Type  string      `json:"type"`            // 消息类型
-	Data  interface{} `json:"data"`            // 消息数据
-	ID    string      `json:"id,omitempty"`    // 消息ID
-	Error string      `json:"error,omitempty"` // 错误信息
+	// 消息类型
+	// required: true
+	Type string `json:"type"`
+	// 消息数据
+	// required: true
+	Data interface{} `json:"data"`
+	// 消息ID
+	// required: true
+	ID string `json:"id"`
+	// 错误信息
+	// required: true
+	Error string `json:"error"`
 }
 
 // StreamChatResponse 流式聊天响应
 // swagger:model
 type StreamChatResponse struct {
-	ID      string `json:"id"`      // 消息ID
-	Content string `json:"content"` // 完整内容
-	Delta   string `json:"delta"`   // 增量内容
-	Done    bool   `json:"done"`    // 是否完成
+	// 消息ID
+	// required: true
+	ID string `json:"id"`
+	// 完整内容
+	// required: true
+	Content string `json:"content"`
+	// 增量内容
+	// required: true
+	Delta string `json:"delta"`
+	// 是否完成
+	// required: true
+	Done bool `json:"done"`
 }
 
 // ConversationSettings 对话设置
-// @Description 对话设置
 // swagger:model
 type ConversationSettings struct {
-	Name             string   `json:"name"`                   // 对话名称
-	Desc             string   `json:"desc"`                   // 对话描述
-	ModelID          int      `json:"model_id"`               // 模型ID（数字）
-	Temperature      float64  `json:"temperature"`            // 多样性
-	TopP             float64  `json:"top_p"`                  // 采样范围
-	PresencePenalty  float64  `json:"presence_penalty"`       // 词汇控制
-	FrequencyPenalty float64  `json:"frequency_penalty"`      // 重复控制
-	ResponseType     string   `json:"responseType,omitempty"` // 响应类型  text/json
-	Stream           bool     `json:"stream"`                 // 对话输出模式 true=流式输出, false=非流式输出
+	// 对话名称
+	// required: true
+	Name string `json:"name"`
+	// 对话描述
+	// required: true
+	Desc string `json:"desc"`
+	// 模型ID（数字）
+	// required: true
+	ModelID int `json:"model_id"`
+	// 多样性
+	// required: true
+	Temperature float64 `json:"temperature"`
+	// 采样范围
+	// required: true
+	TopP float64 `json:"top_p"`
+	// 词汇控制
+	// required: true
+	PresencePenalty float64 `json:"presence_penalty"`
+	// 重复控制
+	// required: true
+	FrequencyPenalty float64 `json:"frequency_penalty"`
+	// 响应类型  text/json
+	// required: true
+	ResponseType string `json:"responseType"`
+	// 对话输出模式 true=流式输出, false=非流式输出
+	// required: true
+	Stream bool `json:"stream"`
+	// 知识库ID列表
+	// required: true
 	KnowledgeBaseIDs []string `json:"knowledge_base_ids"`
-	ContextLimit     int      `json:"contextLimit"` // 上下文限制（消息数量）
+	// 上下文限制（消息数量）
+	// required: true
+	ContextLimit int `json:"contextLimit"`
 }
 
 // NewDefaultConversationSettings 创建默认的对话设置
@@ -192,8 +335,12 @@ func NewDefaultConversationSettings() *ConversationSettings {
 // DefaultModelSettings 默认模型设置
 // swagger:model
 type DefaultModelSettings struct {
-	ChatModelID      int `json:"chat_model_id"`      // 默认对话模型ID
-	EmbeddingModelID int `json:"embedding_model_id"` // 默认向量模型ID（嵌入模型）
+	// 默认对话模型ID
+	// required: true
+	ChatModelID int `json:"chat_model_id"`
+	// 默认向量模型ID（嵌入模型）
+	// required: true
+	EmbeddingModelID int `json:"embedding_model_id"`
 }
 
 // DefaultConversationConfig 默认对话配置
@@ -202,12 +349,24 @@ type DefaultConversationConfig = ConversationSettings
 // KnowledgeBaseSettings 知识库设置
 // swagger:model
 type KnowledgeBaseSettings struct {
-	Name          string `json:"name"`          // 知识库名称
-	Desc          string `json:"desc"`          // 知识库描述
-	VectorModel   int    `json:"vectorModel"`   // 向量模型ID
-	AgentModel    int    `json:"agentModel"`    // 对话模型ID
-	ChunkStrategy string `json:"chunkStrategy"` // 切片策略
-	ChunkSize     int    `json:"chunkSize"`     // 切片大小
+	// 知识库名称
+	// required: true
+	Name string `json:"name"`
+	// 知识库描述
+	// required: true
+	Desc string `json:"desc"`
+	// 向量模型ID
+	// required: true
+	VectorModel int `json:"vectorModel"`
+	// 对话模型ID
+	// required: true
+	AgentModel int `json:"agentModel"`
+	// 切片策略
+	// required: true
+	ChunkStrategy string `json:"chunkStrategy"`
+	// 切片大小
+	// required: true
+	ChunkSize int `json:"chunkSize"`
 }
 
 // DefaultKnowledgeBaseConfig 默认知识库配置
@@ -216,27 +375,388 @@ type DefaultKnowledgeBaseConfig = KnowledgeBaseSettings
 // DefaultSettings 统一的默认设置（用于持久化）
 // swagger:model
 type DefaultSettings struct {
-	Models        DefaultModelSettings       `json:"models"`         // 默认模型设置
-	Conversation  DefaultConversationConfig  `json:"conversation"`   // 默认对话配置
-	KnowledgeBase DefaultKnowledgeBaseConfig `json:"knowledge_base"` // 默认知识库配置
-	UpdatedAt     time.Time                  `json:"updated_at"`     // 更新时间
+	// 默认模型设置
+	// required: true
+	Models DefaultModelSettings `json:"models"`
+	// 默认对话配置
+	// required: true
+	Conversation DefaultConversationConfig `json:"conversation"`
+	// 默认知识库配置
+	// required: true
+	KnowledgeBase DefaultKnowledgeBaseConfig `json:"knowledge_base"`
+	// 更新时间
+	// required: true
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // DefaultKnowledgeBaseSettings 默认知识库设置（用于持久化）
 // swagger:model
 type DefaultKnowledgeBaseSettings struct {
 	KnowledgeBaseSettings
+	// 更新时间
+	// required: true
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // FileToggleEnableRequest 文件启用/禁用请求
 // swagger:model
 type FileToggleEnableRequest struct {
-	Enable *bool `json:"enable" example:"true"` // true=启用, false=禁用
+	// true=启用, false=禁用
+	// required: true
+	Enable *bool `json:"enable" example:"true"`
 }
 
+// ====== Swagger 响应定义 ======
+
+// 通用响应类型在 utils 包中定义
+// - SuccessResponse：统一成功响应 (utils/response.go)
+// - ErrorResponse：统一错误响应 (utils/errors.go)
+
+// ConversationSuccessResponse 对话创建成功响应
+// swagger:response ConversationSuccessResponse
+type ConversationSuccessResponse struct {
+	// 请求是否成功
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 对话数据
+		// required: true
+		Data Conversation `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// ConversationListSuccessResponse 对话列表获取成功响应
+// swagger:response ConversationListSuccessResponse
+type ConversationListSuccessResponse struct {
+	// 对话列表响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 对话列表数据
+		// required: true
+		Data ConversationListResponse `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// EmptySuccessResponse 空数据成功响应
+// swagger:response EmptySuccessResponse
+type EmptySuccessResponse struct {
+	// 空数据响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 空数据
+		// required: false
+		Data interface{} `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// ConversationSettingsSuccessResponse 对话设置成功响应
+// swagger:response ConversationSettingsSuccessResponse
+type ConversationSettingsSuccessResponse struct {
+	// 对话设置响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 对话设置数据
+		// required: true
+		Data ConversationSettings `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// ConversationHistorySuccessResponse 对话历史成功响应
+// swagger:response ConversationHistorySuccessResponse
+type ConversationHistorySuccessResponse struct {
+	// 对话历史响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 对话历史数据
+		// required: true
+		Data ConversationHistoryResponse `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// KnowledgeBaseListSuccessResponse 知识库列表成功响应
+// swagger:response KnowledgeBaseListSuccessResponse
+type KnowledgeBaseListSuccessResponse struct {
+	// 知识库列表响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 知识库列表数据
+		// required: true
+		Data []KnowledgeBase `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// KnowledgeBaseSuccessResponse 知识库成功响应
+// swagger:response KnowledgeBaseSuccessResponse
+type KnowledgeBaseSuccessResponse struct {
+	// 知识库响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 知识库数据
+		// required: true
+		Data KnowledgeBase `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// KnowledgeFileListSuccessResponse 知识库文件列表成功响应
+// swagger:response KnowledgeFileListSuccessResponse
+type KnowledgeFileListSuccessResponse struct {
+	// 知识库文件列表响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 知识库文件列表数据
+		// required: true
+		Data []KnowledgeFile `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// KnowledgeFileSuccessResponse 知识库文件成功响应
+// swagger:response KnowledgeFileSuccessResponse
+type KnowledgeFileSuccessResponse struct {
+	// 知识库文件响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 知识库文件数据
+		// required: true
+		Data KnowledgeFile `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// DefaultSettingsSuccessResponse 默认设置成功响应
+// swagger:response DefaultSettingsSuccessResponse
+type DefaultSettingsSuccessResponse struct {
+	// 默认设置响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 默认设置数据
+		// required: true
+		Data DefaultSettings `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// VersionInfo 版本信息结构（用于响应）
+// swagger:model
+type VersionInfo struct {
+	// 版本号
+	// required: true
+	Version string `json:"version" example:"1.0.0"`
+	// 构建时间
+	// required: true
+	BuildTime string `json:"build_time" example:"2024-01-01 12:00:00"`
+	// Git提交哈希
+	// required: true
+	GitCommit string `json:"git_commit" example:"abc1234"`
+	// Git分支
+	// required: true
+	GitBranch string `json:"git_branch" example:"main"`
+	// Git标签
+	// required: true
+	GitTag string `json:"git_tag" example:"v1.0.0"`
+}
+
+// VersionInfoSuccessResponse 版本信息成功响应
+// swagger:response VersionInfoSuccessResponse
+type VersionInfoSuccessResponse struct {
+	// 版本信息响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 版本信息数据
+		// required: true
+		Data VersionInfo `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// ModelSaveSuccessResponse 模型保存成功响应
+// swagger:response ModelSaveSuccessResponse
+type ModelSaveSuccessResponse struct {
+	// 模型保存响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 模型ID数据
+		// required: true
+		Data map[string]interface{} `json:"data"` // gin.H{"id": modelID}
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// ModelListSuccessResponse 模型列表成功响应 (通用)
+// swagger:response ModelListSuccessResponse
+type ModelListSuccessResponse struct {
+	// 模型列表响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 模型列表数据
+		// required: true
+		Data []modelSvc.ModelInfo `json:"data"` // ModelInfo类型的列表 (适用于可用模型接口)
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// SupportedChatModelListSuccessResponse 支持的聊天模型列表成功响应
+// swagger:response SupportedChatModelListSuccessResponse
+type SupportedChatModelListSuccessResponse struct {
+	// 支持的聊天模型列表响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 支持的聊天模型列表数据
+		// required: true
+		Data []modelSvc.SupportedChatModel `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// SupportedVectorModelListSuccessResponse 支持的向量模型列表成功响应
+// swagger:response SupportedVectorModelListSuccessResponse
+type SupportedVectorModelListSuccessResponse struct {
+	// 支持的向量模型列表响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 支持的向量模型列表数据
+		// required: true
+		Data []modelSvc.SupportedVectorModel `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// ====== 通用响应 ======
+
+// 所有API现在使用统一的响应结构：
+// - SuccessResponse：定义在 utils/response.go
+// - ErrorResponse：定义在 utils/errors.go
+
 // ModelStatusEnableRequest 模型状态启用/禁用请求
-// swagger:model ModelStatusEnableRequest
+// swagger:model
 type ModelStatusEnableRequest struct {
-	Enable bool `json:"enable" example:"true"` // true=启用, false=禁用
+	// true=启用, false=禁用
+	// required: true
+	Enable bool `json:"enable" example:"true"`
 }

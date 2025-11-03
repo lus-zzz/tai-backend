@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -114,8 +113,8 @@ func (s *ChatService) CreateConversation(ctx context.Context, settings *models.C
 	saveConfigReq.Chat.Plugin.Knowledge.Knowledges = knowledgeIDs
 
 	// 输出配置 saveConfigReq 的json
-	jsonData, _ := json.MarshalIndent(saveConfigReq, "", "  ")
-	fmt.Printf("保存配置: %s\n", jsonData)
+	// jsonData, _ := json.MarshalIndent(saveConfigReq, "", "  ")
+	// fmt.Printf("保存配置: %s\n", jsonData)
 
 	settingID, err := s.sdk.Agent.SaveConfig(ctx, saveConfigReq)
 	if err != nil {
@@ -162,7 +161,7 @@ func (s *ChatService) SendMessage(ctx context.Context, req *models.ChatRequest, 
 		return err
 	}
 
-	utils.InfoWith("流式消息发送完成", "session_id", req.SessionID, "request_id", req.RequestID)
+	utils.InfoWith("流式消息发送完成", "session_id", req.SessionID)
 	return nil
 }
 
