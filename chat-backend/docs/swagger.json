@@ -2742,7 +2742,7 @@
       "x-go-package": "flowy-sdk/services/agent"
     },
     "VersionInfo": {
-      "description": "VersionInfo 版本信息结构（用于响应）",
+      "description": "VersionInfo 版本信息响应结构",
       "type": "object",
       "required": [
         "version",
@@ -2778,7 +2778,7 @@
           "x-go-name": "Version"
         }
       },
-      "x-go-package": "chat-backend/models"
+      "x-go-package": "chat-backend/handlers"
     },
     "WebSocketMessage": {
       "description": "WebSocketMessage WebSocket消息",
