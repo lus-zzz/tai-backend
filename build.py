@@ -127,6 +127,14 @@ def get_auto_version():
     return f"0.0.{timestamp}"
 
 
+def check_tag_exists(tag_name):
+    """检查指定的标签是否已存在"""
+    returncode, stdout, stderr = run_command(['git', 'tag', '-l', tag_name])
+    if returncode == 0 and stdout.strip():
+        return True
+    return False
+
+
 def get_git_branch():
     """获取 Git 分支"""
     returncode, stdout, stderr = run_command(['git', 'rev-parse', '--abbrev-ref', 'HEAD'])
@@ -261,6 +269,12 @@ class Builder:
                 return False
         
         tag_name = f"v{self.version}"
+        
+        # 检查标签是否已存在
+        if check_tag_exists(tag_name):
+            print_info(f"标签 {tag_name} 已存在，跳过创建和推送")
+            print_info("代码没有变化，无需重复发布")
+            return True
         
         # 创建标签
         if create_git_tag(tag_name, f"Release {self.version}"):
