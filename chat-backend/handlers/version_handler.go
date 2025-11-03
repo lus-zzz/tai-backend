@@ -29,11 +29,42 @@ func NewVersionHandler(version, buildTime, gitCommit, gitBranch, gitTag string) 
 // VersionInfo 版本信息响应结构
 // swagger:model
 type VersionInfo struct {
-	Version   string `json:"version" example:"1.0.0"`                  // 版本号
-	BuildTime string `json:"build_time" example:"2024-01-01 12:00:00"` // 构建时间
-	GitCommit string `json:"git_commit" example:"abc1234"`             // Git提交哈希
-	GitBranch string `json:"git_branch" example:"main"`                // Git分支
-	GitTag    string `json:"git_tag" example:"v1.0.0"`                 // Git标签
+	// 版本号
+	// required: true
+	Version string `json:"version" example:"1.0.0"`
+	// 构建时间
+	// required: true
+	BuildTime string `json:"build_time" example:"2024-01-01 12:00:00"`
+	// Git提交哈希
+	// required: true
+	GitCommit string `json:"git_commit" example:"abc1234"`
+	// Git分支
+	// required: true
+	GitBranch string `json:"git_branch" example:"main"`
+	// Git标签
+	// required: true
+	GitTag string `json:"git_tag" example:"v1.0.0"`
+}
+
+// VersionInfoSuccessResponse 版本信息成功响应
+// swagger:response VersionInfoSuccessResponse
+type VersionInfoSuccessResponse struct {
+	// 版本信息响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 版本信息数据
+		// required: true
+		Data VersionInfo `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
 }
 
 // GetVersion 返回应用程序的版本信息。

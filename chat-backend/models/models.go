@@ -622,46 +622,9 @@ type DefaultSettingsSuccessResponse struct {
 	}
 }
 
-// VersionInfo 版本信息结构（用于响应）
-// swagger:model
-type VersionInfo struct {
-	// 版本号
-	// required: true
-	Version string `json:"version" example:"1.0.0"`
-	// 构建时间
-	// required: true
-	BuildTime string `json:"build_time" example:"2024-01-01 12:00:00"`
-	// Git提交哈希
-	// required: true
-	GitCommit string `json:"git_commit" example:"abc1234"`
-	// Git分支
-	// required: true
-	GitBranch string `json:"git_branch" example:"main"`
-	// Git标签
-	// required: true
-	GitTag string `json:"git_tag" example:"v1.0.0"`
-}
 
-// VersionInfoSuccessResponse 版本信息成功响应
-// swagger:response VersionInfoSuccessResponse
-type VersionInfoSuccessResponse struct {
-	// 版本信息响应
-	// in: body
-	Body struct {
-		// 请求是否成功
-		// required: true
-		Success bool `json:"success"`
-		// 响应消息
-		// required: true
-		Message string `json:"message"`
-		// 版本信息数据
-		// required: true
-		Data VersionInfo `json:"data"`
-		// 时间戳
-		// required: true
-		Timestamp string `json:"timestamp"`
-	}
-}
+	
+
 
 // ModelSaveSuccessResponse 模型保存成功响应
 // swagger:response ModelSaveSuccessResponse
