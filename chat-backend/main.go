@@ -46,11 +46,14 @@ type Server struct {
 
 // NewServer 创建新的服务器实例
 func NewServer() *Server {
+	// 初始化环境配置
+	envConfig := utils.GetGlobalEnvConfig()
+
 	// 配置Flowy SDK
 	flowyConfig := &config.Config{
-		BaseURL: utils.GetEnvOrDefault("FLOWY_BASE_URL", "http://10.18.13.10:8888/api/v1"),
-		APIKey:  utils.GetEnvOrDefault("FLOWY_API_KEY", ""),
-		Token:   utils.GetEnvOrDefault("FLOWY_TOKEN", "Basic c3dvcmQ6c3dvcmRfc2VjcmV0"),
+		BaseURL: envConfig.Get("FLOWY_BASE_URL"),
+		APIKey:  envConfig.Get("FLOWY_API_KEY"),
+		Token:   envConfig.Get("FLOWY_TOKEN"),
 		Timeout: 30,
 	}
 
@@ -66,7 +69,7 @@ func NewServer() *Server {
 	modelService := services.NewModelService(sdk)
 
 	// 创建快捷方式服务 - 这里需要配置实际的API地址
-	shortcutAPIURL := utils.GetEnvOrDefault("SHORTCUT_API_URL", "http://10.18.13.157:26034")
+	shortcutAPIURL := envConfig.Get("SHORTCUT_API_URL")
 	shortcutService := services.NewShortcutService(shortcutAPIURL)
 
 	// 创建处理器层
@@ -90,7 +93,8 @@ func NewServer() *Server {
 
 // Start 启动服务器
 func (s *Server) Start() {
-	port := utils.GetEnvOrDefault("PORT", "9090")
+	envConfig := utils.GetGlobalEnvConfig()
+	port := envConfig.Get("PORT")
 	addr := ":" + port
 
 	utils.LogInfo("服务器监听端口: %s", port)
@@ -150,7 +154,8 @@ func printVersion() {
 
 // printBanner 打印启动横幅
 func printBanner() {
-	port := utils.GetEnvOrDefault("PORT", "9090")
+	envConfig := utils.GetGlobalEnvConfig()
+	port := envConfig.Get("PORT")
 
 	// 所有信息只写入日志
 	utils.LogInfo("========================================")
@@ -163,7 +168,7 @@ func printBanner() {
 		utils.LogInfo("Git Tag: %s", GitTag)
 	}
 	utils.LogInfo("工作目录: %s", getCurrentDir())
-	utils.LogInfo("Flowy API: %s", utils.GetEnvOrDefault("FLOWY_BASE_URL", "http://10.18.13.10:8888/api/v1"))
+	utils.LogInfo("Flowy API: %s", envConfig.Get("FLOWY_BASE_URL"))
 	utils.LogInfo("服务端口: %s", port)
 	utils.LogInfo("API 文档: http://localhost:%s/swagger/index.html", port)
 	utils.LogInfo("版本信息: http://localhost:%s/api/v1/version", port)

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -52,14 +51,6 @@ func RespondWithBadRequest(c *gin.Context, message string) {
 func RespondWithInternalError(c *gin.Context, message string) {
 	apiErr := NewAPIError(ErrInternalServer, message, http.StatusInternalServerError)
 	RespondWithError(c, apiErr)
-}
-
-// GetEnvOrDefault 获取环境变量或默认值
-func GetEnvOrDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }
 
 // GetCurrentTime 获取当前时间
