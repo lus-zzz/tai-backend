@@ -8,11 +8,14 @@
 
 - ✅ 跨平台支持（Windows、Linux、macOS）
 - ✅ 自动获取 Git 提交信息（commit、branch、tag）
+- ✅ **智能版本管理**（自动版本号生成 + Git 标签管理）
 - ✅ 版本信息嵌入到二进制文件
 - ✅ **资源文件嵌入**（配置文件、静态文件全部打包到二进制中）
 - ✅ **单文件部署**（只需一个二进制文件即可运行）
+- ✅ **Swagger 文档自动生成**
 - ✅ 彩色终端输出
 - ✅ 编译优化（去除调试符号，减小体积）
+- ✅ **Git 标签自动创建和推送**
 - ✅ 应用程序启动时自动记录版本信息到日志
 - ✅ 提供 `--version` 命令行参数查看版本
 - ✅ 提供 `/api/v1/version` API 接口获取版本信息
@@ -24,7 +27,8 @@
 - Go 1.21+
 
 ### 可选
-- Git（用于获取版本信息）
+- Git（用于获取版本信息和标签管理）
+- Swagger 工具（用于生成 API 文档，脚本会自动安装）
 
 ## 安装
 
@@ -50,13 +54,17 @@ python build.py [选项]
 选项:
   -h, --help            显示帮助信息
   -v VERSION, --version VERSION
-                        指定版本号（默认: 1.0.0，如果有 Git 标签则使用标签）
+                        指定版本号（默认: auto - 自动生成版本号）
   -o OUTPUT, --output OUTPUT
                         指定输出目录（默认: release）
   -p {all,windows,linux,darwin,current}, --platform {all,windows,linux,darwin,current}
                         指定编译平台（默认: current）
   -c, --clean           清理之前的构建
   --skip-deps           跳过依赖下载
+  --skip-swagger        跳过 Swagger 文档生成
+  --no-tag              跳过自动创建和推送 Git 标签
+  --no-push             创建标签但不推送到远程仓库
+  --force-tag           强制在当前分支创建标签，忽略分支检查
 ```
 
 ### 使用示例
@@ -67,7 +75,10 @@ python build.py [选项]
 python build.py
 ```
 
-这将编译当前平台的版本并输出到 `release` 目录。
+这将使用自动版本号编译当前平台的版本并输出到 `release` 目录，同时会：
+- 自动生成版本号（基于提交计数）
+- 生成 Swagger API 文档
+- 创建并推送 Git 标签（如果在正确分支且无未提交更改）
 
 #### 2. 编译所有平台
 
@@ -83,7 +94,15 @@ python build.py -p all -c
 python build.py -v 2.1.0
 ```
 
-#### 4. 编译特定平台
+#### 4. 自动版本号模式
+
+```bash
+python build.py -v auto
+```
+
+脚本会根据 Git 提交计数自动生成版本号，格式为 `major.minor.patch`。
+
+#### 5. 编译特定平台
 
 ```bash
 # 仅编译 Windows 版本
@@ -96,19 +115,32 @@ python build.py -p linux
 python build.py -p darwin
 ```
 
-#### 5. 自定义输出目录
+#### 6. 自定义输出目录
 
 ```bash
 python build.py -o dist -c
 ```
 
-#### 6. 跳过依赖下载（加快编译速度）
+#### 7. 跳过依赖下载和 Swagger 生成（加快编译速度）
 
 ```bash
-python build.py --skip-deps
+python build.py --skip-deps --skip-swagger
 ```
 
-#### 7. 完整示例：发布版本
+#### 8. 禁用 Git 标签管理
+
+```bash
+# 编译但不创建和推送标签
+python build.py --no-tag
+
+# 创建标签但不推送到远程
+python build.py --no-push
+
+# 强制在非主分支创建标签
+python build.py --force-tag
+```
+
+#### 9. 完整示例：发布版本
 
 ```bash
 python build.py -v 1.0.0 -p all -o release -c
@@ -125,11 +157,54 @@ python build.py -v 1.0.0 -p all -o release -c
 - **Git Tag**: 最近的标签（如果存在）
 - **Git Status**: 是否有未提交的更改（clean/dirty）
 
-### 版本号优先级
+### 版本号生成策略
 
-1. 如果指定了 `-v` 参数，使用指定的版本号
-2. 如果存在 Git 标签且未指定版本号，使用 Git 标签
-3. 否则使用默认版本号 `1.0.0`
+脚本支持多种版本号生成策略：
+
+#### 1. 自动版本号（默认）
+
+```bash
+python build.py -v auto
+# 或
+python build.py  # 默认使用 auto
+```
+
+基于 Git 提交计数自动生成版本号：
+- 格式：`major.minor.patch`
+- 计算方式：
+  - major = 提交总数 ÷ 1000
+  - minor = (提交总数 % 1000) ÷ 100
+  - patch = 提交总数 % 100
+
+示例：
+- 提交计数 1: `0.0.1`
+- 提交计数 50: `0.0.50`
+- 提交计数 150: `0.1.50`
+- 提交计数 1250: `1.2.50`
+
+#### 2. 手动指定版本号
+
+```bash
+python build.py -v 1.2.3
+```
+
+使用指定的版本号。
+
+### Git 标签自动管理
+
+脚本会自动处理 Git 标签的创建和推送：
+
+#### 自动标签策略
+
+1. **分支检查**: 仅在推荐分支（main, master, release, develop）创建标签
+2. **状态检查**: 仅在工作区干净（无未提交更改）时创建标签
+3. **重复检查**: 如果标签已存在，跳过创建
+4. **自动推送**: 默认推送标签到远程仓库
+
+#### 标签格式
+
+- 格式：`v{version}`
+- 示例：`v1.0.0`, `v0.1.50`
 
 ### 版本标记
 
@@ -243,14 +318,42 @@ release/
 
 - **配置文件**: `config/default_settings.json`
 - **静态文件**: `static/log-viewer.html`
+- **Swagger 文档**: `docs/swagger.json`（自动生成）
 
 这意味着：
 - ✅ 无需随二进制分发任何额外文件
 - ✅ 单个可执行文件即可完整运行
+- ✅ 包含完整的 API 文档
 - ✅ 简化部署流程
 - ✅ 避免配置文件丢失问题
 
 如需自定义配置，可在程序运行目录创建 `config/default_settings.json`，程序会优先使用外部配置文件。
+
+## Swagger 文档生成
+
+脚本会自动生成 Swagger API 文档：
+
+### 自动安装 Swagger 工具
+
+如果系统中没有 `swagger` 工具，脚本会自动安装：
+
+```bash
+go install github.com/go-swagger/go-swagger/cmd/swagger@latest
+```
+
+### 文档生成
+
+- 生成位置：`chat-backend/docs/swagger.json`
+- 嵌入到二进制：无需单独分发文档文件
+- 访问地址：`http://localhost:9090/swagger/index.html`
+
+### 跳过文档生成
+
+如果不需要 Swagger 文档或遇到问题，可以跳过：
+
+```bash
+python build.py --skip-swagger
+```
 
 ## 平台支持
 
@@ -313,6 +416,27 @@ chmod +x build.py
 - 使用 Windows Terminal
 - 脚本会自动处理 ANSI 颜色支持
 
+### 6. Swagger 工具安装失败
+
+**问题**: `swagger 安装失败` 或 `swagger 工具不可用`
+
+**解决**:
+- 确保 Go 环境正确配置
+- 确保 `$GOPATH/bin` 或 `$GOBIN` 在 PATH 中
+- 手动安装：`go install github.com/go-swagger/go-swagger/cmd/swagger@latest`
+- 或使用 `--skip-swagger` 跳过文档生成
+
+### 7. Git 标签相关问题
+
+**问题**: `标签创建失败` 或 `推送标签失败`
+
+**解决**:
+- 确保有 Git 推送权限
+- 检查远程仓库配置：`git remote -v`
+- 使用 `--no-tag` 跳过标签管理
+- 使用 `--no-push` 仅创建本地标签
+- 使用 `--force-tag` 强制在当前分支创建标签
+
 ## 环境变量
 
 可以通过环境变量覆盖默认配置：
@@ -364,15 +488,33 @@ python build.py -p current
 发布新版本时，编译所有平台：
 
 ```bash
-# 1. 创建 Git 标签
-git tag v1.0.0
-git push origin v1.0.0
+# 1. 确保代码已提交（避免 -dirty 版本）
+git add .
+git commit -m "Release v1.0.0"
 
-# 2. 编译所有平台
-python build.py -p all -c
+# 2. 编译所有平台（会自动创建和推送标签）
+python build.py -v 1.0.0 -p all -c
 
 # 3. 检查输出（只有二进制文件）
 ls release/
+
+# 标签会自动创建并推送到远程仓库
+```
+
+### 自动版本发布模式
+
+使用自动版本号进行发布：
+
+```bash
+# 1. 提交代码
+git add .
+git commit -m "Add new features"
+
+# 2. 自动编译和发布
+python build.py -p all -c
+
+# 版本号会根据提交计数自动生成
+# 标签会自动创建和推送
 ```
 
 ### 运行和测试
@@ -394,8 +536,11 @@ cd release
 在 CI/CD 流程中使用：
 
 ```bash
-# GitHub Actions 示例
-python build.py -v ${{ github.ref_name }} -p all -o artifacts -c
+# GitHub Actions 示例 - 手动版本号
+python build.py -v ${{ github.ref_name }} -p all -o artifacts -c --no-tag
+
+# GitHub Actions 示例 - 自动版本号
+python build.py -v auto -p all -o artifacts -c --no-tag
 
 # 构建产物：
 # artifacts/chat-backend-windows-amd64.exe
@@ -404,19 +549,165 @@ python build.py -v ${{ github.ref_name }} -p all -o artifacts -c
 # artifacts/chat-backend-darwin-arm64
 ```
 
-## 与 PowerShell 脚本对比
+### CI/CD 中的标签管理策略
 
-| 特性 | Python 脚本 | PowerShell 脚本 |
-|------|------------|----------------|
-| 跨平台 | ✅ Windows/Linux/Mac | ❌ 仅 Windows |
-| Git 集成 | ✅ 完整 | ✅ 完整 |
-| 彩色输出 | ✅ | ✅ |
-| 资源嵌入 | ✅ 单文件部署 | ❌ 需要复制文件 |
-| 输出清洁 | ✅ 只生成二进制 | ❌ 生成多个文件 |
-| 依赖 | Python 3.6+ | PowerShell 5.1+ |
-| 执行 | `python build.py` | `.\build-release.ps1` |
+**为什么在 CI/CD 中使用 `--no-tag`？**
 
-**推荐使用 Python 脚本**，因为它支持跨平台且输出更简洁。
+CI/CD 环境中通常使用 `--no-tag` 参数，因为标签管理由 CI/CD 系统统一处理，避免冲突和重复操作：
+
+#### 1. **GitHub Actions 标签管理**
+
+```yaml
+# .github/workflows/release.yml
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # 当推送 v* 标签时触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      
+      - name: Build binaries
+        run: |
+          # 从标签名提取版本号 (v1.0.0 -> 1.0.0)
+          VERSION=${GITHUB_REF#refs/tags/v}
+          python build.py -v $VERSION -p all -o artifacts -c --no-tag
+      
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          files: artifacts/*
+```
+
+#### 2. **GitLab CI 标签管理**
+
+```yaml
+# .gitlab-ci.yml
+stages:
+  - build
+  - release
+
+build:
+  stage: build
+  script:
+    - python build.py -v $CI_COMMIT_TAG -p all -o artifacts -c --no-tag
+  artifacts:
+    paths:
+      - artifacts/
+  only:
+    - tags
+
+release:
+  stage: release
+  script:
+    - echo "Creating release for $CI_COMMIT_TAG"
+  only:
+    - tags
+```
+
+#### 3. **标签创建工作流**
+
+**传统方式（手动）：**
+```bash
+# 开发者手动创建和推送标签
+git tag v1.0.0
+git push origin v1.0.0
+# 触发 CI/CD 构建和发布
+```
+
+**自动化方式（推荐）：**
+```yaml
+# GitHub Actions - 自动标签和发布
+name: Auto Release
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  auto-release:
+    if: "contains(github.event.head_commit.message, '[release]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取完整历史用于计算版本号
+      
+      - name: Generate version
+        id: version
+        run: |
+          # 使用脚本生成版本号
+          VERSION=$(python -c "
+          import subprocess
+          result = subprocess.run(['git', 'rev-list', '--count', 'HEAD'], 
+                                capture_output=True, text=True)
+          count = int(result.stdout.strip())
+          major = count // 1000
+          minor = (count % 1000) // 100  
+          patch = count % 100
+          print(f'{major}.{minor}.{patch}')
+          ")
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "version_number=$VERSION" >> $GITHUB_OUTPUT
+      
+      - name: Create and push tag
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+      
+      - name: Build binaries
+        run: |
+          python build.py -v ${{ steps.version.outputs.version_number }} -p all -o artifacts -c --no-tag
+      
+      - name: Create Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          release_name: Release ${{ steps.version.outputs.version }}
+          files: artifacts/*
+```
+
+#### 4. **分离关注点的好处**
+
+1. **避免权限问题**：CI/CD 系统有统一的 Git 操作权限
+2. **确保原子性**：标签创建和构建发布在同一个事务中
+3. **支持回滚**：如果构建失败，可以删除标签重新发布
+4. **审计追踪**：所有标签操作都有完整的 CI/CD 日志
+5. **多环境支持**：不同环境可以有不同的标签策略
+
+#### 5. **混合策略示例**
+
+```bash
+# 开发环境：允许本地标签管理
+python build.py -v 1.0.0-dev -p current
+
+# 测试环境：使用自动版本，无标签
+python build.py -v auto -p all --no-tag
+
+# 生产环境：CI/CD 管理标签，编译使用指定版本
+python build.py -v $CI_COMMIT_TAG -p all --no-tag
+```
+
+这种分离策略确保了版本管理的一致性和可控性，避免了本地脚本和 CI/CD 系统之间的冲突。
 
 ## 许可证
 
@@ -439,9 +730,18 @@ python build.py -v ${{ github.ref_name }} -p all -o artifacts -c
 
 ```bash
 # 最常用命令
-python build.py                          # 编译当前平台
-python build.py -p all                   # 编译所有平台
+python build.py                          # 编译当前平台（自动版本号）
+python build.py -p all                   # 编译所有平台（自动版本号）
 python build.py -v 1.0.0 -p all -c      # 发布版本编译
+
+# 版本管理
+python build.py -v auto                  # 自动版本号
+python build.py -v 1.2.3                # 指定版本号
+python build.py --no-tag                # 跳过标签管理
+python build.py --no-push               # 创建标签但不推送
+
+# 快速编译
+python build.py --skip-deps --skip-swagger  # 跳过依赖和文档生成
 
 # 查看版本
 ./release/chat-backend.exe --version
@@ -457,4 +757,4 @@ python build.py -v 1.0.0 -p all -c      # 发布版本编译
 
 ---
 
-**最后更新**: 2025-10-30
+**最后更新**: 2025-11-04
