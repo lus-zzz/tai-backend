@@ -10,17 +10,8 @@
   ],
   "swagger": "2.0",
   "info": {
-    "description": "聊天后端服务\n对话知识模型管理",
-    "title": "Chat Backend API",
-    "termsOfService": "there are no TOS at this moment, use at your own risk we take no responsibility",
-    "contact": {
-      "name": "API Support",
-      "email": "support@example.com"
-    },
-    "license": {
-      "name": "MIT",
-      "url": "https://opensource.org/licenses/MIT"
-    },
+    "description": "TAI后端服务",
+    "title": "TAI Backend API",
     "version": "1.0.0"
   },
   "host": "localhost:9090",

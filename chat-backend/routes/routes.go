@@ -4,6 +4,7 @@ import (
 	"chat-backend/handlers"
 	"chat-backend/utils"
 	"embed"
+	"encoding/json"
 	"io/fs"
 	"net/http"
 
@@ -153,12 +154,24 @@ func (r *Router) setupRoutes() {
 	r.engine.GET("/logs/:filename/download", logViewer.DownloadLogFile)
 	r.engine.GET("/logs/:filename/stream", logViewer.StreamLogFile)
 
-	// Swagger UI - 使用ginSwagger中间件，指定spec URL
-	r.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler,
-		ginSwagger.URL("http://localhost:9090/swagger.json"),
-		ginSwagger.DefaultModelsExpandDepth(-1)))
+	// Swagger UI - 使用ginSwagger中间件，动态生成完整URL
+	r.engine.GET("/swagger/*any", func(c *gin.Context) {
+		// 构建完整的 swagger.json URL
+		scheme := "http"
+		if c.Request.TLS != nil {
+			scheme = "https"
+		}
+		swaggerURL := scheme + "://" + c.Request.Host + "/swagger.json"
 
-	// Swagger spec - 使用嵌入的文件
+		// 使用动态URL创建handler
+		handler := ginSwagger.WrapHandler(swaggerFiles.Handler,
+			ginSwagger.URL(swaggerURL),
+			ginSwagger.DefaultModelsExpandDepth(-1))
+
+		handler(c)
+	})
+
+	// Swagger spec - 动态生成swagger.json，使用当前请求的host
 	r.engine.GET("/swagger.json", func(c *gin.Context) {
 		// 从嵌入的文件系统中读取 swagger.json
 		data, err := r.docsFS.ReadFile("docs/swagger.json")
@@ -166,7 +179,19 @@ func (r *Router) setupRoutes() {
 			c.JSON(500, gin.H{"error": "Failed to load swagger.json"})
 			return
 		}
-		c.Data(200, "application/json", data)
+
+		// 动态替换host字段
+		var swaggerDoc map[string]interface{}
+		if err := json.Unmarshal(data, &swaggerDoc); err != nil {
+			c.JSON(500, gin.H{"error": "Failed to parse swagger.json"})
+			return
+		}
+
+		// 获取当前请求的host
+		host := c.Request.Host
+		swaggerDoc["host"] = host
+
+		c.JSON(200, swaggerDoc)
 	})
 }
 
