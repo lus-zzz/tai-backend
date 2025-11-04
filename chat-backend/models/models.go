@@ -622,10 +622,6 @@ type DefaultSettingsSuccessResponse struct {
 	}
 }
 
-
-	
-
-
 // ModelSaveSuccessResponse 模型保存成功响应
 // swagger:response ModelSaveSuccessResponse
 type ModelSaveSuccessResponse struct {
@@ -640,7 +636,7 @@ type ModelSaveSuccessResponse struct {
 		Message string `json:"message"`
 		// 模型ID数据
 		// required: true
-		Data map[string]interface{} `json:"data"` // gin.H{"id": modelID}
+		Data ModelID `json:"data"`
 		// 时间戳
 		// required: true
 		Timestamp string `json:"timestamp"`
@@ -722,4 +718,87 @@ type ModelStatusEnableRequest struct {
 	// true=启用, false=禁用
 	// required: true
 	Enable bool `json:"enable" example:"true"`
+}
+
+// ChatInput 快捷方式推荐输入
+// swagger:model
+type ChatInput struct {
+	// 用户输入的自然语言描述，会有截断（模型输入tokens限制为512，包括prompt），如果用户输入太长
+	// required: true
+	UserInput string `json:"user_input" example:"我想要调整模型的温度参数"`
+	// 根据用户的输入，返回推荐设置的数量
+	// required: true
+	RecommendNum int32 `json:"recommend_num" example:"3"`
+}
+
+// RecommendData 推荐数据响应
+// swagger:model
+type RecommendData struct {
+	// 推荐的设置名列表，与recommend_score分数按顺序对应
+	// required: true
+	SettingName []string `json:"setting_name" example:"[\"temperature\", \"max_tokens\", \"top_p\"]"`
+	// 推荐的设置名的分数，与setting_name分数按顺序对应
+	// required: true
+	RecommendScore []float64 `json:"recommend_score" example:"[0.95, 0.87, 0.76]"`
+	// 是否为用户执行推荐名列表第一个设置，True为执行，False为不执行
+	// required: true
+	ProcessForUser bool `json:"process_for_user" example:"true"`
+}
+
+// SettingName 支持的设置名响应
+// swagger:model
+type SettingName struct {
+	// 支持的全部设置列表
+	// required: true
+	SupportedSettingName []string `json:"supported_setting_name" example:"[\"temperature\", \"max_tokens\", \"top_p\", \"frequency_penalty\", \"presence_penalty\"]"`
+}
+
+// RecommendDataSuccessResponse 推荐数据成功响应
+// swagger:response RecommendDataSuccessResponse
+type RecommendDataSuccessResponse struct {
+	// 推荐数据响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 推荐数据
+		// required: true
+		Data RecommendData `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// SettingNameSuccessResponse 支持设置名成功响应
+// swagger:response SettingNameSuccessResponse
+type SettingNameSuccessResponse struct {
+	// 支持设置名响应
+	// in: body
+	Body struct {
+		// 请求是否成功
+		// required: true
+		Success bool `json:"success"`
+		// 响应消息
+		// required: true
+		Message string `json:"message"`
+		// 设置名数据
+		// required: true
+		Data SettingName `json:"data"`
+		// 时间戳
+		// required: true
+		Timestamp string `json:"timestamp"`
+	}
+}
+
+// ModelID 模型ID响应数据
+// swagger:model
+type ModelID struct {
+	// 模型ID
+	// required: true
+	ID int `json:"id" example:"1"`
 }

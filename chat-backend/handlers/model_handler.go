@@ -215,7 +215,7 @@ func (h *ModelHandler) SaveModel(c *gin.Context) {
 		return
 	}
 
-	utils.RespondWithSuccess(c, gin.H{"id": modelID}, "模型保存成功")
+	utils.RespondWithSuccess(c, models.ModelID{ID: modelID}, "模型保存成功")
 }
 
 // DeleteModel 根据ID删除指定的模型。

@@ -1003,6 +1003,76 @@
         }
       }
     },
+    "/shortcut/recommend": {
+      "post": {
+        "description": "根据用户输入和推荐数目，得到推荐的设置列表",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Shortcut"
+        ],
+        "summary": "快捷方式推荐",
+        "operationId": "recommendSettings",
+        "parameters": [
+          {
+            "description": "用户输入和推荐数量",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "用户输入和推荐数量",
+              "type": "object",
+              "$ref": "#/definitions/ChatInput"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/responses/RecommendDataSuccessResponse"
+          },
+          "400": {
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/shortcut/supportedSetting": {
+      "post": {
+        "description": "获取当前支持的设置列表",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Shortcut"
+        ],
+        "summary": "获取支持的设置列表",
+        "operationId": "getSupportedSettings",
+        "responses": {
+          "200": {
+            "$ref": "#/responses/SettingNameSuccessResponse"
+          },
+          "500": {
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/version": {
       "get": {
         "description": "返回应用程序的详细版本信息，包括版本号、构建时间和Git信息",
@@ -1100,6 +1170,28 @@
         }
       },
       "x-go-package": "flowy-sdk/services/agent"
+    },
+    "ChatInput": {
+      "description": "ChatInput 快捷方式推荐输入",
+      "type": "object",
+      "required": [
+        "user_input",
+        "recommend_num"
+      ],
+      "properties": {
+        "recommend_num": {
+          "description": "根据用户的输入，返回推荐设置的数量",
+          "type": "integer",
+          "format": "int32",
+          "x-go-name": "RecommendNum"
+        },
+        "user_input": {
+          "description": "用户输入的自然语言描述，会有截断（模型输入tokens限制为512，包括prompt），如果用户输入太长",
+          "type": "string",
+          "x-go-name": "UserInput"
+        }
+      },
+      "x-go-package": "chat-backend/models"
     },
     "ChatMessageRequest": {
       "description": "ChatMessageRequest 聊天消息请求（用于Swagger文档）",
@@ -2199,6 +2291,22 @@
       },
       "x-go-package": "chat-backend/models"
     },
+    "ModelID": {
+      "description": "ModelID 模型ID响应数据",
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "description": "模型ID",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
     "ModelInfo": {
       "description": "ModelInfo 模型信息",
       "type": "object",
@@ -2236,6 +2344,59 @@
           "x-go-name": "Symbol"
         },
         "type": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "flowy-sdk/services/model"
+    },
+    "ModelSaveRequest": {
+      "description": "ModelSaveRequest 添加/修改模型请求\nAPI: POST /model/save",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "type",
+        "symbol",
+        "endpoint",
+        "enable",
+        "credentials"
+      ],
+      "properties": {
+        "credentials": {
+          "description": "模型鉴权信息",
+          "type": "string",
+          "x-go-name": "Credentials"
+        },
+        "enable": {
+          "description": "是否启用",
+          "type": "boolean",
+          "x-go-name": "Enable"
+        },
+        "endpoint": {
+          "description": "模型接入点",
+          "type": "string",
+          "x-go-name": "Endpoint"
+        },
+        "id": {
+          "description": "模型ID: 0=新建, \u003e0=修改",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
+        },
+        "name": {
+          "description": "模型名称",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "symbol": {
+          "description": "模型编码",
+          "type": "string",
+          "x-go-name": "Symbol"
+        },
+        "type": {
+          "description": "模型类型: 0=聊天模型, 1=嵌入模型",
           "type": "integer",
           "format": "int64",
           "x-go-name": "Type"
@@ -2299,6 +2460,40 @@
         }
       },
       "x-go-package": "flowy-sdk/services/agent"
+    },
+    "RecommendData": {
+      "description": "RecommendData 推荐数据响应",
+      "type": "object",
+      "required": [
+        "setting_name",
+        "recommend_score",
+        "process_for_user"
+      ],
+      "properties": {
+        "process_for_user": {
+          "description": "是否为用户执行推荐名列表第一个设置，True为执行，False为不执行",
+          "type": "boolean",
+          "x-go-name": "ProcessForUser"
+        },
+        "recommend_score": {
+          "description": "推荐的设置名的分数，与setting_name分数按顺序对应",
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "double"
+          },
+          "x-go-name": "RecommendScore"
+        },
+        "setting_name": {
+          "description": "推荐的设置名列表，与recommend_score分数按顺序对应",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "SettingName"
+        }
+      },
+      "x-go-package": "chat-backend/models"
     },
     "Reference": {
       "description": "Reference 引用信息",
@@ -2444,6 +2639,24 @@
         }
       },
       "x-go-package": "flowy-sdk/services/agent"
+    },
+    "SettingName": {
+      "description": "SettingName 支持的设置名响应",
+      "type": "object",
+      "required": [
+        "supported_setting_name"
+      ],
+      "properties": {
+        "supported_setting_name": {
+          "description": "支持的全部设置列表",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "SupportedSettingName"
+        }
+      },
+      "x-go-package": "chat-backend/models"
     },
     "StreamChatResponse": {
       "description": "StreamChatResponse 流式聊天响应",
@@ -3193,10 +3406,71 @@
         ],
         "properties": {
           "data": {
-            "description": "模型ID数据",
-            "type": "object",
-            "additionalProperties": {},
-            "x-go-name": "Data"
+            "$ref": "#/definitions/ModelID"
+          },
+          "message": {
+            "description": "响应消息",
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "description": "请求是否成功",
+            "type": "boolean",
+            "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
+          }
+        }
+      }
+    },
+    "RecommendDataSuccessResponse": {
+      "description": "RecommendDataSuccessResponse 推荐数据成功响应",
+      "schema": {
+        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/RecommendData"
+          },
+          "message": {
+            "description": "响应消息",
+            "type": "string",
+            "x-go-name": "Message"
+          },
+          "success": {
+            "description": "请求是否成功",
+            "type": "boolean",
+            "x-go-name": "Success"
+          },
+          "timestamp": {
+            "description": "时间戳",
+            "type": "string",
+            "x-go-name": "Timestamp"
+          }
+        }
+      }
+    },
+    "SettingNameSuccessResponse": {
+      "description": "SettingNameSuccessResponse 支持设置名成功响应",
+      "schema": {
+        "type": "object",
+        "required": [
+          "success",
+          "message",
+          "data",
+          "timestamp"
+        ],
+        "properties": {
+          "data": {
+            "$ref": "#/definitions/SettingName"
           },
           "message": {
             "description": "响应消息",

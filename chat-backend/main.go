@@ -65,15 +65,20 @@ func NewServer() *Server {
 	knowledgeService := services.NewKnowledgeService(sdk)
 	modelService := services.NewModelService(sdk)
 
+	// 创建快捷方式服务 - 这里需要配置实际的API地址
+	shortcutAPIURL := utils.GetEnvOrDefault("SHORTCUT_API_URL", "http://10.18.13.157:26034")
+	shortcutService := services.NewShortcutService(shortcutAPIURL)
+
 	// 创建处理器层
 	chatHandler := handlers.NewChatHandler(chatService, defaultSettingsService)
 	settingsHandler := handlers.NewSettingsHandler(defaultSettingsService)
 	knowledgeHandler := handlers.NewKnowledgeHandler(knowledgeService)
 	modelHandler := handlers.NewModelHandler(modelService)
 	versionHandler := handlers.NewVersionHandler(Version, BuildTime, GitCommit, GitBranch, GitTag)
+	shortcutHandler := handlers.NewShortcutHandler(shortcutService)
 
 	// 创建路由，传入嵌入的文件系统
-	router := routes.NewRouter(chatHandler, settingsHandler, knowledgeHandler, modelHandler, versionHandler, staticFiles, docsFiles)
+	router := routes.NewRouter(chatHandler, settingsHandler, knowledgeHandler, modelHandler, versionHandler, shortcutHandler, staticFiles, docsFiles)
 
 	return &Server{
 		router:           router,

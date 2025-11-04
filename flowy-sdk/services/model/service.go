@@ -70,14 +70,29 @@ type ModelInfo struct {
 
 // ModelSaveRequest 添加/修改模型请求
 // API: POST /model/save
+// swagger:model
 type ModelSaveRequest struct {
-	ID          int    `json:"id"`          // 模型ID: 0=新建, >0=修改
-	Name        string `json:"name"`        // 模型名称
-	Type        int    `json:"type"`        // 模型类型: 0=聊天模型, 1=嵌入模型
-	Symbol      string `json:"symbol"`      // 模型编码
-	Endpoint    string `json:"endpoint"`    // 模型接入点
-	Enable      bool   `json:"enable"`      // 是否启用
-	Credentials string `json:"credentials"` // 模型鉴权信息
+	// 模型ID: 0=新建, >0=修改
+	// required: true
+	ID int `json:"id"`
+	// 模型名称
+	// required: true
+	Name string `json:"name"`
+	// 模型类型: 0=聊天模型, 1=嵌入模型
+	// required: true
+	Type int `json:"type"`
+	// 模型编码
+	// required: true
+	Symbol string `json:"symbol"`
+	// 模型接入点
+	// required: true
+	Endpoint string `json:"endpoint"`
+	// 是否启用
+	// required: true
+	Enable bool `json:"enable"`
+	// 模型鉴权信息
+	// required: true
+	Credentials string `json:"credentials"`
 }
 
 // ModelDeleteRequest 删除模型请求

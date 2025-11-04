@@ -20,6 +20,7 @@ type Router struct {
 	knowledgeHandler *handlers.KnowledgeHandler
 	modelHandler     *handlers.ModelHandler
 	versionHandler   *handlers.VersionHandler
+	shortcutHandler  *handlers.ShortcutHandler
 	staticFS         embed.FS
 	docsFS           embed.FS
 }
@@ -31,6 +32,7 @@ func NewRouter(
 	knowledgeHandler *handlers.KnowledgeHandler,
 	modelHandler *handlers.ModelHandler,
 	versionHandler *handlers.VersionHandler,
+	shortcutHandler *handlers.ShortcutHandler,
 	staticFS embed.FS,
 	docsFS embed.FS,
 ) *Router {
@@ -62,6 +64,7 @@ func NewRouter(
 		knowledgeHandler: knowledgeHandler,
 		modelHandler:     modelHandler,
 		versionHandler:   versionHandler,
+		shortcutHandler:  shortcutHandler,
 		staticFS:         staticFS,
 		docsFS:           docsFS,
 	}
@@ -125,6 +128,13 @@ func (r *Router) setupRoutes() {
 		models.POST("", r.modelHandler.SaveModel)
 		models.DELETE("/:id", r.modelHandler.DeleteModel)
 		models.PUT("/:id/status", r.modelHandler.SetModelStatus)
+	}
+
+	// 快捷方式相关路由
+	shortcut := api.Group("/shortcut")
+	{
+		shortcut.POST("/recommend", r.shortcutHandler.RecommendSettings)
+		shortcut.POST("/supportedSetting", r.shortcutHandler.GetSupportedSettings)
 	}
 
 	// 系统信息路由
