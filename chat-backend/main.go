@@ -169,6 +169,7 @@ func printBanner() {
 	}
 	utils.LogInfo("工作目录: %s", getCurrentDir())
 	utils.LogInfo("Flowy API: %s", envConfig.Get("FLOWY_BASE_URL"))
+	utils.LogInfo("快捷方式 API: %s", envConfig.Get("SHORTCUT_API_URL"))
 	utils.LogInfo("服务端口: %s", port)
 	utils.LogInfo("API 文档: http://localhost:%s/swagger/index.html", port)
 	utils.LogInfo("版本信息: http://localhost:%s/api/v1/version", port)
