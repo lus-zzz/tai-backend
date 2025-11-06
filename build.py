@@ -441,9 +441,43 @@ class Builder:
         
         return success_count, len(platforms)
 
+    def sync_with_remote(self):
+        """如果工作区是干净的，则从远程拉取更新"""
+        print_info("检查工作区状态...")
+        if self.git_status == "clean":
+            print_info("工作区是干净的，尝试从远程拉取更新...")
+            returncode, stdout, stderr = run_command(['git', 'pull'])
+            if returncode != 0:
+                print_error(f"git pull 失败: {stderr}")
+                print_warning("将使用本地代码继续编译")
+                return
+
+            if "Already up to date." in stdout:
+                print_success("代码已是最新")
+            else:
+                print_success("代码已更新，重新加载版本信息...")
+                # 更新后重新获取版本信息
+                self.git_commit = get_git_commit()
+                self.git_tag = get_git_tag()
+                self.git_branch = get_git_branch()
+                if self.args.version == "auto":
+                    self.version = get_auto_version()
+                
+                # 如果状态是 dirty，在版本号后面加上标记
+                self.git_status = get_git_status()
+                if self.git_status == "dirty":
+                    self.version += "-dirty"
+                    print_warning(f"拉取更新后检测到未提交的更改(可能是合并冲突)，版本号标记为: {self.version}")
+
+        else:
+            print_warning("工作区存在未提交的更改，跳过 `git pull`")
+
     def build(self):
         """执行编译"""
         try:
+            # 同步远程仓库
+            self.sync_with_remote()
+
             # 打印编译信息
             self.print_build_info()
             
