@@ -1,5 +1,5 @@
 **/*.exe
 *.log
-config
+default_settings.json
 release
 .env
