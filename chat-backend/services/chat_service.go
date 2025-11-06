@@ -225,17 +225,30 @@ func (s *ChatService) ListConversations(ctx context.Context, page, pageSize int)
 		}
 	}
 
-	// 简单分页
-	start := (page - 1) * pageSize
-	end := start + pageSize
-	if start > len(allConversations) {
-		start = len(allConversations)
+	// 增加对 page 和 pageSize 的校验
+	if page <= 0 {
+		page = 1
 	}
-	if end > len(allConversations) {
-		end = len(allConversations)
+	if pageSize <= 0 {
+		pageSize = 10 // 或者一个合理的默认值
 	}
 
-	pagedConversations := allConversations[start:end]
+	start := (page - 1) * pageSize
+	end := start + pageSize
+
+	var pagedConversations []models.Conversation
+
+	// 确保 start 不会越界
+	if start < len(allConversations) {
+		// 如果 end 越界，Go 的切片操作会自动处理
+		if end > len(allConversations) {
+			end = len(allConversations)
+		}
+		pagedConversations = allConversations[start:end]
+	} else {
+		// 如果 start 已经超出范围，直接返回空切片
+		pagedConversations = []models.Conversation{}
+	}
 
 	return &models.ConversationListResponse{
 		Conversations: pagedConversations,
