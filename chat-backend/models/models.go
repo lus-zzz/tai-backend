@@ -220,6 +220,51 @@ type KnowledgeFile struct {
 	ErrorMessage string `json:"errorMessage"`
 }
 
+// BatchUploadFilesRequest 批量上传文件请求
+// swagger:model
+type BatchUploadFilesRequest struct {
+	// 上传文件路径列表（本地文件系统路径）
+	// required: true
+	FilePaths []string `json:"file_paths"`
+}
+
+// BatchUploadResult 单个文件上传结果
+// swagger:model
+type BatchUploadResult struct {
+	// 文件路径
+	// required: true
+	FilePath string `json:"file_path"`
+	// 上传是否成功
+	// required: true
+	Success bool `json:"success"`
+	// 上传结果信息
+	// required: true
+	Message string `json:"message"`
+	// 文件信息（成功时返回）
+	// required: false
+	File *KnowledgeFile `json:"file,omitempty"`
+	// 错误信息（失败时返回）
+	// required: false
+	Error string `json:"error,omitempty"`
+}
+
+// BatchUploadResponse 批量上传响应
+// swagger:model
+type BatchUploadResponse struct {
+	// 上传总数
+	// required: true
+	Total int `json:"total"`
+	// 成功数
+	// required: true
+	SuccessCount int `json:"success_count"`
+	// 失败数
+	// required: true
+	FailureCount int `json:"failure_count"`
+	// 每个文件的上传结果
+	// required: true
+	Results []BatchUploadResult `json:"results"`
+}
+
 // APIResponse 通用API响应（成功和错误都使用这个结构）
 // swagger:model
 type APIResponse struct {

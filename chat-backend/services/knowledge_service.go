@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -217,7 +220,7 @@ func (s *KnowledgeService) GetKnowledgeBaseFiles(ctx context.Context, id string)
 	return knowledgeFiles, nil
 }
 
-// UploadFile 上传文件到知识库
+// UploadFile 上传文件到知识库（文件流上传）
 func (s *KnowledgeService) UploadFile(ctx context.Context, id string, filename string, content []byte) (*models.KnowledgeFile, error) {
 	utils.LogInfo("上传文件到知识库: %s, 文件: %s", id, filename)
 
@@ -250,6 +253,126 @@ func (s *KnowledgeService) UploadFile(ctx context.Context, id string, filename s
 
 	utils.InfoWith("上传文件成功", "id", id, "filename", filename, "file_id", uploadData.ID)
 	return result, nil
+}
+
+// UploadFileFromPath 从文件路径上传文件到知识库
+func (s *KnowledgeService) UploadFileFromPath(ctx context.Context, id string, filePath string) (*models.KnowledgeFile, error) {
+	// 验证文件路径
+	if filePath == "" {
+		return nil, fmt.Errorf("文件路径不能为空")
+	}
+
+	// 验证文件是否存在
+	fileInfo, err := os.Stat(filePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("文件不存在: %s", filePath)
+		}
+		return nil, fmt.Errorf("无法访问文件: %w", err)
+	}
+
+	// 验证是否是文件（不是目录）
+	if fileInfo.IsDir() {
+		return nil, fmt.Errorf("路径是一个目录，不是文件: %s", filePath)
+	}
+
+	// 获取文件名
+	filename := filepath.Base(filePath)
+
+	utils.LogInfo("从路径上传文件到知识库: %s, 路径: %s, 文件: %s", id, filePath, filename)
+
+	// 打开文件
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("打开文件失败: %w", err)
+	}
+	defer file.Close()
+
+	// 读取文件内容
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("读取文件失败: %w", err)
+	}
+
+	// 转换ID
+	kbID, err := strconv.Atoi(id)
+	if err != nil {
+		return nil, fmt.Errorf("无效的知识库ID: %w", err)
+	}
+
+	// 创建bytes.Reader
+	reader := bytes.NewReader(content)
+
+	// 调用Flowy SDK上传文件
+	uploadData, err := s.sdk.Knowledge.UploadFile(ctx, reader, filename, kbID, 0, "zh")
+	if err != nil {
+		utils.ErrorWith("从路径上传文件失败", "id", id, "path", filePath, "filename", filename, "error", err)
+		return nil, fmt.Errorf("上传文件失败: %w", err)
+	}
+
+	result := &models.KnowledgeFile{
+		ID:           uploadData.ID,
+		Name:         uploadData.Name,
+		Size:         uploadData.FileSize,
+		Enable:       uploadData.Enable,
+		Status:       uploadData.Status,
+		UploadedAt:   time.Now(),
+		IndexPercent: uploadData.IndexPercent,
+		ErrorMessage: uploadData.ErrorMessage,
+	}
+
+	utils.InfoWith("从路径上传文件成功", "id", id, "path", filePath, "filename", filename, "file_id", uploadData.ID)
+	return result, nil
+}
+
+// BatchUploadFilesFromPath 批量从文件路径上传文件到知识库
+func (s *KnowledgeService) BatchUploadFilesFromPath(ctx context.Context, id string, filePaths []string) (*models.BatchUploadResponse, error) {
+	if len(filePaths) == 0 {
+		return nil, fmt.Errorf("文件路径列表不能为空")
+	}
+
+	utils.LogInfo("开始批量上传文件到知识库: %s, 文件数: %d", id, len(filePaths))
+
+	response := &models.BatchUploadResponse{
+		Total:   len(filePaths),
+		Results: make([]models.BatchUploadResult, 0, len(filePaths)),
+	}
+
+	// 创建超时上下文用于整个批量操作
+	batchCtx, cancel := context.WithTimeout(context.Background(), time.Duration(len(filePaths)*60)*time.Second)
+	defer cancel()
+
+	// 上传每个文件
+	for _, filePath := range filePaths {
+		result := models.BatchUploadResult{
+			FilePath: filePath,
+		}
+
+		// 为每个文件单独设置超时
+		fileCtx, fileCancel := context.WithTimeout(batchCtx, 60*time.Second)
+
+		uploadedFile, err := s.UploadFileFromPath(fileCtx, id, filePath)
+		fileCancel()
+
+		if err != nil {
+			result.Success = false
+			result.Message = "上传失败"
+			result.Error = err.Error()
+			response.FailureCount++
+			utils.ErrorWith("批量上传文件失败", "path", filePath, "error", err)
+		} else {
+			result.Success = true
+			result.Message = "上传成功"
+			result.File = uploadedFile
+			response.SuccessCount++
+			utils.InfoWith("批量上传文件成功", "path", filePath, "file_id", uploadedFile.ID)
+		}
+
+		response.Results = append(response.Results, result)
+	}
+
+	utils.InfoWith("批量上传完成", "知识库ID", id, "总数", response.Total, "成功", response.SuccessCount, "失败", response.FailureCount)
+	return response, nil
 }
 
 // DeleteFile 删除知识库文件

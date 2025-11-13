@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 	"time"
@@ -268,10 +270,13 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
 //
 // 上传文件到知识库
 //
-// 上传文件到指定的知识库，系统将自动处理文档向量化
+// 支持两种上传方式：
+// 文件流上传：使用 multipart/form-data 格式，字段名为 'file',多个文件使用多个 'file' 字段
+// 文件路径上传：使用 application/json 格式，body 中包含 file_paths 数组
 //
 // Consumes:
 // - multipart/form-data
+// - application/json
 //
 // Produces:
 // - application/json
@@ -284,13 +289,18 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
 //     type: string
 //   - +name: file
 //     in: formData
-//     description: 上传文件
-//     required: true
+//     description: 上传文件（支持单个或多个文件）
+//     required: false
 //     type: file
+//   - +name: body
+//     in: body
+//     description: 单文件路径或多文件路径列表（用于路径上传）
+//     required: false
+//     type: BatchUploadFilesRequest
 //
 // Responses:
 //
-//	200: KnowledgeFileSuccessResponse
+//	200: KnowledgeFileSuccessResponse or BatchUploadResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
@@ -301,17 +311,51 @@ func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 		return
 	}
 
-	file, header, err := c.Request.FormFile("file")
+	// 判断上传方式：先检查是否是表单数据（文件流上传），否则检查JSON（路径上传）
+	contentType := c.ContentType()
+
+	if contentType == "application/json" {
+		// JSON上传方式，支持单文件或多文件路径
+		h.uploadFilesFromPath(c, kbID)
+	} else {
+		// 文件流上传方式，支持单文件或多文件
+		h.uploadFilesFromStream(c, kbID)
+	}
+}
+
+// uploadFilesFromStream 从文件流上传文件（支持单文件和多文件）
+func (h *KnowledgeHandler) uploadFilesFromStream(c *gin.Context, kbID string) {
+	// 获取所有上传的文件
+	form, err := c.MultipartForm()
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFileUpload, "文件上传失败", http.StatusBadRequest).WithCause(err)
+		apiErr := utils.NewAPIError(utils.ErrFileUpload, "解析表单失败", http.StatusBadRequest).WithCause(err)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	files := form.File["file"]
+	if len(files) == 0 {
+		apiErr := utils.NewAPIError(utils.ErrFileUpload, "没有找到上传的文件", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	// 多个文件，返回批量上传结果
+	h.uploadMultipleFilesFromStream(c, kbID, files)
+}
+
+// uploadSingleFileFromStream 上传单个文件流
+func (h *KnowledgeHandler) uploadSingleFileFromStream(c *gin.Context, kbID string, fileHeader *multipart.FileHeader) {
+	file, err := fileHeader.Open()
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrFileUpload, "打开文件失败", http.StatusBadRequest).WithCause(err)
 		utils.RespondWithError(c, apiErr)
 		return
 	}
 	defer file.Close()
 
 	// 读取文件内容
-	content := make([]byte, header.Size)
-	_, err = file.Read(content)
+	content, err := io.ReadAll(file)
 	if err != nil {
 		apiErr := utils.NewAPIError(utils.ErrFileUpload, "读取文件失败", http.StatusInternalServerError).WithCause(err)
 		utils.RespondWithError(c, apiErr)
@@ -321,7 +365,7 @@ func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	uploadedFile, err := h.knowledgeService.UploadFile(ctx, kbID, header.Filename, content)
+	uploadedFile, err := h.knowledgeService.UploadFile(ctx, kbID, fileHeader.Filename, content)
 	if err != nil {
 		apiErr := utils.NewAPIError(utils.ErrFileUpload, "上传文件失败", http.StatusInternalServerError).WithCause(err)
 		utils.RespondWithError(c, apiErr)
@@ -329,6 +373,107 @@ func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 	}
 
 	utils.RespondWithSuccess(c, uploadedFile, "文件上传成功")
+}
+
+// uploadMultipleFilesFromStream 上传多个文件流
+func (h *KnowledgeHandler) uploadMultipleFilesFromStream(c *gin.Context, kbID string, fileHeaders []*multipart.FileHeader) {
+	response := &models.BatchUploadResponse{
+		Total:   len(fileHeaders),
+		Results: make([]models.BatchUploadResult, 0, len(fileHeaders)),
+	}
+
+	// 创建超时上下文，根据文件数量调整超时时间
+	timeoutSeconds := len(fileHeaders) * 60
+	batchCtx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
+	defer cancel()
+
+	// 上传每个文件
+	for _, fileHeader := range fileHeaders {
+		result := models.BatchUploadResult{
+			FilePath: fileHeader.Filename,
+		}
+
+		// 为每个文件单独设置超时
+		fileCtx, fileCancel := context.WithTimeout(batchCtx, 60*time.Second)
+
+		// 打开文件
+		file, err := fileHeader.Open()
+		if err != nil {
+			result.Success = false
+			result.Message = "打开文件失败"
+			result.Error = err.Error()
+			response.FailureCount++
+			fileCancel()
+			response.Results = append(response.Results, result)
+			continue
+		}
+
+		// 读取文件内容
+		content, err := io.ReadAll(file)
+		file.Close()
+
+		if err != nil {
+			result.Success = false
+			result.Message = "读取文件失败"
+			result.Error = err.Error()
+			response.FailureCount++
+			fileCancel()
+			response.Results = append(response.Results, result)
+			continue
+		}
+
+		// 上传文件
+		uploadedFile, err := h.knowledgeService.UploadFile(fileCtx, kbID, fileHeader.Filename, content)
+		fileCancel()
+
+		if err != nil {
+			result.Success = false
+			result.Message = "上传失败"
+			result.Error = err.Error()
+			response.FailureCount++
+			utils.ErrorWith("批量上传文件失败", "filename", fileHeader.Filename, "error", err)
+		} else {
+			result.Success = true
+			result.Message = "上传成功"
+			result.File = uploadedFile
+			response.SuccessCount++
+			utils.InfoWith("批量上传文件成功", "filename", fileHeader.Filename, "file_id", uploadedFile.ID)
+		}
+
+		response.Results = append(response.Results, result)
+	}
+
+	utils.RespondWithSuccess(c, response, "批量上传完成")
+}
+
+// uploadFilesFromPath 从文件路径上传文件（支持单文件和多文件，统一使用 file_paths）
+func (h *KnowledgeHandler) uploadFilesFromPath(c *gin.Context, kbID string) {
+	var req models.BatchUploadFilesRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "JSON 解析失败", http.StatusBadRequest).WithCause(err)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	if len(req.FilePaths) == 0 {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "文件路径列表不能为空", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	// 统一处理：直接调用批量上传，遍历处理所有文件
+	timeoutSeconds := len(req.FilePaths) * 60
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
+	defer cancel()
+
+	response, err := h.knowledgeService.BatchUploadFilesFromPath(ctx, kbID, req.FilePaths)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrFileUpload, "上传文件失败", http.StatusInternalServerError).WithCause(err)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	utils.RespondWithSuccess(c, response, "文件上传完成")
 }
 
 // DeleteFile 从知识库中删除指定的文件。
@@ -445,4 +590,71 @@ func (h *KnowledgeHandler) ToggleFileEnable(c *gin.Context) {
 		message = "文件已启用"
 	}
 	utils.RespondWithSuccess(c, nil, message)
+}
+
+// BatchUploadFiles 批量上传文件到指定的知识库。
+//
+// swagger:route POST /knowledge/bases/{id}/batch-files Knowledge batchUploadFiles
+//
+// 批量上传文件到知识库
+//
+// 支持批量上传多个文件到知识库，使用 application/json 格式，body 中包含 file_paths 数组
+//
+// Consumes:
+// - application/json
+//
+// Produces:
+// - application/json
+//
+// Parameters:
+//   - +name: id
+//     in: path
+//     description: 知识库ID
+//     required: true
+//     type: string
+//   - +name: body
+//     in: body
+//     description: 批量上传文件路径列表
+//     required: true
+//     type: BatchUploadFilesRequest
+//
+// Responses:
+//
+//	200: BatchUploadResponse
+//	400: ErrorResponse
+//	500: ErrorResponse
+func (h *KnowledgeHandler) BatchUploadFiles(c *gin.Context) {
+	kbID := c.Param("id")
+	if kbID == "" {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少知识库ID", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	var req models.BatchUploadFilesRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "JSON 解析失败", http.StatusBadRequest).WithCause(err)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	if len(req.FilePaths) == 0 {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "文件路径列表不能为空", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	// 创建超时上下文，根据文件数量调整超时时间
+	timeoutSeconds := len(req.FilePaths) * 60
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutSeconds)*time.Second)
+	defer cancel()
+
+	response, err := h.knowledgeService.BatchUploadFilesFromPath(ctx, kbID, req.FilePaths)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrFileUpload, "批量上传文件失败", http.StatusInternalServerError).WithCause(err)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	utils.RespondWithSuccess(c, response, "批量上传完成")
 }

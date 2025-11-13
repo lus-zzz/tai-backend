@@ -473,6 +473,62 @@
         }
       }
     },
+    "/knowledge/bases/{id}/batch-files": {
+      "post": {
+        "description": "支持批量上传多个文件到知识库，使用 application/json 格式，body 中包含 file_paths 数组",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Knowledge"
+        ],
+        "summary": "批量上传文件到知识库",
+        "operationId": "batchUploadFiles",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "知识库ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "批量上传文件路径列表",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "description": "批量上传文件路径列表",
+              "type": "object",
+              "$ref": "#/definitions/BatchUploadFilesRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "BatchUploadResponse",
+            "schema": {
+              "$ref": "#/definitions/BatchUploadResponse"
+            }
+          },
+          "400": {
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "ErrorResponse",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
     "/knowledge/bases/{id}/files": {
       "get": {
         "description": "获取指定知识库中所有已上传文件的列表和状态信息",
@@ -512,9 +568,10 @@
         }
       },
       "post": {
-        "description": "上传文件到指定的知识库，系统将自动处理文档向量化",
+        "description": "支持两种上传方式：\n文件流上传：使用 multipart/form-data 格式，字段名为 'file',多个文件使用多个 'file' 字段\n文件路径上传：使用 application/json 格式，body 中包含 file_paths 数组",
         "consumes": [
-          "multipart/form-data"
+          "multipart/form-data",
+          "application/json"
         ],
         "produces": [
           "application/json"
@@ -534,13 +591,23 @@
           },
           {
             "type": "object",
-            "description": "上传文件",
-            "name": "file",
-            "required": true
+            "description": "上传文件（支持单个或多个文件）",
+            "name": "file"
+          },
+          {
+            "description": "单文件路径或多文件路径列表（用于路径上传）",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "description": "单文件路径或多文件路径列表（用于路径上传）",
+              "type": "object",
+              "$ref": "#/definitions/BatchUploadFilesRequest"
+            }
           }
         ],
         "responses": {
           "200": {
+            "description": "or BatchUploadResponse",
             "$ref": "#/responses/KnowledgeFileSuccessResponse"
           },
           "400": {
@@ -1161,6 +1228,98 @@
         }
       },
       "x-go-package": "flowy-sdk/services/agent"
+    },
+    "BatchUploadFilesRequest": {
+      "description": "BatchUploadFilesRequest 批量上传文件请求",
+      "type": "object",
+      "required": [
+        "file_paths"
+      ],
+      "properties": {
+        "file_paths": {
+          "description": "上传文件路径列表（本地文件系统路径）",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-go-name": "FilePaths"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "BatchUploadResponse": {
+      "description": "BatchUploadResponse 批量上传响应",
+      "type": "object",
+      "required": [
+        "total",
+        "success_count",
+        "failure_count",
+        "results"
+      ],
+      "properties": {
+        "failure_count": {
+          "description": "失败数",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "FailureCount"
+        },
+        "results": {
+          "description": "每个文件的上传结果",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BatchUploadResult"
+          },
+          "x-go-name": "Results"
+        },
+        "success_count": {
+          "description": "成功数",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "SuccessCount"
+        },
+        "total": {
+          "description": "上传总数",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Total"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
+    "BatchUploadResult": {
+      "description": "BatchUploadResult 单个文件上传结果",
+      "type": "object",
+      "required": [
+        "file_path",
+        "success",
+        "message"
+      ],
+      "properties": {
+        "error": {
+          "description": "错误信息（失败时返回）",
+          "type": "string",
+          "x-go-name": "Error"
+        },
+        "file": {
+          "$ref": "#/definitions/KnowledgeFile"
+        },
+        "file_path": {
+          "description": "文件路径",
+          "type": "string",
+          "x-go-name": "FilePath"
+        },
+        "message": {
+          "description": "上传结果信息",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "success": {
+          "description": "上传是否成功",
+          "type": "boolean",
+          "x-go-name": "Success"
+        }
+      },
+      "x-go-package": "chat-backend/models"
     },
     "ChatInput": {
       "description": "ChatInput 快捷方式推荐输入",
