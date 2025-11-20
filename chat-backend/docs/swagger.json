@@ -473,62 +473,6 @@
         }
       }
     },
-    "/knowledge/bases/{id}/batch-files": {
-      "post": {
-        "description": "支持批量上传多个文件到知识库，使用 application/json 格式，body 中包含 file_paths 数组",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Knowledge"
-        ],
-        "summary": "批量上传文件到知识库",
-        "operationId": "batchUploadFiles",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "知识库ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          },
-          {
-            "description": "批量上传文件路径列表",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "description": "批量上传文件路径列表",
-              "type": "object",
-              "$ref": "#/definitions/BatchUploadFilesRequest"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "BatchUploadResponse",
-            "schema": {
-              "$ref": "#/definitions/BatchUploadResponse"
-            }
-          },
-          "400": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
     "/knowledge/bases/{id}/files": {
       "get": {
         "description": "获取指定知识库中所有已上传文件的列表和状态信息",
