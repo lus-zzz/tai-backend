@@ -10,6 +10,7 @@ import (
 
 	"chat-backend/models"
 	"chat-backend/services"
+	"chat-backend/services/interfaces"
 	"chat-backend/utils"
 
 	"github.com/gin-gonic/gin"
@@ -17,13 +18,20 @@ import (
 
 // KnowledgeHandler 处理知识库相关的HTTP请求。
 type KnowledgeHandler struct {
-	knowledgeService *services.KnowledgeService
+	knowledgeService interfaces.KnowledgeServiceInterface
 }
 
 // NewKnowledgeHandler 创建并返回一个新的知识库处理器实例。
-func NewKnowledgeHandler(knowledgeService *services.KnowledgeService) *KnowledgeHandler {
+func NewKnowledgeHandler(knowledgeService interfaces.KnowledgeServiceInterface) *KnowledgeHandler {
 	return &KnowledgeHandler{
 		knowledgeService: knowledgeService,
+	}
+}
+
+// NewKnowledgeHandlerFromGlobal 使用全局服务创建知识库处理器实例
+func NewKnowledgeHandlerFromGlobal() *KnowledgeHandler {
+	return &KnowledgeHandler{
+		knowledgeService: services.GetGlobalKnowledgeService(),
 	}
 }
 

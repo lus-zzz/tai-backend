@@ -2,15 +2,45 @@ package models
 
 import (
 	"time"
-
-	agentSvc "flowy-sdk/services/agent"
-	modelSvc "flowy-sdk/services/model"
 )
 
-// ChatRequest 聊天请求 - 直接使用 SDK 的 AsyncChatRequest
+
+// ChatRequest 聊天请求
 // swagger:model
 type ChatRequest struct {
-	agentSvc.AsyncChatRequest
+	// 会话ID
+	// required: true
+	SessionID int `json:"sessionId" example:"123"`
+	// 消息内容
+	// required: true
+	Content string `json:"content" example:"你好"`
+	// 文件列表（可选）
+	// required: false
+	Files []string `json:"files" example:"[]"`
+	// 模型ID
+	// required: true
+	ModelID int `json:"model_id"`
+	// 温度参数
+	// required: false
+	Temperature float64 `json:"temperature"`
+	// 顶部P参数
+	// required: false
+	TopP float64 `json:"top_p"`
+	// 存在惩罚
+	// required: false
+	PresencePenalty float64 `json:"presence_penalty"`
+	// 频率惩罚
+	// required: false
+	FrequencyPenalty float64 `json:"frequency_penalty"`
+	// 最大token数
+	// required: false
+	MaxTokens int `json:"max_tokens"`
+	// 是否流式输出
+	// required: false
+	Stream bool `json:"stream"`
+	// 知识库ID列表
+	// required: false
+	KnowledgeBaseIDs []int `json:"knowledge_base_ids"`
 }
 
 // ChatMessageRequest 聊天消息请求（用于Swagger文档）
@@ -27,9 +57,22 @@ type ChatMessageRequest struct {
 	Files []string `json:"files" example:"[]"`
 }
 
-// SSEChatEvent SSE聊天事件 - 直接使用 SDK 的 StreamEvent
+// SSEChatEvent SSE聊天事件
 // swagger:model
-type SSEChatEvent = agentSvc.StreamEvent
+type SSEChatEvent struct {
+	// 事件类型
+	// required: true
+	Type string `json:"type"`
+	// 事件数据
+	// required: true
+	Data interface{} `json:"data"`
+	// 消息ID
+	// required: true
+	ID string `json:"id"`
+	// 错误信息
+	// required: false
+	Error string `json:"error,omitempty"`
+}
 
 // ChatResponse 聊天响应
 // swagger:model
@@ -105,7 +148,7 @@ type ConversationHistoryResponse struct {
 	ConversationID string `json:"conversation_id"`
 	// 消息列表
 	// required: true
-	Messages []agentSvc.SessionRecord `json:"messages"`
+	Messages []MessageRecord `json:"messages"`
 	// 消息总数
 	// required: true
 	Total int `json:"total"`
@@ -116,8 +159,9 @@ type ConversationHistoryResponse struct {
 type Conversation struct {
 	// 对话ID
 	// required: true
-	ID                   int `json:"id"`
-	ConversationSettings     // 嵌入对话配置
+	ID int `json:"id"`
+	// 对话设置
+	ConversationSettings `json:"settings"`
 }
 
 // ConversationListRequest 对话列表请求
@@ -177,7 +221,8 @@ type KnowledgeBase struct {
 	// 知识库ID
 	// required: true
 	ID int `json:"id"`
-	KnowledgeBaseConfig
+	// 知识库配置
+	KnowledgeBaseConfig `json:"config"`
 	// 文件数量
 	// required: true
 	FileCount int `json:"file_count"`
@@ -451,6 +496,65 @@ type FileToggleEnableRequest struct {
 	Enable *bool `json:"enable" example:"true"`
 }
 
+// ModelInfo 模型信息
+// swagger:model
+type ModelInfo struct {
+	// 模型ID
+	// required: true
+	ID int `json:"id"`
+	// 模型名称
+	// required: true
+	Name string `json:"name"`
+	// 模型类型
+	// required: true
+	Type string `json:"type"`
+	// 模型描述
+	// required: true
+	Description string `json:"description"`
+	// 是否启用
+	// required: true
+	Enabled bool `json:"enabled"`
+}
+
+// SupportedChatModel 支持的聊天模型
+// swagger:model
+type SupportedChatModel struct {
+	// 模型ID
+	// required: true
+	ID int `json:"id"`
+	// 模型名称
+	// required: true
+	Name string `json:"name"`
+	// 模型描述
+	// required: true
+	Description string `json:"description"`
+}
+
+// SupportedVectorModel 支持的向量模型
+// swagger:model
+type SupportedVectorModel struct {
+	// 模型ID
+	// required: true
+	ID int `json:"id"`
+	// 模型名称
+	// required: true
+	Name string `json:"name"`
+	// 模型描述
+	// required: true
+	Description string `json:"description"`
+	// 向量维度
+	// required: true
+	Dimensions int `json:"dimensions"`
+}
+
+// ModelID 模型ID响应数据
+// swagger:model
+type ModelID struct {
+	// 模型ID
+	// required: true
+	ID int `json:"id" example:"1"`
+}
+
 // ====== Swagger 响应定义 ======
 
 // 通用响应类型在 utils 包中定义
@@ -702,7 +806,7 @@ type ModelListSuccessResponse struct {
 		Message string `json:"message"`
 		// 模型列表数据
 		// required: true
-		Data []modelSvc.ModelInfo `json:"data"` // ModelInfo类型的列表 (适用于可用模型接口)
+		Data []ModelInfo `json:"data"` // ModelInfo类型的列表 (适用于可用模型接口)
 		// 时间戳
 		// required: true
 		Timestamp string `json:"timestamp"`
@@ -723,7 +827,7 @@ type SupportedChatModelListSuccessResponse struct {
 		Message string `json:"message"`
 		// 支持的聊天模型列表数据
 		// required: true
-		Data []modelSvc.SupportedChatModel `json:"data"`
+		Data []SupportedChatModel `json:"data"`
 		// 时间戳
 		// required: true
 		Timestamp string `json:"timestamp"`
@@ -744,7 +848,7 @@ type SupportedVectorModelListSuccessResponse struct {
 		Message string `json:"message"`
 		// 支持的向量模型列表数据
 		// required: true
-		Data []modelSvc.SupportedVectorModel `json:"data"`
+		Data []SupportedVectorModel `json:"data"`
 		// 时间戳
 		// required: true
 		Timestamp string `json:"timestamp"`
@@ -838,12 +942,4 @@ type SettingNameSuccessResponse struct {
 		// required: true
 		Timestamp string `json:"timestamp"`
 	}
-}
-
-// ModelID 模型ID响应数据
-// swagger:model
-type ModelID struct {
-	// 模型ID
-	// required: true
-	ID int `json:"id" example:"1"`
 }

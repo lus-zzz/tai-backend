@@ -8,6 +8,7 @@ import (
 
 	"chat-backend/models"
 	"chat-backend/services"
+	"chat-backend/services/interfaces"
 	"chat-backend/utils"
 
 	modelSvc "flowy-sdk/services/model"
@@ -17,13 +18,20 @@ import (
 
 // ModelHandler 处理模型相关的HTTP请求。
 type ModelHandler struct {
-	modelService *services.ModelService
+	modelService interfaces.ModelServiceInterface
 }
 
 // NewModelHandler 创建并返回一个新的模型处理器实例。
-func NewModelHandler(modelService *services.ModelService) *ModelHandler {
+func NewModelHandler(modelService interfaces.ModelServiceInterface) *ModelHandler {
 	return &ModelHandler{
 		modelService: modelService,
+	}
+}
+
+// NewModelHandlerFromGlobal 使用全局服务创建模型处理器实例
+func NewModelHandlerFromGlobal() *ModelHandler {
+	return &ModelHandler{
+		modelService: services.GetGlobalModelService(),
 	}
 }
 

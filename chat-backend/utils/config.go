@@ -14,13 +14,39 @@ type EnvConfig struct {
 	mu      sync.RWMutex
 }
 
-// 默认配置项（移除日志相关配置）
+// 默认配置项
 var defaultConfigs = map[string]string{
+	// 基础服务配置
 	"PORT":             "9090",
+	"SERVICE_TYPE":      "flowy", // flowy 或 langchaingo
+	"SHORTCUT_API_URL": "http://10.18.13.157:26034",
+	
+	// Flowy SDK 配置
 	"FLOWY_BASE_URL":   "http://10.18.13.10:8888/api/v1",
 	"FLOWY_API_KEY":    "",
 	"FLOWY_TOKEN":      "Basic c3dvcmQ6c3dvcmRfc2VjcmV0",
-	"SHORTCUT_API_URL": "http://10.18.13.157:26034",
+	
+	// Langchaingo - OpenAI 配置
+	"LANGCHAINO_OPENAI_BASE_URL":   "https://api.openai.com/v1",
+	"LANGCHAINO_OPENAI_API_KEY":    "",
+	"LANGCHAINO_OPENAI_MODEL":      "gpt-3.5-turbo",
+	
+	// Langchaingo - Ollama 配置
+	"LANGCHAINO_OLLAMA_URL":   "http://localhost:11434",
+	"LANGCHAINO_OLLAMA_MODEL": "bge-m3:latest",
+	
+	// Langchaingo - Qdrant 配置
+	"LANGCHAINO_QDRANT_URL":       "http://localhost:6333",
+	"LANGCHAINO_QDRANT_API_KEY":    "",
+	"LANGCHAINO_QDRANT_VECTOR_SIZE": "1024",
+	
+	// Langchaingo - Docling 配置
+	"LANGCHAINO_DOCLING_URL":   "http://localhost:8001",
+	"LANGCHAINO_DOCLING_API_KEY": "",
+	
+	// Langchaingo - SQLite 配置
+	"LANGCHAINO_SQLITE_DB_PATH": "./chat_history.db",
+	"LANGCHAINO_SQLITE_PASSWORD": "",
 }
 
 var globalEnvConfig *EnvConfig
@@ -121,16 +147,64 @@ func (c *EnvConfig) ensureEnvFile() {
 		fmt.Fprintf(file, "# 环境配置文件\n")
 		fmt.Fprintf(file, "# 可以修改以下配置项，OS 环境变量会覆盖这些设置\n\n")
 
-		fmt.Fprintf(file, "# 服务器配置\n")
-		fmt.Fprintf(file, "PORT=%s\n\n", defaultConfigs["PORT"])
-
-		fmt.Fprintf(file, "# Flowy SDK 配置\n")
-		fmt.Fprintf(file, "FLOWY_BASE_URL=%s\n", defaultConfigs["FLOWY_BASE_URL"])
-		fmt.Fprintf(file, "FLOWY_API_KEY=%s\n", defaultConfigs["FLOWY_API_KEY"])
-		fmt.Fprintf(file, "FLOWY_TOKEN=%s\n\n", defaultConfigs["FLOWY_TOKEN"])
+		fmt.Fprintf(file, "# ========================================\n")
+		fmt.Fprintf(file, "# 基础服务配置\n")
+		fmt.Fprintf(file, "# ========================================\n")
+		fmt.Fprintf(file, "# 服务器端口\n")
+		fmt.Fprintf(file, "PORT=%s\n", defaultConfigs["PORT"])
+		fmt.Fprintf(file, "# 服务类型: flowy 或 langchaingo\n")
+		fmt.Fprintf(file, "SERVICE_TYPE=%s\n\n", defaultConfigs["SERVICE_TYPE"])
 
 		fmt.Fprintf(file, "# 快捷方式服务配置\n")
-		fmt.Fprintf(file, "SHORTCUT_API_URL=%s\n", defaultConfigs["SHORTCUT_API_URL"])
+		fmt.Fprintf(file, "SHORTCUT_API_URL=%s\n\n", defaultConfigs["SHORTCUT_API_URL"])
+
+		fmt.Fprintf(file, "# ========================================\n")
+		fmt.Fprintf(file, "# Flowy SDK 配置 (当 SERVICE_TYPE=flowy 时使用)\n")
+		fmt.Fprintf(file, "# ========================================\n")
+		fmt.Fprintf(file, "# Flowy API 基础 URL\n")
+		fmt.Fprintf(file, "FLOWY_BASE_URL=%s\n", defaultConfigs["FLOWY_BASE_URL"])
+		fmt.Fprintf(file, "# Flowy API 密钥\n")
+		fmt.Fprintf(file, "FLOWY_API_KEY=%s\n", defaultConfigs["FLOWY_API_KEY"])
+		fmt.Fprintf(file, "# Flowy 认证 Token\n")
+		fmt.Fprintf(file, "FLOWY_TOKEN=%s\n\n", defaultConfigs["FLOWY_TOKEN"])
+
+		fmt.Fprintf(file, "# ========================================\n")
+		fmt.Fprintf(file, "# Langchaingo 配置 (当 SERVICE_TYPE=langchaingo 时使用)\n")
+		fmt.Fprintf(file, "# ========================================\n")
+
+		fmt.Fprintf(file, "# OpenAI 配置\n")
+		fmt.Fprintf(file, "# OpenAI API 基础 URL\n")
+		fmt.Fprintf(file, "LANGCHAINO_OPENAI_BASE_URL=%s\n", defaultConfigs["LANGCHAINO_OPENAI_BASE_URL"])
+		fmt.Fprintf(file, "# OpenAI API 密钥\n")
+		fmt.Fprintf(file, "LANGCHAINO_OPENAI_API_KEY=%s\n", defaultConfigs["LANGCHAINO_OPENAI_API_KEY"])
+		fmt.Fprintf(file, "# OpenAI 模型名称\n")
+		fmt.Fprintf(file, "LANGCHAINO_OPENAI_MODEL=%s\n\n", defaultConfigs["LANGCHAINO_OPENAI_MODEL"])
+
+		fmt.Fprintf(file, "# Ollama 配置\n")
+		fmt.Fprintf(file, "# Ollama 服务 URL\n")
+		fmt.Fprintf(file, "LANGCHAINO_OLLAMA_URL=%s\n", defaultConfigs["LANGCHAINO_OLLAMA_URL"])
+		fmt.Fprintf(file, "# Ollama 向量化模型\n")
+		fmt.Fprintf(file, "LANGCHAINO_OLLAMA_MODEL=%s\n\n", defaultConfigs["LANGCHAINO_OLLAMA_MODEL"])
+
+		fmt.Fprintf(file, "# Qdrant 配置\n")
+		fmt.Fprintf(file, "# Qdrant 服务 URL\n")
+		fmt.Fprintf(file, "LANGCHAINO_QDRANT_URL=%s\n", defaultConfigs["LANGCHAINO_QDRANT_URL"])
+		fmt.Fprintf(file, "# Qdrant API 密钥\n")
+		fmt.Fprintf(file, "LANGCHAINO_QDRANT_API_KEY=%s\n", defaultConfigs["LANGCHAINO_QDRANT_API_KEY"])
+		fmt.Fprintf(file, "# 向量维度 (bge-m3 为 1024)\n")
+		fmt.Fprintf(file, "LANGCHAINO_QDRANT_VECTOR_SIZE=%s\n\n", defaultConfigs["LANGCHAINO_QDRANT_VECTOR_SIZE"])
+
+		fmt.Fprintf(file, "# Docling 配置\n")
+		fmt.Fprintf(file, "# Docling 服务 URL\n")
+		fmt.Fprintf(file, "LANGCHAINO_DOCLING_URL=%s\n", defaultConfigs["LANGCHAINO_DOCLING_URL"])
+		fmt.Fprintf(file, "# Docling API 密钥\n")
+		fmt.Fprintf(file, "LANGCHAINO_DOCLING_API_KEY=%s\n\n", defaultConfigs["LANGCHAINO_DOCLING_API_KEY"])
+
+		fmt.Fprintf(file, "# SQLite 配置\n")
+		fmt.Fprintf(file, "# SQLite 数据库路径\n")
+		fmt.Fprintf(file, "LANGCHAINO_SQLITE_DB_PATH=%s\n", defaultConfigs["LANGCHAINO_SQLITE_DB_PATH"])
+		fmt.Fprintf(file, "# SQLite 数据库密码\n")
+		fmt.Fprintf(file, "LANGCHAINO_SQLITE_PASSWORD=%s\n", defaultConfigs["LANGCHAINO_SQLITE_PASSWORD"])
 	}
 }
 

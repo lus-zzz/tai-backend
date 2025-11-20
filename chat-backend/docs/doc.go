@@ -1,4 +1,4 @@
-// Package main TAI Backend API
+// Package docs TAI Backend API
 //
 // TAI后端服务
 //
@@ -14,4 +14,4 @@
 //	- application/json
 //
 // swagger:meta
-package main
+package docs

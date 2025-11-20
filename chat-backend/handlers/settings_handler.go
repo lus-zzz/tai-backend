@@ -5,6 +5,7 @@ import (
 
 	"chat-backend/models"
 	"chat-backend/services"
+	"chat-backend/services/interfaces"
 	"chat-backend/utils"
 
 	"github.com/gin-gonic/gin"
@@ -12,13 +13,20 @@ import (
 
 // SettingsHandler 处理系统设置相关的HTTP请求。
 type SettingsHandler struct {
-	defaultSettingsService *services.DefaultSettingsService
+	defaultSettingsService interfaces.DefaultSettingsServiceInterface
 }
 
 // NewSettingsHandler 创建并返回一个新的设置处理器实例。
-func NewSettingsHandler(defaultSettingsService *services.DefaultSettingsService) *SettingsHandler {
+func NewSettingsHandler(defaultSettingsService interfaces.DefaultSettingsServiceInterface) *SettingsHandler {
 	return &SettingsHandler{
 		defaultSettingsService: defaultSettingsService,
+	}
+}
+
+// NewSettingsHandlerFromGlobal 使用全局服务创建设置处理器实例
+func NewSettingsHandlerFromGlobal() *SettingsHandler {
+	return &SettingsHandler{
+		defaultSettingsService: services.GetGlobalDefaultSettingsService(),
 	}
 }
 

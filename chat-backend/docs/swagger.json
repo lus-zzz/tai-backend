@@ -1005,76 +1005,6 @@
         }
       }
     },
-    "/shortcut/recommend": {
-      "post": {
-        "description": "根据用户输入和推荐数目，得到推荐的设置列表",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Shortcut"
-        ],
-        "summary": "快捷方式推荐",
-        "operationId": "recommendSettings",
-        "parameters": [
-          {
-            "description": "用户输入和推荐数量",
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "description": "用户输入和推荐数量",
-              "type": "object",
-              "$ref": "#/definitions/ChatInput"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "$ref": "#/responses/RecommendDataSuccessResponse"
-          },
-          "400": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/shortcut/supportedSetting": {
-      "post": {
-        "description": "获取当前支持的设置列表",
-        "produces": [
-          "application/json"
-        ],
-        "tags": [
-          "Shortcut"
-        ],
-        "summary": "获取支持的设置列表",
-        "operationId": "getSupportedSettings",
-        "responses": {
-          "200": {
-            "$ref": "#/responses/SettingNameSuccessResponse"
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
     "/version": {
       "get": {
         "description": "返回应用程序的详细版本信息，包括版本号、构建时间和Git信息",
@@ -1135,43 +1065,6 @@
         }
       },
       "x-go-package": "chat-backend/models"
-    },
-    "AsyncChatRequest": {
-      "description": "AsyncChatRequest 异步对话请求",
-      "type": "object",
-      "required": [
-        "sessionId",
-        "content",
-        "requestId",
-        "files"
-      ],
-      "properties": {
-        "content": {
-          "description": "消息内容",
-          "type": "string",
-          "x-go-name": "Content"
-        },
-        "files": {
-          "description": "文件列表",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Files"
-        },
-        "requestId": {
-          "description": "请求ID (UUID)",
-          "type": "string",
-          "x-go-name": "RequestID"
-        },
-        "sessionId": {
-          "description": "会话ID",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "SessionID"
-        }
-      },
-      "x-go-package": "flowy-sdk/services/agent"
     },
     "BatchUploadFilesRequest": {
       "description": "BatchUploadFilesRequest 批量上传文件请求",
@@ -1319,13 +1212,12 @@
       "x-go-package": "chat-backend/models"
     },
     "ChatRequest": {
-      "description": "ChatRequest 聊天请求 - 直接使用 SDK 的 AsyncChatRequest",
+      "description": "ChatRequest 聊天请求",
       "type": "object",
       "required": [
         "sessionId",
         "content",
-        "requestId",
-        "files"
+        "model_id"
       ],
       "properties": {
         "content": {
@@ -1334,23 +1226,68 @@
           "x-go-name": "Content"
         },
         "files": {
-          "description": "文件列表",
+          "description": "文件列表（可选）",
           "type": "array",
           "items": {
             "type": "string"
           },
           "x-go-name": "Files"
         },
-        "requestId": {
-          "description": "请求ID (UUID)",
-          "type": "string",
-          "x-go-name": "RequestID"
+        "frequency_penalty": {
+          "description": "频率惩罚",
+          "type": "number",
+          "format": "double",
+          "x-go-name": "FrequencyPenalty"
+        },
+        "knowledge_base_ids": {
+          "description": "知识库ID列表",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "x-go-name": "KnowledgeBaseIDs"
+        },
+        "max_tokens": {
+          "description": "最大token数",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxTokens"
+        },
+        "model_id": {
+          "description": "模型ID",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ModelID"
+        },
+        "presence_penalty": {
+          "description": "存在惩罚",
+          "type": "number",
+          "format": "double",
+          "x-go-name": "PresencePenalty"
         },
         "sessionId": {
           "description": "会话ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "SessionID"
+        },
+        "stream": {
+          "description": "是否流式输出",
+          "type": "boolean",
+          "x-go-name": "Stream"
+        },
+        "temperature": {
+          "description": "温度参数",
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Temperature"
+        },
+        "top_p": {
+          "description": "顶部P参数",
+          "type": "number",
+          "format": "double",
+          "x-go-name": "TopP"
         }
       },
       "x-go-package": "chat-backend/models"
@@ -1527,7 +1464,7 @@
           "description": "消息列表",
           "type": "array",
           "items": {
-            "$ref": "#/definitions/SessionRecord"
+            "$ref": "#/definitions/MessageRecord"
           },
           "x-go-name": "Messages"
         },
@@ -1686,25 +1623,6 @@
         }
       },
       "x-go-package": "chat-backend/models"
-    },
-    "CredentialSchemaItem": {
-      "description": "CredentialSchemaItem 模型凭证配置项",
-      "type": "object",
-      "properties": {
-        "desc": {
-          "type": "string",
-          "x-go-name": "Desc"
-        },
-        "name": {
-          "type": "string",
-          "x-go-name": "Name"
-        },
-        "value": {
-          "type": "string",
-          "x-go-name": "Value"
-        }
-      },
-      "x-go-package": "flowy-sdk/services/model"
     },
     "DefaultConversationConfig": {
       "description": "DefaultConversationConfig 默认对话配置",
@@ -1945,32 +1863,6 @@
       },
       "x-go-package": "chat-backend/models"
     },
-    "EmbeddingProperty": {
-      "description": "EmbeddingProperty 向量模型属性",
-      "type": "object",
-      "properties": {
-        "batchLimit": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "BatchLimit"
-        },
-        "embeddingDimension": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "EmbeddingDimension"
-        },
-        "embeddingMaxLength": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "EmbeddingMaxLength"
-        },
-        "model": {
-          "type": "string",
-          "x-go-name": "Model"
-        }
-      },
-      "x-go-package": "flowy-sdk/services/model"
-    },
     "ErrorCode": {
       "description": "ErrorCode 错误代码类型",
       "type": "string",
@@ -2013,21 +1905,6 @@
         }
       },
       "x-go-package": "chat-backend/utils"
-    },
-    "ExtraInfo": {
-      "description": "ExtraInfo 额外信息",
-      "type": "object",
-      "properties": {
-        "chartData": {
-          "x-go-name": "ChartData"
-        },
-        "tools": {
-          "type": "array",
-          "items": {},
-          "x-go-name": "Tools"
-        }
-      },
-      "x-go-package": "flowy-sdk/services/agent"
     },
     "FileToggleEnableRequest": {
       "description": "FileToggleEnableRequest 文件启用/禁用请求",
@@ -2312,44 +2189,6 @@
       },
       "x-go-package": "chat-backend/models"
     },
-    "LLMProperty": {
-      "description": "LLMProperty 聊天模型属性",
-      "type": "object",
-      "properties": {
-        "contextLength": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "ContextLength"
-        },
-        "fixQwqThink": {
-          "type": "boolean",
-          "x-go-name": "FixQwqThink"
-        },
-        "maxToken": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "MaxToken"
-        },
-        "model": {
-          "type": "string",
-          "x-go-name": "Model"
-        },
-        "stream": {
-          "type": "boolean",
-          "x-go-name": "Stream"
-        },
-        "supportTool": {
-          "type": "boolean",
-          "x-go-name": "SupportTool"
-        },
-        "tokenProportion": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "TokenProportion"
-        }
-      },
-      "x-go-package": "flowy-sdk/services/model"
-    },
     "MessageRecord": {
       "description": "MessageRecord 对话消息记录",
       "type": "object",
@@ -2404,46 +2243,42 @@
     "ModelInfo": {
       "description": "ModelInfo 模型信息",
       "type": "object",
+      "required": [
+        "id",
+        "name",
+        "type",
+        "description",
+        "enabled"
+      ],
       "properties": {
-        "credentials": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CredentialSchemaItem"
-          },
-          "x-go-name": "Credentials"
-        },
-        "enable": {
-          "type": "boolean",
-          "x-go-name": "Enable"
-        },
-        "endpoint": {
+        "description": {
+          "description": "模型描述",
           "type": "string",
-          "x-go-name": "Endpoint"
+          "x-go-name": "Description"
+        },
+        "enabled": {
+          "description": "是否启用",
+          "type": "boolean",
+          "x-go-name": "Enabled"
         },
         "id": {
+          "description": "模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ID"
         },
         "name": {
+          "description": "模型名称",
           "type": "string",
           "x-go-name": "Name"
         },
-        "role": {
-          "type": "string",
-          "x-go-name": "Role"
-        },
-        "symbol": {
-          "type": "string",
-          "x-go-name": "Symbol"
-        },
         "type": {
-          "type": "integer",
-          "format": "int64",
+          "description": "模型类型",
+          "type": "string",
           "x-go-name": "Type"
         }
       },
-      "x-go-package": "flowy-sdk/services/model"
+      "x-go-package": "chat-backend/models"
     },
     "ModelSaveRequest": {
       "description": "ModelSaveRequest 添加/修改模型请求\nAPI: POST /model/save",
@@ -2512,48 +2347,6 @@
         }
       },
       "x-go-package": "chat-backend/models"
-    },
-    "MultiContentItem": {
-      "description": "MultiContentItem 多内容项",
-      "type": "object",
-      "properties": {
-        "text": {
-          "type": "string",
-          "x-go-name": "Text"
-        },
-        "type": {
-          "type": "string",
-          "x-go-name": "Type"
-        }
-      },
-      "x-go-package": "flowy-sdk/services/agent"
-    },
-    "PluginsInfo": {
-      "description": "PluginsInfo 插件信息",
-      "type": "object",
-      "properties": {
-        "file_analysis": {
-          "type": "array",
-          "items": {},
-          "x-go-name": "FileAnalysis"
-        },
-        "knowledge": {
-          "type": "array",
-          "items": {},
-          "x-go-name": "Knowledge"
-        },
-        "nl2sql": {
-          "type": "array",
-          "items": {},
-          "x-go-name": "NL2SQL"
-        },
-        "onlineSearch": {
-          "type": "array",
-          "items": {},
-          "x-go-name": "OnlineSearch"
-        }
-      },
-      "x-go-package": "flowy-sdk/services/agent"
     },
     "RecommendData": {
       "description": "RecommendData 推荐数据响应",
@@ -2631,108 +2424,35 @@
       "x-go-package": "chat-backend/models"
     },
     "SSEChatEvent": {
-      "description": "SSEChatEvent SSE聊天事件 - 直接使用 SDK 的 StreamEvent",
+      "description": "SSEChatEvent SSE聊天事件",
       "type": "object",
-      "x-go-package": "chat-backend/models"
-    },
-    "SessionRecord": {
-      "description": "SessionRecord 对话记录",
-      "type": "object",
+      "required": [
+        "type",
+        "data",
+        "id"
+      ],
       "properties": {
-        "agentId": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "AgentID"
-        },
-        "content": {
-          "type": "string",
-          "x-go-name": "Content"
+        "data": {
+          "description": "事件数据",
+          "x-go-name": "Data"
         },
         "error": {
-          "type": "boolean",
+          "description": "错误信息",
+          "type": "string",
           "x-go-name": "Error"
         },
-        "errorMessage": {
-          "type": "string",
-          "x-go-name": "ErrorMessage"
-        },
-        "extra": {
-          "$ref": "#/definitions/ExtraInfo"
-        },
-        "finishReason": {
-          "type": "string",
-          "x-go-name": "FinishReason"
-        },
         "id": {
-          "type": "integer",
-          "format": "int64",
+          "description": "消息ID",
+          "type": "string",
           "x-go-name": "ID"
         },
-        "index": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Index"
-        },
-        "message": {
+        "type": {
+          "description": "事件类型",
           "type": "string",
-          "x-go-name": "Message"
-        },
-        "multi_content": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/MultiContentItem"
-          },
-          "x-go-name": "MultiContent"
-        },
-        "pending": {
-          "type": "boolean",
-          "x-go-name": "Pending"
-        },
-        "plugins": {
-          "$ref": "#/definitions/PluginsInfo"
-        },
-        "question": {
-          "type": "string",
-          "x-go-name": "Question"
-        },
-        "requestId": {
-          "type": "string",
-          "x-go-name": "RequestID"
-        },
-        "role": {
-          "type": "string",
-          "x-go-name": "Role"
-        },
-        "sender": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Sender"
-        },
-        "sessionId": {
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "SessionID"
-        },
-        "suggestedQuestions": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "SuggestedQuestions"
-        },
-        "tools": {
-          "x-go-name": "Tools"
-        },
-        "usage": {
-          "$ref": "#/definitions/UsageInfo"
-        },
-        "userData": {
-          "type": "object",
-          "additionalProperties": {},
-          "x-go-name": "UserData"
+          "x-go-name": "Type"
         }
       },
-      "x-go-package": "flowy-sdk/services/agent"
+      "x-go-package": "chat-backend/models"
     },
     "SettingName": {
       "description": "SettingName 支持的设置名响应",
@@ -2922,56 +2642,65 @@
     "SupportedChatModel": {
       "description": "SupportedChatModel 支持的聊天模型",
       "type": "object",
+      "required": [
+        "id",
+        "name",
+        "description"
+      ],
       "properties": {
-        "OncurrencyLimit": {
-          "type": "integer",
-          "format": "int64"
-        },
-        "credentialSchema": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CredentialSchemaItem"
-          },
-          "x-go-name": "CredentialSchema"
-        },
-        "identify": {
+        "description": {
+          "description": "模型描述",
           "type": "string",
-          "x-go-name": "Identify"
+          "x-go-name": "Description"
         },
-        "llmProperty": {
-          "$ref": "#/definitions/LLMProperty"
+        "id": {
+          "description": "模型ID",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
         },
         "name": {
+          "description": "模型名称",
           "type": "string",
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "flowy-sdk/services/model"
+      "x-go-package": "chat-backend/models"
     },
     "SupportedVectorModel": {
       "description": "SupportedVectorModel 支持的向量模型",
       "type": "object",
+      "required": [
+        "id",
+        "name",
+        "description",
+        "dimensions"
+      ],
       "properties": {
-        "credentialSchema": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/CredentialSchemaItem"
-          },
-          "x-go-name": "CredentialSchema"
-        },
-        "identify": {
+        "description": {
+          "description": "模型描述",
           "type": "string",
-          "x-go-name": "Identify"
+          "x-go-name": "Description"
         },
-        "llmProperty": {
-          "$ref": "#/definitions/EmbeddingProperty"
+        "dimensions": {
+          "description": "向量维度",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Dimensions"
+        },
+        "id": {
+          "description": "模型ID",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID"
         },
         "name": {
+          "description": "模型名称",
           "type": "string",
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "flowy-sdk/services/model"
+      "x-go-package": "chat-backend/models"
     },
     "UpdateKnowledgeBaseRequest": {
       "description": "UpdateKnowledgeBaseRequest 更新知识库请求",

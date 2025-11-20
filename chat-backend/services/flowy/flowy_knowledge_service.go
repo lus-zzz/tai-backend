@@ -1,4 +1,4 @@
-package services
+package flowy
 
 import (
 	"bytes"
@@ -11,25 +11,26 @@ import (
 	"time"
 
 	"chat-backend/models"
+	"chat-backend/services/interfaces"
 	"chat-backend/utils"
 	"flowy-sdk"
 	knowledgeSvc "flowy-sdk/services/knowledge"
 )
 
-// KnowledgeService 知识库服务
-type KnowledgeService struct {
+// FlowyKnowledgeService 基于 flowy-sdk 的知识库服务实现
+type FlowyKnowledgeService struct {
 	sdk *flowy.SDK
 }
 
-// NewKnowledgeService 创建知识库服务
-func NewKnowledgeService(sdk *flowy.SDK) *KnowledgeService {
-	return &KnowledgeService{
+// NewFlowyKnowledgeService 创建 Flowy 知识库服务
+func NewFlowyKnowledgeService(sdk *flowy.SDK) interfaces.KnowledgeServiceInterface {
+	return &FlowyKnowledgeService{
 		sdk: sdk,
 	}
 }
 
 // ListKnowledgeBases 获取知识库列表
-func (s *KnowledgeService) ListKnowledgeBases(ctx context.Context) ([]models.KnowledgeBase, error) {
+func (s *FlowyKnowledgeService) ListKnowledgeBases(ctx context.Context) ([]models.KnowledgeBase, error) {
 	utils.InfoWith("获取知识库列表")
 
 	// 调用Flowy SDK获取知识库列表
@@ -62,7 +63,7 @@ func (s *KnowledgeService) ListKnowledgeBases(ctx context.Context) ([]models.Kno
 }
 
 // CreateKnowledgeBase 创建知识库
-func (s *KnowledgeService) CreateKnowledgeBase(ctx context.Context, req *models.KnowledgeBaseCreateRequest) (*models.KnowledgeBase, error) {
+func (s *FlowyKnowledgeService) CreateKnowledgeBase(ctx context.Context, req *models.KnowledgeBaseCreateRequest) (*models.KnowledgeBase, error) {
 	utils.InfoWith("创建知识库",
 		"name", req.Name,
 		"description", req.Desc,
@@ -124,7 +125,7 @@ func (s *KnowledgeService) CreateKnowledgeBase(ctx context.Context, req *models.
 }
 
 // UpdateKnowledgeBase 更新知识库
-func (s *KnowledgeService) UpdateKnowledgeBase(ctx context.Context, id string, req *models.UpdateKnowledgeBaseRequest) (*models.KnowledgeBase, error) {
+func (s *FlowyKnowledgeService) UpdateKnowledgeBase(ctx context.Context, id string, req *models.UpdateKnowledgeBaseRequest) (*models.KnowledgeBase, error) {
 	utils.InfoWith("更新知识库",
 		"id", id,
 		"name", req.Name,
@@ -163,7 +164,7 @@ func (s *KnowledgeService) UpdateKnowledgeBase(ctx context.Context, id string, r
 }
 
 // DeleteKnowledgeBase 删除知识库
-func (s *KnowledgeService) DeleteKnowledgeBase(ctx context.Context, id string) error {
+func (s *FlowyKnowledgeService) DeleteKnowledgeBase(ctx context.Context, id string) error {
 	utils.LogInfo("删除知识库: %s", id)
 
 	// 转换ID
@@ -184,7 +185,7 @@ func (s *KnowledgeService) DeleteKnowledgeBase(ctx context.Context, id string) e
 }
 
 // GetKnowledgeBaseFiles 获取知识库文件列表
-func (s *KnowledgeService) GetKnowledgeBaseFiles(ctx context.Context, id string) ([]models.KnowledgeFile, error) {
+func (s *FlowyKnowledgeService) GetKnowledgeBaseFiles(ctx context.Context, id string) ([]models.KnowledgeFile, error) {
 	utils.LogInfo("获取知识库文件列表: %s", id)
 
 	// 转换ID
@@ -221,7 +222,7 @@ func (s *KnowledgeService) GetKnowledgeBaseFiles(ctx context.Context, id string)
 }
 
 // UploadFile 上传文件到知识库（文件流上传）
-func (s *KnowledgeService) UploadFile(ctx context.Context, id string, filename string, content []byte) (*models.KnowledgeFile, error) {
+func (s *FlowyKnowledgeService) UploadFile(ctx context.Context, id string, filename string, content []byte) (*models.KnowledgeFile, error) {
 	utils.LogInfo("上传文件到知识库: %s, 文件: %s", id, filename)
 
 	// 转换ID
@@ -256,7 +257,7 @@ func (s *KnowledgeService) UploadFile(ctx context.Context, id string, filename s
 }
 
 // UploadFileFromPath 从文件路径上传文件到知识库
-func (s *KnowledgeService) UploadFileFromPath(ctx context.Context, id string, filePath string) (*models.KnowledgeFile, error) {
+func (s *FlowyKnowledgeService) UploadFileFromPath(ctx context.Context, id string, filePath string) (*models.KnowledgeFile, error) {
 	// 验证文件路径
 	if filePath == "" {
 		return nil, fmt.Errorf("文件路径不能为空")
@@ -326,7 +327,7 @@ func (s *KnowledgeService) UploadFileFromPath(ctx context.Context, id string, fi
 }
 
 // BatchUploadFilesFromPath 批量从文件路径上传文件到知识库
-func (s *KnowledgeService) BatchUploadFilesFromPath(ctx context.Context, id string, filePaths []string) (*models.BatchUploadResponse, error) {
+func (s *FlowyKnowledgeService) BatchUploadFilesFromPath(ctx context.Context, id string, filePaths []string) (*models.BatchUploadResponse, error) {
 	if len(filePaths) == 0 {
 		return nil, fmt.Errorf("文件路径列表不能为空")
 	}
@@ -376,7 +377,7 @@ func (s *KnowledgeService) BatchUploadFilesFromPath(ctx context.Context, id stri
 }
 
 // DeleteFile 删除知识库文件
-func (s *KnowledgeService) DeleteFile(ctx context.Context, fileID int) error {
+func (s *FlowyKnowledgeService) DeleteFile(ctx context.Context, fileID int) error {
 	utils.InfoWith("删除知识库文件", "file_id", fileID)
 
 	if fileID == 0 {
@@ -396,7 +397,7 @@ func (s *KnowledgeService) DeleteFile(ctx context.Context, fileID int) error {
 }
 
 // ToggleFileEnable 切换文件启用状态
-func (s *KnowledgeService) ToggleFileEnable(ctx context.Context, fileID int, enable bool) error {
+func (s *FlowyKnowledgeService) ToggleFileEnable(ctx context.Context, fileID int, enable bool) error {
 	utils.InfoWith("切换文件启用状态", "file_id", fileID, "enable", enable)
 
 	if fileID == 0 {
@@ -438,7 +439,7 @@ func parseTime(timeStr string) time.Time {
 }
 
 // getModelNameByID 根据模型ID获取模型名称
-func (s *KnowledgeService) getModelNameByID(ctx context.Context, modelID int) (string, error) {
+func (s *FlowyKnowledgeService) getModelNameByID(ctx context.Context, modelID int) (string, error) {
 	if modelID <= 0 {
 		return "", fmt.Errorf("无效的模型ID: %d", modelID)
 	}

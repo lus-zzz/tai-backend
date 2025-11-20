@@ -12,9 +12,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-
-	"flowy-sdk"
-	"flowy-sdk/pkg/config"
 )
 
 // 嵌入静态文件
@@ -38,56 +35,42 @@ var (
 
 // Server HTTP服务器结构
 type Server struct {
-	router           *routes.Router
-	chatService      *services.ChatService
-	knowledgeService *services.KnowledgeService
-	modelService     *services.ModelService
+	router *routes.Router
 }
 
 // NewServer 创建新的服务器实例
 func NewServer() *Server {
-	// 初始化环境配置
+	// 获取服务类型配置
 	envConfig := utils.GetGlobalEnvConfig()
-
-	// 配置Flowy SDK
-	flowyConfig := &config.Config{
-		BaseURL: envConfig.Get("FLOWY_BASE_URL"),
-		APIKey:  envConfig.Get("FLOWY_API_KEY"),
-		Token:   envConfig.Get("FLOWY_TOKEN"),
-		Timeout: 30,
+	serviceTypeStr := envConfig.Get("SERVICE_TYPE")
+	var serviceType services.ServiceType
+	
+	switch serviceTypeStr {
+	case "langchaingo":
+		serviceType = services.ServiceTypeLangchaingo
+	default:
+		serviceType = services.ServiceTypeFlowy
 	}
 
-	// 创建Flowy SDK实例
-	sdk := flowy.New(flowyConfig)
-
-	// 创建默认配置服务(不使用嵌入文件)
-	defaultSettingsService := services.NewDefaultSettingsService()
-
-	// 创建服务层
-	chatService := services.NewChatService(sdk, defaultSettingsService)
-	knowledgeService := services.NewKnowledgeService(sdk)
-	modelService := services.NewModelService(sdk)
-
-	// 创建快捷方式服务 - 这里需要配置实际的API地址
-	shortcutAPIURL := envConfig.Get("SHORTCUT_API_URL")
-	shortcutService := services.NewShortcutService(shortcutAPIURL)
+	// 初始化全局服务
+	if err := services.InitGlobalServices(serviceType); err != nil {
+		utils.LogError("初始化全局服务失败: %v", err)
+		slog.Error("初始化全局服务失败", "error", err)
+		os.Exit(1)
+	}
 
 	// 创建处理器层
-	chatHandler := handlers.NewChatHandler(chatService, defaultSettingsService)
-	settingsHandler := handlers.NewSettingsHandler(defaultSettingsService)
-	knowledgeHandler := handlers.NewKnowledgeHandler(knowledgeService)
-	modelHandler := handlers.NewModelHandler(modelService)
+	chatHandler := handlers.NewChatHandlerFromGlobal()
+	settingsHandler := handlers.NewSettingsHandlerFromGlobal()
+	knowledgeHandler := handlers.NewKnowledgeHandlerFromGlobal()
+	modelHandler := handlers.NewModelHandlerFromGlobal()
 	versionHandler := handlers.NewVersionHandler(Version, BuildTime, GitCommit, GitBranch, GitTag)
-	shortcutHandler := handlers.NewShortcutHandler(shortcutService)
 
 	// 创建路由，传入嵌入的文件系统
-	router := routes.NewRouter(chatHandler, settingsHandler, knowledgeHandler, modelHandler, versionHandler, shortcutHandler, staticFiles, docsFiles)
+	router := routes.NewRouter(chatHandler, settingsHandler, knowledgeHandler, modelHandler, versionHandler, staticFiles, docsFiles)
 
 	return &Server{
-		router:           router,
-		chatService:      chatService,
-		knowledgeService: knowledgeService,
-		modelService:     modelService,
+		router: router,
 	}
 }
 
@@ -156,10 +139,11 @@ func printVersion() {
 func printBanner() {
 	envConfig := utils.GetGlobalEnvConfig()
 	port := envConfig.Get("PORT")
+	serviceType := envConfig.Get("SERVICE_TYPE")
 
 	// 所有信息只写入日志
 	utils.LogInfo("========================================")
-	utils.LogInfo("Flowy 聊天后端服务启动")
+	utils.LogInfo("聊天后端服务启动")
 	utils.LogInfo("版本: %s", Version)
 	utils.LogInfo("构建时间: %s", BuildTime)
 	utils.LogInfo("Git Commit: %s", GitCommit)
@@ -168,7 +152,27 @@ func printBanner() {
 		utils.LogInfo("Git Tag: %s", GitTag)
 	}
 	utils.LogInfo("工作目录: %s", getCurrentDir())
-	utils.LogInfo("Flowy API: %s", envConfig.Get("FLOWY_BASE_URL"))
+	
+	// 显示服务类型和相关配置
+	utils.LogInfo("服务类型: %s", serviceType)
+	
+	if serviceType == "langchaingo" {
+		utils.LogInfo("OpenAI URL: %s", envConfig.Get("LANGCHAINO_OPENAI_BASE_URL"))
+		utils.LogInfo("OpenAI Model: %s", envConfig.Get("LANGCHAINO_OPENAI_MODEL"))
+		utils.LogInfo("Ollama URL: %s", envConfig.Get("LANGCHAINO_OLLAMA_URL"))
+		utils.LogInfo("Ollama Model: %s", envConfig.Get("LANGCHAINO_OLLAMA_MODEL"))
+		utils.LogInfo("Qdrant URL: %s", envConfig.Get("LANGCHAINO_QDRANT_URL"))
+		utils.LogInfo("Docling URL: %s", envConfig.Get("LANGCHAINO_DOCLING_URL"))
+		utils.LogInfo("SQLite DB: %s", envConfig.Get("LANGCHAINO_SQLITE_DB_PATH"))
+		if password := envConfig.Get("LANGCHAINO_SQLITE_PASSWORD"); password != "" {
+			utils.LogInfo("SQLite Password: [已设置]")
+		} else {
+			utils.LogInfo("SQLite Password: [未设置]")
+		}
+	} else {
+		utils.LogInfo("Flowy API: %s", envConfig.Get("FLOWY_BASE_URL"))
+	}
+	
 	utils.LogInfo("快捷方式 API: %s", envConfig.Get("SHORTCUT_API_URL"))
 	utils.LogInfo("服务端口: %s", port)
 	utils.LogInfo("API 文档: http://localhost:%s/swagger/index.html", port)

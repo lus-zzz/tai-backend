@@ -10,6 +10,7 @@ import (
 
 	"chat-backend/models"
 	"chat-backend/services"
+	"chat-backend/services/interfaces"
 	"chat-backend/utils"
 
 	"github.com/gin-gonic/gin"
@@ -17,15 +18,23 @@ import (
 
 // ChatHandler 处理聊天相关的HTTP请求。
 type ChatHandler struct {
-	chatService            *services.ChatService
-	defaultSettingsService *services.DefaultSettingsService
+	chatService            interfaces.ChatServiceInterface
+	defaultSettingsService interfaces.DefaultSettingsServiceInterface
 }
 
 // NewChatHandler 创建并返回一个新的聊天处理器实例。
-func NewChatHandler(chatService *services.ChatService, defaultSettingsService *services.DefaultSettingsService) *ChatHandler {
+func NewChatHandler(chatService interfaces.ChatServiceInterface, defaultSettingsService interfaces.DefaultSettingsServiceInterface) *ChatHandler {
 	return &ChatHandler{
 		chatService:            chatService,
 		defaultSettingsService: defaultSettingsService,
+	}
+}
+
+// NewChatHandlerFromGlobal 使用全局服务创建聊天处理器实例
+func NewChatHandlerFromGlobal() *ChatHandler {
+	return &ChatHandler{
+		chatService:            services.GetGlobalChatService(),
+		defaultSettingsService: services.GetGlobalDefaultSettingsService(),
 	}
 }
 
@@ -266,25 +275,24 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 				continue
 			}
 
-			// 使用SDK中的事件类型，如果没有则根据状态推断
-			eventType := event.EventType
-			if eventType == "" {
-				// 兼容逻辑：如果SDK没有提供事件类型，则根据状态推断
-				eventType = "resp_increment" // 默认为增量响应
-				if event.Pending {
-					eventType = "resp_splash" // 等待状态
-				}
-				if event.FinishReason != "" {
-					eventType = "resp_finish" // 完成状态
-				}
+			// 使用事件类型
+			eventType := event.Type
+			// 根据事件内容推断类型（兼容逻辑）
+			if eventType == "resp_finish" || (eventType == "" && event.Error != "") {
+				eventType = "resp_finish"
+			} else if eventType == "resp_splash" {
+				// 保持为 splash 事件
+			} else {
+				// 默认为增量响应
+				eventType = "resp_increment"
 			}
 
 			// 按照SSE格式输出: event字段 + data字段
 			fmt.Fprintf(c.Writer, "event:%s\ndata: %s\n\n", eventType, eventData)
 			flusher.Flush()
 
-			// 根据 FinishReason 或 Error 判断是否结束
-			if event.FinishReason != "" || event.Error {
+			// 根据事件类型或错误状态判断是否结束
+			if eventType == "resp_finish" || event.Error != "" {
 				return
 			}
 
