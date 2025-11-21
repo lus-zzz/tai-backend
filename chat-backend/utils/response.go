@@ -4,23 +4,6 @@ import (
 	"time"
 )
 
-// SuccessResponse 统一成功响应结构
-// swagger:model
-type SuccessResponse struct {
-	// 请求是否成功
-	// required: true
-	Success bool `json:"success"`
-	// 响应消息
-	// required: true
-	Message string `json:"message"`
-	// 响应数据
-	// required: true
-	Data interface{} `json:"data"`
-	// 时间戳
-	// required: true
-	Timestamp time.Time `json:"timestamp"`
-}
-
 // ResponseBody 统一响应体结构
 // swagger:model
 type ResponseBody struct {

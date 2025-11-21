@@ -45,18 +45,18 @@ func NewModelHandlerFromGlobal() *ModelHandler {
 //
 // Responses:
 //
-//	200: SupportedChatModelListSuccessResponse
-//	500: ErrorResponse
+//	200: SupportedChatModels
+//	400: ResponseBody
 func (h *ModelHandler) ListSupportedChatModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	models, err := h.modelService.ListSupportedChatModels(ctx)
+	supportedModels, err := h.modelService.ListSupportedChatModels(ctx)
 	if err != nil {
 		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	return models, nil
+	return models.SupportedChatModels{Models: supportedModels}, nil
 }
 
 // ListSupportedVectorModels 返回支持的向量模型列表。
@@ -72,18 +72,18 @@ func (h *ModelHandler) ListSupportedChatModels(c *gin.Context) (interface{}, err
 //
 // Responses:
 //
-//	200: SupportedVectorModelListSuccessResponse
-//	500: ErrorResponse
+//	200: SupportedVectorModels
+//	400: ResponseBody
 func (h *ModelHandler) ListSupportedVectorModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	models, err := h.modelService.ListSupportedVectorModels(ctx)
+	supportedModels, err := h.modelService.ListSupportedVectorModels(ctx)
 	if err != nil {
 		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	return models, nil
+	return models.SupportedVectorModels{Models: supportedModels}, nil
 }
 
 // ListAvailableAllModels 返回所有可用模型的列表。
@@ -99,18 +99,18 @@ func (h *ModelHandler) ListSupportedVectorModels(c *gin.Context) (interface{}, e
 //
 // Responses:
 //
-//	200: ModelListSuccessResponse
-//	500: ErrorResponse
+//	200: ModelInfos
+//	400: ResponseBody
 func (h *ModelHandler) ListAvailableAllModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	models, err := h.modelService.ListAvailableAllModels(ctx)
+	allModels, err := h.modelService.ListAvailableAllModels(ctx)
 	if err != nil {
 		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	return models, nil
+	return models.ModelInfos{Models: allModels}, nil
 }
 
 // ListAvailableChatModels 返回可用的聊天模型列表。
@@ -126,8 +126,8 @@ func (h *ModelHandler) ListAvailableAllModels(c *gin.Context) (interface{}, erro
 //
 // Responses:
 //
-//	200: ModelListSuccessResponse
-//	500: ErrorResponse
+//	200: []models.ModelInfo
+//	400: ResponseBody
 func (h *ModelHandler) ListAvailableChatModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
@@ -153,8 +153,8 @@ func (h *ModelHandler) ListAvailableChatModels(c *gin.Context) (interface{}, err
 //
 // Responses:
 //
-//	200: ModelListSuccessResponse
-//	500: ErrorResponse
+//	200: []models.ModelInfo
+//	400: ResponseBody
 func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
@@ -190,9 +190,8 @@ func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) (interface{}, e
 //
 // Responses:
 //
-//	200: ModelSaveSuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: ModelID
+//	400: ResponseBody
 func (h *ModelHandler) SaveModel(c *gin.Context) (interface{}, error) {
 	var req models.ModelSaveRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -230,9 +229,8 @@ func (h *ModelHandler) SaveModel(c *gin.Context) (interface{}, error) {
 //
 // Responses:
 //
-//	200: EmptySuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: MessageOnlyResponse
+//	400: ResponseBody
 func (h *ModelHandler) DeleteModel(c *gin.Context) (interface{}, error) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -281,9 +279,8 @@ func (h *ModelHandler) DeleteModel(c *gin.Context) (interface{}, error) {
 //
 // Responses:
 //
-//	200: EmptySuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: MessageOnlyResponse
+//	400: ResponseBody
 func (h *ModelHandler) SetModelStatus(c *gin.Context) (interface{}, error) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)

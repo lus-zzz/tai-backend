@@ -59,9 +59,8 @@ func NewChatHandlerFromGlobal() *ChatHandler {
 //
 // Responses:
 //
-//	200: ConversationSuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: Conversation
+//	400: ResponseBody
 func (h *ChatHandler) CreateConversation(c *gin.Context) (interface{}, error) {
 	var settings models.ConversationSettings
 	// 使用 BindJSON 避免 validate 标签验证
@@ -106,8 +105,8 @@ func (h *ChatHandler) CreateConversation(c *gin.Context) (interface{}, error) {
 //
 // responses:
 //
-//	200: ConversationListSuccessResponse
-//	500: ErrorResponse
+//	200: ConversationListResponse
+//	400: ResponseBody
 func (h *ChatHandler) GetConversations(c *gin.Context) (interface{}, error) {
 	page := 1
 	pageSize := 20
@@ -151,13 +150,12 @@ func (h *ChatHandler) GetConversations(c *gin.Context) (interface{}, error) {
 //     in: path
 //     description: 对话ID
 //     required: true
-//     type: string
+//     type: integer
 //
 // Responses:
 //
-//	200: EmptySuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: MessageOnlyResponse
+//	400: ResponseBody
 func (h *ChatHandler) DeleteConversation(c *gin.Context) (interface{}, error) {
 	conversationIDStr := c.Param("id")
 	if conversationIDStr == "" {
@@ -207,8 +205,7 @@ func (h *ChatHandler) DeleteConversation(c *gin.Context) (interface{}, error) {
 //
 //	200:
 //	  description: SSE流式数据
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	400: ResponseBody
 func (h *ChatHandler) SendMessage(c *gin.Context) {
 	var req models.ChatRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -314,13 +311,12 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 //     in: path
 //     description: 对话ID
 //     required: true
-//     type: string
+//     type: integer
 //
 // Responses:
 //
-//	200: ConversationSettingsSuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: ConversationSettings
+//	400: ResponseBody
 func (h *ChatHandler) GetConversationSettings(c *gin.Context) (interface{}, error) {
 	conversationIDStr := c.Param("id")
 	if conversationIDStr == "" {
@@ -362,7 +358,7 @@ func (h *ChatHandler) GetConversationSettings(c *gin.Context) (interface{}, erro
 //     in: path
 //     description: 对话ID
 //     required: true
-//     type: string
+//     type: integer
 //   - +name: body
 //     in: body
 //     description: 对话设置
@@ -371,9 +367,8 @@ func (h *ChatHandler) GetConversationSettings(c *gin.Context) (interface{}, erro
 //
 // Responses:
 //
-//	200: ConversationSettingsSuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: MessageOnlyResponse
+//	400: ResponseBody
 func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) (interface{}, error) {
 	conversationIDStr := c.Param("id")
 	if conversationIDStr == "" {
@@ -401,7 +396,6 @@ func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) (interface{}, e
 
 	return gin.H{
 		"message": "对话设置更新成功",
-		"data":    settings,
 	}, nil
 }
 
@@ -421,13 +415,12 @@ func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) (interface{}, e
 //     in: path
 //     description: 对话ID
 //     required: true
-//     type: string
+//     type: integer
 //
 // Responses:
 //
-//	200: ConversationHistorySuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: ConversationHistoryResponse
+//	400: ResponseBody
 func (h *ChatHandler) GetConversationHistory(c *gin.Context) (interface{}, error) {
 	conversationIDStr := c.Param("id")
 	if conversationIDStr == "" {
@@ -447,8 +440,5 @@ func (h *ChatHandler) GetConversationHistory(c *gin.Context) (interface{}, error
 		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	return gin.H{
-		"message": "获取对话历史成功",
-		"data":    history,
-	}, nil
+	return history, nil
 }

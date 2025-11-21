@@ -41,7 +41,7 @@ func NewSettingsHandlerFromGlobal() *SettingsHandler {
 //
 // Responses:
 //
-//	200: DefaultSettingsSuccessResponse
+//	200: DefaultSettings
 func (h *SettingsHandler) GetDefaultSettings(c *gin.Context) (interface{}, error) {
 	settings := h.defaultSettingsService.GetDefaultSettings()
 	return settings, nil
@@ -70,9 +70,8 @@ func (h *SettingsHandler) GetDefaultSettings(c *gin.Context) (interface{}, error
 //
 // Responses:
 //
-//	200: DefaultSettingsSuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: DefaultSettings
+//	400: ResponseBody
 func (h *SettingsHandler) UpdateDefaultSettings(c *gin.Context) (interface{}, error) {
 	var settings models.DefaultSettings
 
@@ -103,8 +102,8 @@ func (h *SettingsHandler) UpdateDefaultSettings(c *gin.Context) (interface{}, er
 //
 // Responses:
 //
-//	200: DefaultSettingsSuccessResponse
-//	500: ErrorResponse
+//	200: DefaultSettings
+//	400: ResponseBody
 func (h *SettingsHandler) ResetDefaultSettings(c *gin.Context) (interface{}, error) {
 	err := h.defaultSettingsService.ResetToDefaults()
 	if err != nil {

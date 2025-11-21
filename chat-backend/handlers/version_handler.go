@@ -78,7 +78,7 @@ type VersionInfoSuccessResponse struct {
 //
 // Responses:
 //
-//	200: VersionInfoSuccessResponse
+//	200: VersionInfo
 func (h *VersionHandler) GetVersion(c *gin.Context) (interface{}, error) {
 	versionInfo := VersionInfo{
 		Version:   h.version,

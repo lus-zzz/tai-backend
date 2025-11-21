@@ -130,8 +130,20 @@ func (r *Router) setupRoutes() {
 	}
 
 
-	// 系统信息路由
-	api.GET("/version", utils.WrapHandler(r.versionHandler.GetVersion))
+	// 系统信息路由 - 为swag创建直接路由
+	api.GET("/version", func(c *gin.Context) {
+		result, err := r.versionHandler.GetVersion(c)
+		if err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, result)
+	})
+
+
+	api.GET("/swagger-test", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "swagger test"})
+	})
 
 	// 静态文件服务 - 使用嵌入的文件系统
 	staticSubFS, err := fs.Sub(r.staticFS, "static")

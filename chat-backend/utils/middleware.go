@@ -16,7 +16,7 @@ func ResponseHandlerMiddleware() gin.HandlerFunc {
 	return gin.HandlerFunc(func(c *gin.Context) {
 		// 记录开始时间
 		startTime := time.Now()
-		
+
 		// 获取当前handler
 		handler, exists := c.Get("handler")
 		if !exists {
@@ -36,7 +36,7 @@ func ResponseHandlerMiddleware() gin.HandlerFunc {
 		// 执行handler
 		result, err := handlerFunc(c)
 		duration := time.Since(startTime).Seconds()
-		
+
 		if err != nil {
 			// 处理错误
 			handleError(c, err, duration)
@@ -51,9 +51,9 @@ func ResponseHandlerMiddleware() gin.HandlerFunc {
 // handleSuccess 处理成功响应
 func handleSuccess(c *gin.Context, data interface{}, duration float64) {
 	response := ResponseBody{
-		IsLogin: true,  // 简化处理，默认为true，实际应根据登录状态判断
+		IsLogin: true, // 简化处理，默认为true，实际应根据登录状态判断
 		Code:    true,
-		Message: "",  // 成功时消息可以为空
+		Message: "", // 成功时消息可以为空
 		Data:    data,
 		Time:    duration,
 		CodeNum: 200,
@@ -82,7 +82,7 @@ func handleError(c *gin.Context, err error, duration float64) {
 	mapping := GetErrorMapping(apiErr.ErrorCode)
 	codeNum = mapping.CodeNum
 	codeMsg = string(apiErr.ErrorCode)
-	
+
 	// 获取错误消息，优先使用原始错误信息
 	if apiErr.Err != nil {
 		message = apiErr.Err.Error()
@@ -100,8 +100,8 @@ func handleError(c *gin.Context, err error, duration float64) {
 		CodeMsg: codeMsg,
 	}
 
-	// 统一返回200状态码
-	c.JSON(200, response)
+	// 错误统一返回400状态码
+	c.JSON(400, response)
 }
 
 // WrapHandler 包装handler函数，使其可以被中间件处理

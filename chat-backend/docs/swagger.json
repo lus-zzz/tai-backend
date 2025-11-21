@@ -46,12 +46,15 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationListSuccessResponse"
-          },
-          "500": {
-            "description": "ErrorResponse",
+            "description": "ConversationListResponse",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ConversationListResponse"
+            }
+          },
+          "400": {
+            "description": "ResponseBody",
+            "schema": {
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -84,18 +87,15 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationSuccessResponse"
-          },
-          "400": {
-            "description": "ErrorResponse",
+            "description": "Conversation",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/Conversation"
             }
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -114,7 +114,7 @@
         "operationId": "deleteConversation",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "description": "对话ID",
             "name": "id",
             "in": "path",
@@ -123,18 +123,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/EmptySuccessResponse"
+            "$ref": "#/responses/MessageOnlyResponse"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -153,7 +147,7 @@
         "operationId": "getConversationHistory",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "description": "对话ID",
             "name": "id",
             "in": "path",
@@ -162,18 +156,15 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationHistorySuccessResponse"
-          },
-          "400": {
-            "description": "ErrorResponse",
+            "description": "ConversationHistoryResponse",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ConversationHistoryResponse"
             }
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -192,7 +183,7 @@
         "operationId": "getConversationSettings",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "description": "对话ID",
             "name": "id",
             "in": "path",
@@ -201,18 +192,15 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationSettingsSuccessResponse"
-          },
-          "400": {
-            "description": "ErrorResponse",
+            "description": "ConversationSettings",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ConversationSettings"
             }
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -232,7 +220,7 @@
         "operationId": "updateConversationSettings",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "description": "对话ID",
             "name": "id",
             "in": "path",
@@ -252,18 +240,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ConversationSettingsSuccessResponse"
+            "$ref": "#/responses/MessageWithDataResponse"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -301,15 +283,9 @@
             "description": ""
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -328,12 +304,12 @@
         "operationId": "listKnowledgeBases",
         "responses": {
           "200": {
-            "$ref": "#/responses/KnowledgeBaseListSuccessResponse"
+            "$ref": "#/responses/models.KnowledgeBase"
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -366,18 +342,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/KnowledgeBaseSuccessResponse"
+            "$ref": "#/responses/MessageWithDataResponse"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -399,7 +369,7 @@
         "operationId": "updateKnowledgeBase",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "description": "知识库ID",
             "name": "id",
             "in": "path",
@@ -419,18 +389,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/KnowledgeBaseSuccessResponse"
+            "$ref": "#/responses/MessageWithDataResponse"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -447,7 +411,7 @@
         "operationId": "deleteKnowledgeBase",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "description": "知识库ID",
             "name": "id",
             "in": "path",
@@ -456,18 +420,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/EmptySuccessResponse"
+            "$ref": "#/responses/MessageOnlyResponse"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -486,7 +444,7 @@
         "operationId": "getKnowledgeBaseFiles",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "description": "知识库ID",
             "name": "id",
             "in": "path",
@@ -495,18 +453,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/KnowledgeFileListSuccessResponse"
+            "$ref": "#/responses/models.KnowledgeFile"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -527,7 +479,7 @@
         "operationId": "uploadFile",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "description": "知识库ID",
             "name": "id",
             "in": "path",
@@ -551,19 +503,15 @@
         ],
         "responses": {
           "200": {
-            "description": "or BatchUploadResponse",
-            "$ref": "#/responses/KnowledgeFileSuccessResponse"
-          },
-          "400": {
-            "description": "ErrorResponse",
+            "description": "BatchUploadResponse",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/BatchUploadResponse"
             }
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -591,18 +539,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/EmptySuccessResponse"
+            "$ref": "#/responses/MessageOnlyResponse"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -624,7 +566,7 @@
         "operationId": "toggleFileEnable",
         "parameters": [
           {
-            "type": "string",
+            "type": "integer",
             "description": "文件ID",
             "name": "file_id",
             "in": "path",
@@ -644,18 +586,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/EmptySuccessResponse"
+            "$ref": "#/responses/MessageOnlyResponse"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -690,18 +626,15 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/ModelSaveSuccessResponse"
-          },
-          "400": {
-            "description": "ErrorResponse",
+            "description": "ModelID",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ModelID"
             }
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -720,12 +653,12 @@
         "operationId": "listAvailableAllModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/ModelListSuccessResponse"
+            "$ref": "#/responses/models.ModelInfo"
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -744,12 +677,12 @@
         "operationId": "listAvailableChatModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/ModelListSuccessResponse"
+            "$ref": "#/responses/models.ModelInfo"
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -768,12 +701,12 @@
         "operationId": "listAvailableVectorModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/ModelListSuccessResponse"
+            "$ref": "#/responses/models.ModelInfo"
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -792,12 +725,12 @@
         "operationId": "listSupportedChatModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/SupportedChatModelListSuccessResponse"
+            "$ref": "#/responses/models.SupportedChatModel"
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -816,12 +749,12 @@
         "operationId": "listSupportedVectorModels",
         "responses": {
           "200": {
-            "$ref": "#/responses/SupportedVectorModelListSuccessResponse"
+            "$ref": "#/responses/models.SupportedVectorModel"
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -849,18 +782,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/EmptySuccessResponse"
+            "$ref": "#/responses/MessageOnlyResponse"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -902,18 +829,12 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/EmptySuccessResponse"
+            "$ref": "#/responses/MessageOnlyResponse"
           },
           "400": {
-            "description": "ErrorResponse",
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "ErrorResponse",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -932,7 +853,10 @@
         "operationId": "getDefaultSettings",
         "responses": {
           "200": {
-            "$ref": "#/responses/DefaultSettingsSuccessResponse"
+            "description": "DefaultSettings",
+            "schema": {
+              "$ref": "#/definitions/DefaultSettings"
+            }
           }
         }
       },
@@ -964,18 +888,15 @@
         ],
         "responses": {
           "200": {
-            "$ref": "#/responses/DefaultSettingsSuccessResponse"
-          },
-          "400": {
-            "description": "ErrorResponse",
+            "description": "DefaultSettings",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/DefaultSettings"
             }
           },
-          "500": {
-            "description": "ErrorResponse",
+          "400": {
+            "description": "ResponseBody",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -994,12 +915,15 @@
         "operationId": "resetDefaultSettings",
         "responses": {
           "200": {
-            "$ref": "#/responses/DefaultSettingsSuccessResponse"
-          },
-          "500": {
-            "description": "ErrorResponse",
+            "description": "DefaultSettings",
             "schema": {
-              "$ref": "#/definitions/ErrorResponse"
+              "$ref": "#/definitions/DefaultSettings"
+            }
+          },
+          "400": {
+            "description": "ResponseBody",
+            "schema": {
+              "$ref": "#/definitions/ResponseBody"
             }
           }
         }
@@ -1018,7 +942,10 @@
         "operationId": "getVersion",
         "responses": {
           "200": {
-            "$ref": "#/responses/VersionInfoSuccessResponse"
+            "description": "VersionInfo",
+            "schema": {
+              "$ref": "#/definitions/VersionInfo"
+            }
           }
         }
       }
@@ -1810,48 +1737,31 @@
       },
       "x-go-package": "chat-backend/models"
     },
-    "ErrorCode": {
-      "description": "ErrorCode 错误代码类型",
-      "type": "string",
-      "x-go-package": "chat-backend/utils"
-    },
-    "ErrorResponse": {
-      "description": "ErrorResponse 错误响应结构",
+    "EmbeddingProperty": {
+      "description": "EmbeddingProperty 向量模型属性",
       "type": "object",
-      "required": [
-        "success",
-        "error_code",
-        "message",
-        "details",
-        "timestamp"
-      ],
       "properties": {
-        "details": {
-          "description": "错误详情",
+        "batchLimit": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "BatchLimit"
+        },
+        "embeddingDimension": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "EmbeddingDimension"
+        },
+        "embeddingMaxLength": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "EmbeddingMaxLength"
+        },
+        "model": {
           "type": "string",
-          "x-go-name": "Details"
-        },
-        "error_code": {
-          "$ref": "#/definitions/ErrorCode"
-        },
-        "message": {
-          "description": "错误消息",
-          "type": "string",
-          "x-go-name": "Message"
-        },
-        "success": {
-          "description": "请求是否成功",
-          "type": "boolean",
-          "x-go-name": "Success"
-        },
-        "timestamp": {
-          "description": "时间戳",
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "Timestamp"
+          "x-go-name": "Model"
         }
       },
-      "x-go-package": "chat-backend/utils"
+      "x-go-package": "chat-backend/models"
     },
     "FileToggleEnableRequest": {
       "description": "FileToggleEnableRequest 文件启用/禁用请求",
@@ -2136,6 +2046,44 @@
       },
       "x-go-package": "chat-backend/models"
     },
+    "LLMProperty": {
+      "description": "LLMProperty 聊天模型属性",
+      "type": "object",
+      "properties": {
+        "contextLength": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ContextLength"
+        },
+        "fixQwqThink": {
+          "type": "boolean",
+          "x-go-name": "FixQwqThink"
+        },
+        "maxToken": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "MaxToken"
+        },
+        "model": {
+          "type": "string",
+          "x-go-name": "Model"
+        },
+        "stream": {
+          "type": "boolean",
+          "x-go-name": "Stream"
+        },
+        "supportTool": {
+          "type": "boolean",
+          "x-go-name": "SupportTool"
+        },
+        "tokenProportion": {
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TokenProportion"
+        }
+      },
+      "x-go-package": "chat-backend/models"
+    },
     "MessageRecord": {
       "description": "MessageRecord 对话消息记录",
       "type": "object",
@@ -2190,38 +2138,35 @@
     "ModelInfo": {
       "description": "ModelInfo 模型信息",
       "type": "object",
-      "required": [
-        "id",
-        "name",
-        "type",
-        "description",
-        "enabled"
-      ],
       "properties": {
-        "description": {
-          "description": "模型描述",
-          "type": "string",
-          "x-go-name": "Description"
-        },
-        "enabled": {
-          "description": "是否启用",
+        "enable": {
           "type": "boolean",
-          "x-go-name": "Enabled"
+          "x-go-name": "Enable"
+        },
+        "endpoint": {
+          "type": "string",
+          "x-go-name": "Endpoint"
         },
         "id": {
-          "description": "模型ID",
           "type": "integer",
           "format": "int64",
           "x-go-name": "ID"
         },
         "name": {
-          "description": "模型名称",
           "type": "string",
           "x-go-name": "Name"
         },
-        "type": {
-          "description": "模型类型",
+        "role": {
           "type": "string",
+          "x-go-name": "Role"
+        },
+        "symbol": {
+          "type": "string",
+          "x-go-name": "Symbol"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64",
           "x-go-name": "Type"
         }
       },
@@ -2369,6 +2314,58 @@
         }
       },
       "x-go-package": "chat-backend/models"
+    },
+    "ResponseBody": {
+      "description": "ResponseBody 统一响应体结构",
+      "type": "object",
+      "required": [
+        "is_login",
+        "code",
+        "msg",
+        "data",
+        "time",
+        "code_num",
+        "code_msg"
+      ],
+      "properties": {
+        "code": {
+          "description": "请求是否成功",
+          "type": "boolean",
+          "x-go-name": "Code"
+        },
+        "code_msg": {
+          "description": "错误代码消息",
+          "type": "string",
+          "x-go-name": "CodeMsg"
+        },
+        "code_num": {
+          "description": "数字错误代码",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CodeNum"
+        },
+        "data": {
+          "description": "响应数据",
+          "x-go-name": "Data"
+        },
+        "is_login": {
+          "description": "登录状态",
+          "type": "boolean",
+          "x-go-name": "IsLogin"
+        },
+        "msg": {
+          "description": "响应消息",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "time": {
+          "description": "持续时间（秒）",
+          "type": "number",
+          "format": "double",
+          "x-go-name": "Time"
+        }
+      },
+      "x-go-package": "chat-backend/utils"
     },
     "SSEChatEvent": {
       "description": "SSEChatEvent SSE聊天事件",
@@ -2553,61 +2550,18 @@
       },
       "x-go-package": "flowy-sdk/services/agent"
     },
-    "SuccessResponse": {
-      "description": "SuccessResponse 统一成功响应结构",
-      "type": "object",
-      "required": [
-        "success",
-        "message",
-        "data",
-        "timestamp"
-      ],
-      "properties": {
-        "data": {
-          "description": "响应数据",
-          "x-go-name": "Data"
-        },
-        "message": {
-          "description": "响应消息",
-          "type": "string",
-          "x-go-name": "Message"
-        },
-        "success": {
-          "description": "请求是否成功",
-          "type": "boolean",
-          "x-go-name": "Success"
-        },
-        "timestamp": {
-          "description": "时间戳",
-          "type": "string",
-          "format": "date-time",
-          "x-go-name": "Timestamp"
-        }
-      },
-      "x-go-package": "chat-backend/utils"
-    },
     "SupportedChatModel": {
       "description": "SupportedChatModel 支持的聊天模型",
       "type": "object",
-      "required": [
-        "id",
-        "name",
-        "description"
-      ],
       "properties": {
-        "description": {
-          "description": "模型描述",
+        "identify": {
           "type": "string",
-          "x-go-name": "Description"
+          "x-go-name": "Identify"
         },
-        "id": {
-          "description": "模型ID",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "ID"
+        "llmProperty": {
+          "$ref": "#/definitions/LLMProperty"
         },
         "name": {
-          "description": "模型名称",
           "type": "string",
           "x-go-name": "Name"
         }
@@ -2617,32 +2571,15 @@
     "SupportedVectorModel": {
       "description": "SupportedVectorModel 支持的向量模型",
       "type": "object",
-      "required": [
-        "id",
-        "name",
-        "description",
-        "dimensions"
-      ],
       "properties": {
-        "description": {
-          "description": "模型描述",
+        "identify": {
           "type": "string",
-          "x-go-name": "Description"
+          "x-go-name": "Identify"
         },
-        "dimensions": {
-          "description": "向量维度",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "Dimensions"
-        },
-        "id": {
-          "description": "模型ID",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "ID"
+        "llmProperty": {
+          "$ref": "#/definitions/EmbeddingProperty"
         },
         "name": {
-          "description": "模型名称",
           "type": "string",
           "x-go-name": "Name"
         }
@@ -2893,38 +2830,6 @@
         }
       }
     },
-    "ConversationSuccessResponse": {
-      "description": "ConversationSuccessResponse 对话创建成功响应",
-      "schema": {
-        "type": "object",
-        "required": [
-          "success",
-          "message",
-          "data",
-          "timestamp"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/definitions/Conversation"
-          },
-          "message": {
-            "description": "响应消息",
-            "type": "string",
-            "x-go-name": "Message"
-          },
-          "success": {
-            "description": "请求是否成功",
-            "type": "boolean",
-            "x-go-name": "Success"
-          },
-          "timestamp": {
-            "description": "时间戳",
-            "type": "string",
-            "x-go-name": "Timestamp"
-          }
-        }
-      }
-    },
     "DefaultSettingsSuccessResponse": {
       "description": "DefaultSettingsSuccessResponse 默认设置成功响应",
       "schema": {
@@ -3127,6 +3032,43 @@
         }
       }
     },
+    "MessageOnlyResponse": {
+      "description": "MessageOnlyResponse 仅消息成功响应",
+      "schema": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "description": "响应消息",
+            "type": "string",
+            "x-go-name": "Message"
+          }
+        }
+      }
+    },
+    "MessageWithDataResponse": {
+      "description": "MessageWithDataResponse 消息和数据成功响应",
+      "schema": {
+        "type": "object",
+        "required": [
+          "message",
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "description": "响应数据",
+            "x-go-name": "Data"
+          },
+          "message": {
+            "description": "响应消息",
+            "type": "string",
+            "x-go-name": "Message"
+          }
+        }
+      }
+    },
     "ModelListSuccessResponse": {
       "description": "ModelListSuccessResponse 模型列表成功响应 (通用)",
       "schema": {
@@ -3177,70 +3119,6 @@
         "properties": {
           "data": {
             "$ref": "#/definitions/ModelID"
-          },
-          "message": {
-            "description": "响应消息",
-            "type": "string",
-            "x-go-name": "Message"
-          },
-          "success": {
-            "description": "请求是否成功",
-            "type": "boolean",
-            "x-go-name": "Success"
-          },
-          "timestamp": {
-            "description": "时间戳",
-            "type": "string",
-            "x-go-name": "Timestamp"
-          }
-        }
-      }
-    },
-    "RecommendDataSuccessResponse": {
-      "description": "RecommendDataSuccessResponse 推荐数据成功响应",
-      "schema": {
-        "type": "object",
-        "required": [
-          "success",
-          "message",
-          "data",
-          "timestamp"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/definitions/RecommendData"
-          },
-          "message": {
-            "description": "响应消息",
-            "type": "string",
-            "x-go-name": "Message"
-          },
-          "success": {
-            "description": "请求是否成功",
-            "type": "boolean",
-            "x-go-name": "Success"
-          },
-          "timestamp": {
-            "description": "时间戳",
-            "type": "string",
-            "x-go-name": "Timestamp"
-          }
-        }
-      }
-    },
-    "SettingNameSuccessResponse": {
-      "description": "SettingNameSuccessResponse 支持设置名成功响应",
-      "schema": {
-        "type": "object",
-        "required": [
-          "success",
-          "message",
-          "data",
-          "timestamp"
-        ],
-        "properties": {
-          "data": {
-            "$ref": "#/definitions/SettingName"
           },
           "message": {
             "description": "响应消息",

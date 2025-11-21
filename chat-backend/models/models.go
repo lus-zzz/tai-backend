@@ -18,7 +18,6 @@ type ChatRequest struct {
 	RequestID string `json:"requestId" example:"uuid-v4-string"`
 }
 
-
 // ChatMessageRequest 聊天消息请求（用于Swagger文档）
 // swagger:model
 type ChatMessageRequest struct {
@@ -204,6 +203,14 @@ type KnowledgeBase struct {
 	FileCount int `json:"file_count"`
 }
 
+// KnowledgeBases 知识库（列表返回）
+// swagger:model
+type KnowledgeBases struct {
+	Body struct {
+		KnowledgeBases []KnowledgeBase `json:"knowledge_bases"`
+	}
+}
+
 // KnowledgeBaseCreateRequest 创建知识库请求
 // swagger:model
 type KnowledgeBaseCreateRequest = KnowledgeBaseConfig
@@ -239,6 +246,12 @@ type KnowledgeFile struct {
 	// 错误信息，空字符串表示无错误
 	// required: true
 	ErrorMessage string `json:"errorMessage"`
+}
+
+// KnowledgeFiles 知识库文件列表
+// swagger:model
+type KnowledgeFiles struct {
+	KnowledgeFiles []KnowledgeFile `json:"knowledge_files"`
 }
 
 // BatchUploadFilesRequest 批量上传文件请求
@@ -472,7 +485,6 @@ type FileToggleEnableRequest struct {
 	Enable *bool `json:"enable" example:"true"`
 }
 
-
 // ModelID 模型ID响应数据
 // swagger:model
 type ModelID struct {
@@ -486,27 +498,6 @@ type ModelID struct {
 // 通用响应类型在 utils 包中定义
 // - SuccessResponse：统一成功响应 (utils/response.go)
 // - ErrorResponse：统一错误响应 (utils/errors.go)
-
-// ConversationSuccessResponse 对话创建成功响应
-// swagger:response ConversationSuccessResponse
-type ConversationSuccessResponse struct {
-	// 请求是否成功
-	// in: body
-	Body struct {
-		// 请求是否成功
-		// required: true
-		Success bool `json:"success"`
-		// 响应消息
-		// required: true
-		Message string `json:"message"`
-		// 对话数据
-		// required: true
-		Data Conversation `json:"data"`
-		// 时间戳
-		// required: true
-		Timestamp string `json:"timestamp"`
-	}
-}
 
 // ConversationListSuccessResponse 对话列表获取成功响应
 // swagger:response ConversationListSuccessResponse
@@ -548,6 +539,25 @@ type EmptySuccessResponse struct {
 		// required: true
 		Timestamp string `json:"timestamp"`
 	}
+}
+
+// MessageOnlyResponse 仅消息成功响应
+// swagger:response MessageOnlyResponse
+type MessageOnlyResponse struct {
+	// 响应消息
+	// required: true
+	Message string `json:"message"`
+}
+
+// MessageWithDataResponse 消息和数据成功响应
+// swagger:response MessageWithDataResponse
+type MessageWithDataResponse struct {
+	// 响应消息
+	// required: true
+	Message string `json:"message"`
+	// 响应数据
+	// required: true
+	Data interface{} `json:"data"`
 }
 
 // ConversationSettingsSuccessResponse 对话设置成功响应
@@ -828,48 +838,6 @@ type SettingName struct {
 	SupportedSettingName []string `json:"supported_setting_name" example:"[\"temperature\", \"max_tokens\", \"top_p\", \"frequency_penalty\", \"presence_penalty\"]"`
 }
 
-// RecommendDataSuccessResponse 推荐数据成功响应
-// swagger:response RecommendDataSuccessResponse
-type RecommendDataSuccessResponse struct {
-	// 推荐数据响应
-	// in: body
-	Body struct {
-		// 请求是否成功
-		// required: true
-		Success bool `json:"success"`
-		// 响应消息
-		// required: true
-		Message string `json:"message"`
-		// 推荐数据
-		// required: true
-		Data RecommendData `json:"data"`
-		// 时间戳
-		// required: true
-		Timestamp string `json:"timestamp"`
-	}
-}
-
-// SettingNameSuccessResponse 支持设置名成功响应
-// swagger:response SettingNameSuccessResponse
-type SettingNameSuccessResponse struct {
-	// 支持设置名响应
-	// in: body
-	Body struct {
-		// 请求是否成功
-		// required: true
-		Success bool `json:"success"`
-		// 响应消息
-		// required: true
-		Message string `json:"message"`
-		// 设置名数据
-		// required: true
-		Data SettingName `json:"data"`
-		// 时间戳
-		// required: true
-		Timestamp string `json:"timestamp"`
-	}
-}
-
 // ====== 模型相关结构体（替换 flowy-sdk 结构体） ======
 
 // LLMProperty 聊天模型属性
@@ -898,14 +866,27 @@ type SupportedChatModel struct {
 	LLMProperty LLMProperty `json:"llmProperty"` // LLM属性
 }
 
+// SupportedChatModels 支持的聊天模型列表
+// swagger:model
+type SupportedChatModels struct {
+	Models []SupportedChatModel `json:"models"`
+}
+
 // SupportedVectorModel 支持的向量模型
 type SupportedVectorModel struct {
-	Name             string             `json:"name"`             // 模型名称：Ollama
-	Identify         string             `json:"identify"`         // 模型标识：ollama-embedding
-	LLMProperty      EmbeddingProperty  `json:"llmProperty"`      // 嵌入属性
+	Name        string            `json:"name"`        // 模型名称：Ollama
+	Identify    string            `json:"identify"`    // 模型标识：ollama-embedding
+	LLMProperty EmbeddingProperty `json:"llmProperty"` // 嵌入属性
+}
+
+// SupportedVectorModels 支持的向量模型列表
+// swagger:model
+type SupportedVectorModels struct {
+	Models []SupportedVectorModel `json:"models"`
 }
 
 // ModelInfo 模型信息
+// swagger:model
 type ModelInfo struct {
 	ID       int    `json:"id"`       // 模型ID
 	Name     string `json:"name"`     // 模型名称
@@ -914,6 +895,13 @@ type ModelInfo struct {
 	Enable   bool   `json:"enable"`   // 是否启用
 	Type     int    `json:"type"`     // 模型类型: 0=聊天模型, 1=嵌入模型
 	Role     string `json:"role"`     // 角色信息
+}
+
+// ModelInfos 模型信息
+// swagger:model
+type ModelInfos struct {
+	
+	Models []ModelInfo `json:"models"`
 }
 
 // ModelSaveRequest 添加/修改模型请求

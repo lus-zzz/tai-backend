@@ -46,8 +46,8 @@ func NewKnowledgeHandlerFromGlobal() *KnowledgeHandler {
 //
 // Responses:
 //
-//	200: KnowledgeBaseListSuccessResponse
-//	500: ErrorResponse
+//	200: KnowledgeBases
+//	400: ResponseBody
 func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -57,7 +57,9 @@ func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) (interface{}, erro
 		return nil, utils.NewAPIError(utils.ErrFlowyAPI, err)
 	}
 
-	return knowledgeBases, nil
+	return gin.H{
+		"knowledge_bases": knowledgeBases,
+	}, nil
 }
 
 // CreateKnowledgeBase 创建一个新的知识库。
@@ -83,9 +85,8 @@ func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) (interface{}, erro
 //
 // Responses:
 //
-//	200: KnowledgeBaseSuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: KnowledgeBase
+//	400: ResponseBody
 func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) (interface{}, error) {
 	var req models.KnowledgeBaseCreateRequest
 	// 使用 BindJSON 避免 validate 标签验证
@@ -105,10 +106,7 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) (interface{}, err
 		return nil, utils.NewAPIError(utils.ErrKnowledgeBaseCreate, err)
 	}
 
-	return gin.H{
-		"message": "知识库创建成功",
-		"data":    knowledgeBase,
-	}, nil
+	return knowledgeBase, nil
 }
 
 // UpdateKnowledgeBase 更新指定知识库的信息。
@@ -130,7 +128,7 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) (interface{}, err
 //     in: path
 //     description: 知识库ID
 //     required: true
-//     type: string
+//     type: integer
 //   - +name: body
 //     in: body
 //     description: 更新信息
@@ -139,9 +137,8 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) (interface{}, err
 //
 // Responses:
 //
-//	200: KnowledgeBaseSuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: MessageWithDataResponse
+//	400: ResponseBody
 func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) (interface{}, error) {
 	kbIDStr := c.Param("id")
 	if kbIDStr == "" {
@@ -171,9 +168,9 @@ func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) (interface{}, err
 		return nil, utils.NewAPIError(utils.ErrKnowledgeBaseUpdate, err)
 	}
 
-	return gin.H{
-		"message": "知识库更新成功",
-		"data":    knowledgeBase,
+	return models.MessageWithDataResponse{
+		Message: "知识库更新成功",
+		Data:    knowledgeBase,
 	}, nil
 }
 
@@ -193,13 +190,12 @@ func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) (interface{}, err
 //     in: path
 //     description: 知识库ID
 //     required: true
-//     type: string
+//     type: integer
 //
 // Responses:
 //
-//	200: EmptySuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: MessageOnlyResponse
+//	400: ResponseBody
 func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) (interface{}, error) {
 	kbIDStr := c.Param("id")
 	if kbIDStr == "" {
@@ -219,9 +215,8 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) (interface{}, err
 		return nil, utils.NewAPIError(utils.ErrKnowledgeBaseDelete, err)
 	}
 
-	return gin.H{
-		"message": "知识库删除成功",
-		"data":    nil,
+	return models.MessageOnlyResponse{
+		Message: "知识库删除成功",
 	}, nil
 }
 
@@ -241,13 +236,12 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) (interface{}, err
 //     in: path
 //     description: 知识库ID
 //     required: true
-//     type: string
+//     type: integer
 //
 // Responses:
 //
-//	200: KnowledgeFileListSuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: KnowledgeFiles
+//	400: ResponseBody
 func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) (interface{}, error) {
 	kbIDStr := c.Param("id")
 	if kbIDStr == "" {
@@ -267,7 +261,9 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) (interface{}, e
 		return nil, utils.NewAPIError(utils.ErrFlowyAPI, err)
 	}
 
-	return files, nil
+	return models.KnowledgeFiles{
+		KnowledgeFiles: files,
+	}, nil
 }
 
 // UploadFile 上传文件到指定的知识库。
@@ -292,7 +288,7 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) (interface{}, e
 //     in: path
 //     description: 知识库ID
 //     required: true
-//     type: string
+//     type: integer
 //   - +name: file
 //     in: formData
 //     description: 上传文件（支持单个或多个文件）
@@ -306,9 +302,8 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) (interface{}, e
 //
 // Responses:
 //
-//	200: KnowledgeFileSuccessResponse or BatchUploadResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: BatchUploadResponse
+//	400: ResponseBody
 func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 	kbIDStr := c.Param("id")
 	if kbIDStr == "" {
@@ -457,9 +452,8 @@ func (h *KnowledgeHandler) uploadFilesFromPath(c *gin.Context, kbID int) {
 //
 // Responses:
 //
-//	200: EmptySuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: MessageOnlyResponse
+//	400: ResponseBody
 func (h *KnowledgeHandler) DeleteFile(c *gin.Context) (interface{}, error) {
 	fileID := c.Param("file_id")
 
@@ -476,9 +470,8 @@ func (h *KnowledgeHandler) DeleteFile(c *gin.Context) (interface{}, error) {
 		return nil, utils.NewAPIError(utils.ErrFileNotFound, err)
 	}
 
-	return gin.H{
-		"message": "文件删除成功",
-		"data":    nil,
+	return models.MessageOnlyResponse{
+		Message: "文件删除成功",
 	}, nil
 }
 
@@ -501,7 +494,7 @@ func (h *KnowledgeHandler) DeleteFile(c *gin.Context) (interface{}, error) {
 //     in: path
 //     description: 文件ID
 //     required: true
-//     type: string
+//     type: integer
 //   - +name: body
 //     in: body
 //     description: 状态切换
@@ -510,9 +503,8 @@ func (h *KnowledgeHandler) DeleteFile(c *gin.Context) (interface{}, error) {
 //
 // Responses:
 //
-//	200: EmptySuccessResponse
-//	400: ErrorResponse
-//	500: ErrorResponse
+//	200: MessageOnlyResponse
+//	400: ResponseBody
 func (h *KnowledgeHandler) ToggleFileEnable(c *gin.Context) (interface{}, error) {
 	fileID := c.Param("file_id")
 
@@ -542,9 +534,8 @@ func (h *KnowledgeHandler) ToggleFileEnable(c *gin.Context) (interface{}, error)
 	if *req.Enable {
 		message = "文件已启用"
 	}
-	
-	return gin.H{
-		"message": message,
-		"data":    nil,
+
+	return models.MessageOnlyResponse{
+		Message: message,
 	}, nil
 }

@@ -5,6 +5,7 @@ import (
 	"chat-backend/routes"
 	"chat-backend/services"
 	"chat-backend/utils"
+	_ "chat-backend/docs" // swagger docs
 	"embed"
 	"flag"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 )
+
 
 // 嵌入静态文件
 //
