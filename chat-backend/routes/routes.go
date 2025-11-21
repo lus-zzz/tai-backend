@@ -41,6 +41,7 @@ func NewRouter(
 	// 添加中间件
 	engine.Use(gin.Logger())
 	engine.Use(gin.Recovery())
+	engine.Use(utils.ResponseHandlerMiddleware()) // 添加响应处理中间件
 
 	// CORS中间件
 	engine.Use(func(c *gin.Context) {
@@ -78,59 +79,59 @@ func (r *Router) setupRoutes() {
 	// 聊天相关路由
 	chat := api.Group("/chat")
 	{
-		chat.POST("/conversations", r.chatHandler.CreateConversation)
-		chat.GET("/conversations", r.chatHandler.GetConversations)
-		chat.DELETE("/conversations/:id", r.chatHandler.DeleteConversation)
-		chat.GET("/conversations/:id/history", r.chatHandler.GetConversationHistory)
-		chat.POST("/messages", r.chatHandler.SendMessage)
-		chat.GET("/conversations/:id/settings", r.chatHandler.GetConversationSettings)
-		chat.PUT("/conversations/:id/settings", r.chatHandler.UpdateConversationSettings)
+		chat.POST("/conversations", utils.WrapHandler(r.chatHandler.CreateConversation))
+		chat.GET("/conversations", utils.WrapHandler(r.chatHandler.GetConversations))
+		chat.DELETE("/conversations/:id", utils.WrapHandler(r.chatHandler.DeleteConversation))
+		chat.GET("/conversations/:id/history", utils.WrapHandler(r.chatHandler.GetConversationHistory))
+		chat.POST("/messages", r.chatHandler.SendMessage) // SendMessage 保持原样，使用SSE
+		chat.GET("/conversations/:id/settings", utils.WrapHandler(r.chatHandler.GetConversationSettings))
+		chat.PUT("/conversations/:id/settings", utils.WrapHandler(r.chatHandler.UpdateConversationSettings))
 	}
 
 	// 默认配置相关路由
 	settings := api.Group("/settings")
 	{
-		settings.GET("/defaults", r.settingsHandler.GetDefaultSettings)
-		settings.PUT("/defaults", r.settingsHandler.UpdateDefaultSettings)
-		settings.POST("/defaults/reset", r.settingsHandler.ResetDefaultSettings)
+		settings.GET("/defaults", utils.WrapHandler(r.settingsHandler.GetDefaultSettings))
+		settings.PUT("/defaults", utils.WrapHandler(r.settingsHandler.UpdateDefaultSettings))
+		settings.POST("/defaults/reset", utils.WrapHandler(r.settingsHandler.ResetDefaultSettings))
 	}
 
 	// 知识库相关路由
 	knowledge := api.Group("/knowledge")
 	{
-		knowledge.GET("/bases", r.knowledgeHandler.ListKnowledgeBases)
-		knowledge.POST("/bases", r.knowledgeHandler.CreateKnowledgeBase)
-		knowledge.PUT("/bases/:id", r.knowledgeHandler.UpdateKnowledgeBase)
-		knowledge.DELETE("/bases/:id", r.knowledgeHandler.DeleteKnowledgeBase)
-		knowledge.GET("/bases/:id/files", r.knowledgeHandler.GetKnowledgeBaseFiles)
-		knowledge.POST("/bases/:id/files", r.knowledgeHandler.UploadFile)
+		knowledge.GET("/bases", utils.WrapHandler(r.knowledgeHandler.ListKnowledgeBases))
+		knowledge.POST("/bases", utils.WrapHandler(r.knowledgeHandler.CreateKnowledgeBase))
+		knowledge.PUT("/bases/:id", utils.WrapHandler(r.knowledgeHandler.UpdateKnowledgeBase))
+		knowledge.DELETE("/bases/:id", utils.WrapHandler(r.knowledgeHandler.DeleteKnowledgeBase))
+		knowledge.GET("/bases/:id/files", utils.WrapHandler(r.knowledgeHandler.GetKnowledgeBaseFiles))
+		knowledge.POST("/bases/:id/files", r.knowledgeHandler.UploadFile) // UploadFile 保持原样，使用复杂逻辑
 
 		// 文件操作路由（只需要文件ID）
-		knowledge.DELETE("/files/:file_id", r.knowledgeHandler.DeleteFile)
-		knowledge.PUT("/files/:file_id/toggle", r.knowledgeHandler.ToggleFileEnable)
+		knowledge.DELETE("/files/:file_id", utils.WrapHandler(r.knowledgeHandler.DeleteFile))
+		knowledge.PUT("/files/:file_id/toggle", utils.WrapHandler(r.knowledgeHandler.ToggleFileEnable))
 	}
 
 	// 模型相关路由
 	models := api.Group("/models")
 	{
 		// 支持的模型列表
-		models.GET("/supported/chat", r.modelHandler.ListSupportedChatModels)
-		models.GET("/supported/vector", r.modelHandler.ListSupportedVectorModels)
+		models.GET("/supported/chat", utils.WrapHandler(r.modelHandler.ListSupportedChatModels))
+		models.GET("/supported/vector", utils.WrapHandler(r.modelHandler.ListSupportedVectorModels))
 
 		// 可用的模型列表
-		models.GET("/available/all", r.modelHandler.ListAvailableAllModels)
-		models.GET("/available/chat", r.modelHandler.ListAvailableChatModels)
-		models.GET("/available/vector", r.modelHandler.ListAvailableVectorModels)
+		models.GET("/available/all", utils.WrapHandler(r.modelHandler.ListAvailableAllModels))
+		models.GET("/available/chat", utils.WrapHandler(r.modelHandler.ListAvailableChatModels))
+		models.GET("/available/vector", utils.WrapHandler(r.modelHandler.ListAvailableVectorModels))
 
 		// 模型管理
-		models.POST("", r.modelHandler.SaveModel)
-		models.DELETE("/:id", r.modelHandler.DeleteModel)
-		models.PUT("/:id/status", r.modelHandler.SetModelStatus)
+		models.POST("", utils.WrapHandler(r.modelHandler.SaveModel))
+		models.DELETE("/:id", utils.WrapHandler(r.modelHandler.DeleteModel))
+		models.PUT("/:id/status", utils.WrapHandler(r.modelHandler.SetModelStatus))
 	}
 
 
 	// 系统信息路由
-	api.GET("/version", r.versionHandler.GetVersion)
+	api.GET("/version", utils.WrapHandler(r.versionHandler.GetVersion))
 
 	// 静态文件服务 - 使用嵌入的文件系统
 	staticSubFS, err := fs.Sub(r.staticFS, "static")

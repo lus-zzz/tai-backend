@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -48,18 +47,16 @@ func NewModelHandlerFromGlobal() *ModelHandler {
 //
 //	200: SupportedChatModelListSuccessResponse
 //	500: ErrorResponse
-func (h *ModelHandler) ListSupportedChatModels(c *gin.Context) {
+func (h *ModelHandler) ListSupportedChatModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
 	models, err := h.modelService.ListSupportedChatModels(ctx)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInternalServer, "获取支持的聊天模型列表失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	utils.RespondWithSuccess(c, models)
+	return models, nil
 }
 
 // ListSupportedVectorModels 返回支持的向量模型列表。
@@ -77,18 +74,16 @@ func (h *ModelHandler) ListSupportedChatModels(c *gin.Context) {
 //
 //	200: SupportedVectorModelListSuccessResponse
 //	500: ErrorResponse
-func (h *ModelHandler) ListSupportedVectorModels(c *gin.Context) {
+func (h *ModelHandler) ListSupportedVectorModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
 	models, err := h.modelService.ListSupportedVectorModels(ctx)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInternalServer, "获取支持的向量模型列表失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	utils.RespondWithSuccess(c, models)
+	return models, nil
 }
 
 // ListAvailableAllModels 返回所有可用模型的列表。
@@ -106,18 +101,16 @@ func (h *ModelHandler) ListSupportedVectorModels(c *gin.Context) {
 //
 //	200: ModelListSuccessResponse
 //	500: ErrorResponse
-func (h *ModelHandler) ListAvailableAllModels(c *gin.Context) {
+func (h *ModelHandler) ListAvailableAllModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
 	models, err := h.modelService.ListAvailableAllModels(ctx)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInternalServer, "获取全部可用模型列表失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	utils.RespondWithSuccess(c, models)
+	return models, nil
 }
 
 // ListAvailableChatModels 返回可用的聊天模型列表。
@@ -135,18 +128,16 @@ func (h *ModelHandler) ListAvailableAllModels(c *gin.Context) {
 //
 //	200: ModelListSuccessResponse
 //	500: ErrorResponse
-func (h *ModelHandler) ListAvailableChatModels(c *gin.Context) {
+func (h *ModelHandler) ListAvailableChatModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
 	models, err := h.modelService.ListAvailableChatModels(ctx)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInternalServer, "获取可用的对话模型列表失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	utils.RespondWithSuccess(c, models)
+	return models, nil
 }
 
 // ListAvailableVectorModels 返回可用的向量模型列表。
@@ -164,18 +155,16 @@ func (h *ModelHandler) ListAvailableChatModels(c *gin.Context) {
 //
 //	200: ModelListSuccessResponse
 //	500: ErrorResponse
-func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) {
+func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
 	models, err := h.modelService.ListAvailableVectorModels(ctx)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInternalServer, "获取可用的向量模型列表失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	utils.RespondWithSuccess(c, models)
+	return models, nil
 }
 
 // SaveModel 保存或更新模型配置。
@@ -204,11 +193,10 @@ func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) {
 //	200: ModelSaveSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
-func (h *ModelHandler) SaveModel(c *gin.Context) {
+func (h *ModelHandler) SaveModel(c *gin.Context) (interface{}, error) {
 	var req models.ModelSaveRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.RespondWithValidationError(c, err)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
@@ -216,12 +204,10 @@ func (h *ModelHandler) SaveModel(c *gin.Context) {
 
 	modelID, err := h.modelService.SaveModel(ctx, &req)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInternalServer, "保存模型失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	utils.RespondWithSuccess(c, models.ModelID{ID: modelID}, "模型保存成功")
+	return models.ModelID{ID: modelID}, nil
 }
 
 // DeleteModel 根据ID删除指定的模型。
@@ -247,13 +233,11 @@ func (h *ModelHandler) SaveModel(c *gin.Context) {
 //	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
-func (h *ModelHandler) DeleteModel(c *gin.Context) {
+func (h *ModelHandler) DeleteModel(c *gin.Context) (interface{}, error) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的模型ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
@@ -261,12 +245,12 @@ func (h *ModelHandler) DeleteModel(c *gin.Context) {
 
 	err = h.modelService.DeleteModel(ctx, id)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInternalServer, "删除模型失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	utils.RespondWithSuccess(c, nil, "模型删除成功")
+	return gin.H{
+		"message": "模型删除成功",
+	}, nil
 }
 
 // SetModelStatus 设置模型的启用状态。
@@ -300,19 +284,16 @@ func (h *ModelHandler) DeleteModel(c *gin.Context) {
 //	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
-func (h *ModelHandler) SetModelStatus(c *gin.Context) {
+func (h *ModelHandler) SetModelStatus(c *gin.Context) (interface{}, error) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的模型ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	var req models.ModelStatusEnableRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.RespondWithValidationError(c, err)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
@@ -320,10 +301,10 @@ func (h *ModelHandler) SetModelStatus(c *gin.Context) {
 
 	err = h.modelService.SetModelStatus(ctx, id, req.Enable)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInternalServer, "设置模型状态失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInternalServer, err)
 	}
 
-	utils.RespondWithSuccess(c, nil, "模型状态更新成功")
+	return gin.H{
+		"message": "模型状态更新成功",
+	}, nil
 }

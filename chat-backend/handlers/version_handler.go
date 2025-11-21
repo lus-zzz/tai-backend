@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"chat-backend/utils"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -81,7 +79,7 @@ type VersionInfoSuccessResponse struct {
 // Responses:
 //
 //	200: VersionInfoSuccessResponse
-func (h *VersionHandler) GetVersion(c *gin.Context) {
+func (h *VersionHandler) GetVersion(c *gin.Context) (interface{}, error) {
 	versionInfo := VersionInfo{
 		Version:   h.version,
 		BuildTime: h.buildTime,
@@ -90,5 +88,5 @@ func (h *VersionHandler) GetVersion(c *gin.Context) {
 		GitTag:    h.gitTag,
 	}
 
-	utils.RespondWithSuccess(c, versionInfo, "获取版本信息成功")
+	return versionInfo, nil
 }

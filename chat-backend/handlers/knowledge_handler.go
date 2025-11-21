@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"mime/multipart"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -49,18 +48,16 @@ func NewKnowledgeHandlerFromGlobal() *KnowledgeHandler {
 //
 //	200: KnowledgeBaseListSuccessResponse
 //	500: ErrorResponse
-func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) {
+func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	knowledgeBases, err := h.knowledgeService.ListKnowledgeBases(ctx)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFlowyAPI, "获取知识库列表失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrFlowyAPI, err)
 	}
 
-	utils.RespondWithSuccess(c, knowledgeBases)
+	return knowledgeBases, nil
 }
 
 // CreateKnowledgeBase 创建一个新的知识库。
@@ -89,19 +86,15 @@ func (h *KnowledgeHandler) ListKnowledgeBases(c *gin.Context) {
 //	200: KnowledgeBaseSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
-func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) {
+func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) (interface{}, error) {
 	var req models.KnowledgeBaseCreateRequest
 	// 使用 BindJSON 避免 validate 标签验证
 	if err := c.BindJSON(&req); err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "JSON 解析失败", http.StatusBadRequest).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	if req.Name == "" {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "知识库名称不能为空", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, nil)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -109,12 +102,13 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) {
 
 	knowledgeBase, err := h.knowledgeService.CreateKnowledgeBase(ctx, &req)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrKnowledgeBaseCreate, "创建知识库失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrKnowledgeBaseCreate, err)
 	}
 
-	utils.RespondWithSuccess(c, knowledgeBase, "知识库创建成功")
+	return gin.H{
+		"message": "知识库创建成功",
+		"data":    knowledgeBase,
+	}, nil
 }
 
 // UpdateKnowledgeBase 更新指定知识库的信息。
@@ -148,33 +142,25 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) {
 //	200: KnowledgeBaseSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
-func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
+func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) (interface{}, error) {
 	kbIDStr := c.Param("id")
 	if kbIDStr == "" {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少知识库ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, nil)
 	}
 
 	kbID, err := strconv.Atoi(kbIDStr)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的知识库ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	var req models.UpdateKnowledgeBaseRequest
 	// 使用 BindJSON 避免 validate 标签验证
 	if err := c.BindJSON(&req); err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "JSON 解析失败", http.StatusBadRequest).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	if req.Name == "" {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "知识库名称不能为空", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, nil)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -182,12 +168,13 @@ func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
 
 	knowledgeBase, err := h.knowledgeService.UpdateKnowledgeBase(ctx, kbID, &req)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrKnowledgeBaseUpdate, "更新知识库失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrKnowledgeBaseUpdate, err)
 	}
 
-	utils.RespondWithSuccess(c, knowledgeBase, "知识库更新成功")
+	return gin.H{
+		"message": "知识库更新成功",
+		"data":    knowledgeBase,
+	}, nil
 }
 
 // DeleteKnowledgeBase 根据ID删除指定的知识库。
@@ -213,19 +200,15 @@ func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
 //	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
-func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
+func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) (interface{}, error) {
 	kbIDStr := c.Param("id")
 	if kbIDStr == "" {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少知识库ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, nil)
 	}
 
 	kbID, err := strconv.Atoi(kbIDStr)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的知识库ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -233,12 +216,13 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
 
 	err = h.knowledgeService.DeleteKnowledgeBase(ctx, kbID)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrKnowledgeBaseDelete, "删除知识库失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrKnowledgeBaseDelete, err)
 	}
 
-	utils.RespondWithSuccess(c, nil, "知识库删除成功")
+	return gin.H{
+		"message": "知识库删除成功",
+		"data":    nil,
+	}, nil
 }
 
 // GetKnowledgeBaseFiles 返回指定知识库中的文件列表。
@@ -264,19 +248,15 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
 //	200: KnowledgeFileListSuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
-func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
+func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) (interface{}, error) {
 	kbIDStr := c.Param("id")
 	if kbIDStr == "" {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少知识库ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, nil)
 	}
 
 	kbID, err := strconv.Atoi(kbIDStr)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的知识库ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -284,12 +264,10 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
 
 	files, err := h.knowledgeService.GetKnowledgeBaseFiles(ctx, kbID)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFlowyAPI, "获取文件列表失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrFlowyAPI, err)
 	}
 
-	utils.RespondWithSuccess(c, files)
+	return files, nil
 }
 
 // UploadFile 上传文件到指定的知识库。
@@ -334,15 +312,13 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
 func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 	kbIDStr := c.Param("id")
 	if kbIDStr == "" {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少知识库ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
+		c.JSON(400, gin.H{"error": "缺少知识库ID"})
 		return
 	}
 
 	kbID, err := strconv.Atoi(kbIDStr)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的知识库ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
+		c.JSON(400, gin.H{"error": "无效的知识库ID"})
 		return
 	}
 
@@ -360,46 +336,20 @@ func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 
 // uploadFilesFromStream 从文件流上传文件（支持单文件和多文件）
 func (h *KnowledgeHandler) uploadFilesFromStream(c *gin.Context, kbID int) {
-	// 获取所有上传的文件
 	form, err := c.MultipartForm()
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFileUpload, "解析表单失败", http.StatusBadRequest).WithCause(err)
-		utils.RespondWithError(c, apiErr)
+		c.JSON(400, gin.H{"error": "解析表单失败"})
 		return
 	}
 
 	files := form.File["file"]
 	if len(files) == 0 {
-		apiErr := utils.NewAPIError(utils.ErrFileUpload, "没有找到上传的文件", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
+		c.JSON(400, gin.H{"error": "没有找到上传的文件"})
 		return
 	}
 
 	// 多个文件，返回批量上传结果
 	h.uploadMultipleFilesFromStream(c, kbID, files)
-}
-
-// uploadSingleFileFromStream 上传单个文件流
-func (h *KnowledgeHandler) uploadSingleFileFromStream(c *gin.Context, kbID int, fileHeader *multipart.FileHeader) {
-	file, err := fileHeader.Open()
-	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFileUpload, "打开文件失败", http.StatusBadRequest).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
-	}
-	defer file.Close()
-
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
-	uploadedFile, err := h.knowledgeService.UploadFile(ctx, kbID, fileHeader.Filename, file)
-	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFileUpload, "上传文件失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
-	}
-
-	utils.RespondWithSuccess(c, uploadedFile, "文件上传成功")
 }
 
 // uploadMultipleFilesFromStream 上传多个文件流
@@ -457,21 +407,19 @@ func (h *KnowledgeHandler) uploadMultipleFilesFromStream(c *gin.Context, kbID in
 		response.Results = append(response.Results, result)
 	}
 
-	utils.RespondWithSuccess(c, response, "批量上传完成")
+	c.JSON(200, response)
 }
 
 // uploadFilesFromPath 从文件路径上传文件（支持单文件和多文件，统一使用 file_paths）
 func (h *KnowledgeHandler) uploadFilesFromPath(c *gin.Context, kbID int) {
 	var req models.BatchUploadFilesRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "JSON 解析失败", http.StatusBadRequest).WithCause(err)
-		utils.RespondWithError(c, apiErr)
+		c.JSON(400, gin.H{"error": "JSON 解析失败"})
 		return
 	}
 
 	if len(req.FilePaths) == 0 {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "文件路径列表不能为空", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
+		c.JSON(400, gin.H{"error": "文件路径列表不能为空"})
 		return
 	}
 
@@ -482,12 +430,11 @@ func (h *KnowledgeHandler) uploadFilesFromPath(c *gin.Context, kbID int) {
 
 	response, err := h.knowledgeService.BatchUploadFilesFromPath(ctx, kbID, req.FilePaths)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFileUpload, "上传文件失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
+		c.JSON(500, gin.H{"error": "上传文件失败"})
 		return
 	}
 
-	utils.RespondWithSuccess(c, response, "文件上传完成")
+	c.JSON(200, response)
 }
 
 // DeleteFile 从知识库中删除指定的文件。
@@ -513,14 +460,12 @@ func (h *KnowledgeHandler) uploadFilesFromPath(c *gin.Context, kbID int) {
 //	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
-func (h *KnowledgeHandler) DeleteFile(c *gin.Context) {
+func (h *KnowledgeHandler) DeleteFile(c *gin.Context) (interface{}, error) {
 	fileID := c.Param("file_id")
 
 	id, err := strconv.Atoi(fileID)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的文件ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -528,12 +473,13 @@ func (h *KnowledgeHandler) DeleteFile(c *gin.Context) {
 
 	err = h.knowledgeService.DeleteFile(ctx, id)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFileNotFound, "删除文件失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrFileNotFound, err)
 	}
 
-	utils.RespondWithSuccess(c, nil, "文件删除成功")
+	return gin.H{
+		"message": "文件删除成功",
+		"data":    nil,
+	}, nil
 }
 
 // ToggleFileEnable 切换文件的启用状态。
@@ -567,26 +513,21 @@ func (h *KnowledgeHandler) DeleteFile(c *gin.Context) {
 //	200: EmptySuccessResponse
 //	400: ErrorResponse
 //	500: ErrorResponse
-func (h *KnowledgeHandler) ToggleFileEnable(c *gin.Context) {
+func (h *KnowledgeHandler) ToggleFileEnable(c *gin.Context) (interface{}, error) {
 	fileID := c.Param("file_id")
 
 	id, err := strconv.Atoi(fileID)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的文件ID", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	var req models.FileToggleEnableRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		utils.RespondWithValidationError(c, err)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, err)
 	}
 
 	if req.Enable == nil {
-		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "enable参数不能为空", http.StatusBadRequest)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrInvalidRequest, nil)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -594,14 +535,16 @@ func (h *KnowledgeHandler) ToggleFileEnable(c *gin.Context) {
 
 	err = h.knowledgeService.ToggleFileEnable(ctx, id, *req.Enable)
 	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFlowyAPI, "切换文件状态失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
+		return nil, utils.NewAPIError(utils.ErrFlowyAPI, err)
 	}
 
 	message := "文件已禁用"
 	if *req.Enable {
 		message = "文件已启用"
 	}
-	utils.RespondWithSuccess(c, nil, message)
+	
+	return gin.H{
+		"message": message,
+		"data":    nil,
+	}, nil
 }
