@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -150,9 +149,16 @@ func (h *KnowledgeHandler) CreateKnowledgeBase(c *gin.Context) {
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
-	kbID := c.Param("id")
-	if kbID == "" {
+	kbIDStr := c.Param("id")
+	if kbIDStr == "" {
 		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少知识库ID", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	kbID, err := strconv.Atoi(kbIDStr)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的知识库ID", http.StatusBadRequest)
 		utils.RespondWithError(c, apiErr)
 		return
 	}
@@ -208,9 +214,16 @@ func (h *KnowledgeHandler) UpdateKnowledgeBase(c *gin.Context) {
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
-	kbID := c.Param("id")
-	if kbID == "" {
+	kbIDStr := c.Param("id")
+	if kbIDStr == "" {
 		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少知识库ID", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	kbID, err := strconv.Atoi(kbIDStr)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的知识库ID", http.StatusBadRequest)
 		utils.RespondWithError(c, apiErr)
 		return
 	}
@@ -218,7 +231,7 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	err := h.knowledgeService.DeleteKnowledgeBase(ctx, kbID)
+	err = h.knowledgeService.DeleteKnowledgeBase(ctx, kbID)
 	if err != nil {
 		apiErr := utils.NewAPIError(utils.ErrKnowledgeBaseDelete, "删除知识库失败", http.StatusInternalServerError).WithCause(err)
 		utils.RespondWithError(c, apiErr)
@@ -252,9 +265,16 @@ func (h *KnowledgeHandler) DeleteKnowledgeBase(c *gin.Context) {
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
-	kbID := c.Param("id")
-	if kbID == "" {
+	kbIDStr := c.Param("id")
+	if kbIDStr == "" {
 		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少知识库ID", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	kbID, err := strconv.Atoi(kbIDStr)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的知识库ID", http.StatusBadRequest)
 		utils.RespondWithError(c, apiErr)
 		return
 	}
@@ -312,9 +332,16 @@ func (h *KnowledgeHandler) GetKnowledgeBaseFiles(c *gin.Context) {
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
-	kbID := c.Param("id")
-	if kbID == "" {
+	kbIDStr := c.Param("id")
+	if kbIDStr == "" {
 		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少知识库ID", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	kbID, err := strconv.Atoi(kbIDStr)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的知识库ID", http.StatusBadRequest)
 		utils.RespondWithError(c, apiErr)
 		return
 	}
@@ -332,7 +359,7 @@ func (h *KnowledgeHandler) UploadFile(c *gin.Context) {
 }
 
 // uploadFilesFromStream 从文件流上传文件（支持单文件和多文件）
-func (h *KnowledgeHandler) uploadFilesFromStream(c *gin.Context, kbID string) {
+func (h *KnowledgeHandler) uploadFilesFromStream(c *gin.Context, kbID int) {
 	// 获取所有上传的文件
 	form, err := c.MultipartForm()
 	if err != nil {
@@ -353,7 +380,7 @@ func (h *KnowledgeHandler) uploadFilesFromStream(c *gin.Context, kbID string) {
 }
 
 // uploadSingleFileFromStream 上传单个文件流
-func (h *KnowledgeHandler) uploadSingleFileFromStream(c *gin.Context, kbID string, fileHeader *multipart.FileHeader) {
+func (h *KnowledgeHandler) uploadSingleFileFromStream(c *gin.Context, kbID int, fileHeader *multipart.FileHeader) {
 	file, err := fileHeader.Open()
 	if err != nil {
 		apiErr := utils.NewAPIError(utils.ErrFileUpload, "打开文件失败", http.StatusBadRequest).WithCause(err)
@@ -362,18 +389,10 @@ func (h *KnowledgeHandler) uploadSingleFileFromStream(c *gin.Context, kbID strin
 	}
 	defer file.Close()
 
-	// 读取文件内容
-	content, err := io.ReadAll(file)
-	if err != nil {
-		apiErr := utils.NewAPIError(utils.ErrFileUpload, "读取文件失败", http.StatusInternalServerError).WithCause(err)
-		utils.RespondWithError(c, apiErr)
-		return
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	uploadedFile, err := h.knowledgeService.UploadFile(ctx, kbID, fileHeader.Filename, content)
+	uploadedFile, err := h.knowledgeService.UploadFile(ctx, kbID, fileHeader.Filename, file)
 	if err != nil {
 		apiErr := utils.NewAPIError(utils.ErrFileUpload, "上传文件失败", http.StatusInternalServerError).WithCause(err)
 		utils.RespondWithError(c, apiErr)
@@ -384,7 +403,7 @@ func (h *KnowledgeHandler) uploadSingleFileFromStream(c *gin.Context, kbID strin
 }
 
 // uploadMultipleFilesFromStream 上传多个文件流
-func (h *KnowledgeHandler) uploadMultipleFilesFromStream(c *gin.Context, kbID string, fileHeaders []*multipart.FileHeader) {
+func (h *KnowledgeHandler) uploadMultipleFilesFromStream(c *gin.Context, kbID int, fileHeaders []*multipart.FileHeader) {
 	response := &models.BatchUploadResponse{
 		Total:   len(fileHeaders),
 		Results: make([]models.BatchUploadResult, 0, len(fileHeaders)),
@@ -416,22 +435,9 @@ func (h *KnowledgeHandler) uploadMultipleFilesFromStream(c *gin.Context, kbID st
 			continue
 		}
 
-		// 读取文件内容
-		content, err := io.ReadAll(file)
+		// 上传文件，直接传递文件 reader
+		uploadedFile, err := h.knowledgeService.UploadFile(fileCtx, kbID, fileHeader.Filename, file)
 		file.Close()
-
-		if err != nil {
-			result.Success = false
-			result.Message = "读取文件失败"
-			result.Error = err.Error()
-			response.FailureCount++
-			fileCancel()
-			response.Results = append(response.Results, result)
-			continue
-		}
-
-		// 上传文件
-		uploadedFile, err := h.knowledgeService.UploadFile(fileCtx, kbID, fileHeader.Filename, content)
 		fileCancel()
 
 		if err != nil {
@@ -455,7 +461,7 @@ func (h *KnowledgeHandler) uploadMultipleFilesFromStream(c *gin.Context, kbID st
 }
 
 // uploadFilesFromPath 从文件路径上传文件（支持单文件和多文件，统一使用 file_paths）
-func (h *KnowledgeHandler) uploadFilesFromPath(c *gin.Context, kbID string) {
+func (h *KnowledgeHandler) uploadFilesFromPath(c *gin.Context, kbID int) {
 	var req models.BatchUploadFilesRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "JSON 解析失败", http.StatusBadRequest).WithCause(err)

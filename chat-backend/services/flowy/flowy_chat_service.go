@@ -3,7 +3,6 @@ package flowy
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"chat-backend/models"
@@ -144,16 +143,16 @@ func (s *FlowyChatService) CreateConversation(ctx context.Context, settings *mod
 
 // SendMessage 发送消息并返回SSE流
 func (s *FlowyChatService) SendMessage(ctx context.Context, req *models.ChatRequest, eventChan chan<- models.SSEChatEvent) error {
-	utils.InfoWith("开始流式发送消息", "session_id", req.SessionID, "content", req.Content)
+	utils.InfoWith("开始流式发送消息", "conversation_id", req.ConversationID, "content", req.Content)
 
 	defer close(eventChan)
 
 	// 创建 SDK 的 AsyncChatRequest
 	asyncReq := &agentSvc.AsyncChatRequest{
-		SessionID: req.SessionID,
+		SessionID: req.ConversationID,
 		Content:   req.Content,
-		Files:     req.Files,
-		RequestID: "", // 可以生成一个UUID或使用空字符串
+		Files:     []string{}, // Files字段已移除，使用空数组
+		RequestID: req.RequestID, // 使用请求中的RequestID
 	}
 
 	// 创建转换通道
@@ -180,11 +179,11 @@ func (s *FlowyChatService) SendMessage(ctx context.Context, req *models.ChatRequ
 	// 调用 SDK 的流式对话接口
 	err := s.sdk.Agent.ChatAsync(ctx, asyncReq, flowyEventChan)
 	if err != nil {
-		utils.ErrorWith("流式发送消息失败", "session_id", req.SessionID, "error", err)
+		utils.ErrorWith("流式发送消息失败", "conversation_id", req.ConversationID, "error", err)
 		return err
 	}
 
-	utils.InfoWith("流式消息发送完成", "session_id", req.SessionID)
+	utils.InfoWith("流式消息发送完成", "conversation_id", req.ConversationID)
 	return nil
 }
 
@@ -285,13 +284,10 @@ func (s *FlowyChatService) ListConversations(ctx context.Context, page, pageSize
 }
 
 // DeleteConversation 删除对话
-func (s *FlowyChatService) DeleteConversation(ctx context.Context, conversationID string) error {
-	utils.LogInfo("删除对话: %s", conversationID)
+func (s *FlowyChatService) DeleteConversation(ctx context.Context, conversationID int) error {
+	utils.InfoWith("删除对话", "conversation_id", conversationID)
 
-	sessionID, err := strconv.Atoi(conversationID)
-	if err != nil {
-		return fmt.Errorf("无效的会话ID: %w", err)
-	}
+	sessionID := conversationID
 
 	// 步骤1: 查找会话对应的Agent和Setting
 	sessionInfo, err := s.findSessionInfo(ctx, sessionID)
@@ -337,14 +333,10 @@ func (s *FlowyChatService) GetConversations(ctx context.Context, page, pageSize 
 }
 
 // UpdateConversationSettings 更新对话设置
-func (s *FlowyChatService) UpdateConversationSettings(ctx context.Context, conversationID string, settings *models.ConversationSettings) error {
-	utils.LogInfo("更新对话设置: %s", conversationID)
+func (s *FlowyChatService) UpdateConversationSettings(ctx context.Context, conversationID int, settings *models.ConversationSettings) error {
+	utils.InfoWith("更新对话设置", "conversation_id", conversationID)
 
-	// 将conversationID转换为int
-	sessionID, err := strconv.Atoi(conversationID)
-	if err != nil {
-		return fmt.Errorf("无效的会话ID: %w", err)
-	}
+	sessionID := conversationID
 
 	// 查找会话对应的配置信息
 	sessionInfo, err := s.findSessionInfo(ctx, sessionID)
@@ -479,14 +471,10 @@ func (s *FlowyChatService) UpdateConversationSettings(ctx context.Context, conve
 }
 
 // GetConversationSettings 获取对话设置
-func (s *FlowyChatService) GetConversationSettings(ctx context.Context, conversationID string) (*models.ConversationSettings, error) {
-	utils.LogInfo("获取对话设置: %s", conversationID)
+func (s *FlowyChatService) GetConversationSettings(ctx context.Context, conversationID int) (*models.ConversationSettings, error) {
+	utils.InfoWith("获取对话设置", "conversation_id", conversationID)
 
-	// 将conversationID转换为int
-	sessionID, err := strconv.Atoi(conversationID)
-	if err != nil {
-		return nil, fmt.Errorf("无效的会话ID: %w", err)
-	}
+	sessionID := conversationID
 
 	// 查找会话对应的配置信息
 	sessionInfo, err := s.findSessionInfo(ctx, sessionID)
@@ -540,14 +528,10 @@ func (s *FlowyChatService) GetConversationSettings(ctx context.Context, conversa
 }
 
 // GetConversationHistory 获取对话历史记录
-func (s *FlowyChatService) GetConversationHistory(ctx context.Context, conversationID string) (*models.ConversationHistoryResponse, error) {
-	utils.LogInfo("获取对话历史: %s", conversationID)
+func (s *FlowyChatService) GetConversationHistory(ctx context.Context, conversationID int) (*models.ConversationHistoryResponse, error) {
+	utils.InfoWith("获取对话历史", "conversation_id", conversationID)
 
-	// 将conversationID转换为int
-	sessionID, err := strconv.Atoi(conversationID)
-	if err != nil {
-		return nil, fmt.Errorf("无效的会话ID: %w", err)
-	}
+	sessionID := conversationID
 
 	// 调用SDK获取会话记录
 	recordsResp, err := s.sdk.Agent.GetSessionRecords(ctx, sessionID)
@@ -568,7 +552,7 @@ func (s *FlowyChatService) GetConversationHistory(ctx context.Context, conversat
 	}
 
 	response := &models.ConversationHistoryResponse{
-		ConversationID: conversationID,
+		ConversationID: fmt.Sprintf("%d", conversationID),
 		Messages:       messages,
 		Total:          len(messages),
 	}

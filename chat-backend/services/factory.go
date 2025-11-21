@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"chat-backend/pkg/database"
 	"chat-backend/services/flowy"
 	"chat-backend/services/interfaces"
 	"chat-backend/services/langchaingo"
@@ -88,13 +89,19 @@ func (sc *ServiceContainer) initLangchaingoServices() (*ServiceContainer, error)
 	}
 	sc.langchaingoConfig = langchaingoCfg
 
+	// 创建数据库连接
+	db, err := database.NewDatabase(langchaingoCfg.SQLite.DBPath)
+	if err != nil {
+		return nil, fmt.Errorf("创建数据库连接失败: %w", err)
+	}
+
 	// 创建默认设置服务
 	sc.defaultSettingsService = langchaingo.NewLangchaingoDefaultSettingsService()
 
 	// 创建其他服务
 	sc.chatService = langchaingo.NewLangchaingoChatService(langchaingoCfg, sc.defaultSettingsService)
 	sc.knowledgeService = langchaingo.NewLangchaingoKnowledgeService(langchaingoCfg)
-	sc.modelService = langchaingo.NewLangchaingoModelService(langchaingoCfg)
+	sc.modelService = langchaingo.NewLangchaingoModelService(db, langchaingoCfg)
 
 	utils.InfoWith("Langchaingo 服务初始化完成", "chat_service", "langchaingo", "knowledge_service", "langchaingo", "model_service", "langchaingo")
 	return sc, nil
@@ -168,8 +175,8 @@ func (sc *ServiceContainer) GetServiceInfo() map[string]interface{} {
 	case ServiceTypeLangchaingo:
 		if sc.langchaingoConfig != nil {
 			info["config"] = map[string]interface{}{
-				"openai_url":    sc.langchaingoConfig.OpenAI.BaseURL,
-				"ollama_url":    sc.langchaingoConfig.Ollama.BaseURL,
+				"llm_url":       sc.langchaingoConfig.LLM.BaseURL,
+				"embedding_url":  sc.langchaingoConfig.Embedding.BaseURL,
 				"qdrant_url":    sc.langchaingoConfig.Qdrant.URL,
 				"docling_url":   sc.langchaingoConfig.Docling.BaseURL,
 				"sqlite_db":     sc.langchaingoConfig.SQLite.DBPath,

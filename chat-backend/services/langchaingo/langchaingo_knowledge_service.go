@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"chat-backend/models"
+	"chat-backend/pkg/database"
 	"chat-backend/services/interfaces"
 	"chat-backend/utils"
 )
@@ -20,23 +21,49 @@ import (
 // LangchaingoKnowledgeService 基于 langchaingo 的知识库服务实现
 type LangchaingoKnowledgeService struct {
 	config *LangchaingoConfig
+	db     *database.Database
 }
 
 // NewLangchaingoKnowledgeService 创建 Langchaingo 知识库服务
 func NewLangchaingoKnowledgeService(config *LangchaingoConfig) interfaces.KnowledgeServiceInterface {
-	return &LangchaingoKnowledgeService{
+	service := &LangchaingoKnowledgeService{
 		config: config,
 	}
+
+	// 初始化数据库连接
+	if err := service.initDatabase(); err != nil {
+		utils.ErrorWith("初始化数据库失败", "error", err.Error())
+	}
+
+	return service
+}
+
+// initDatabase 初始化数据库连接和表结构
+func (s *LangchaingoKnowledgeService) initDatabase() error {
+	db, err := database.NewDatabase(s.config.SQLite.DBPath)
+	if err != nil {
+		return fmt.Errorf("初始化数据库失败: %w", err)
+	}
+	s.db = db
+	return nil
+}
+
+// closeDatabase 关闭数据库连接
+func (s *LangchaingoKnowledgeService) closeDatabase() error {
+	if s.db != nil {
+		return s.db.Close()
+	}
+	return nil
 }
 
 // ListKnowledgeBases 获取知识库列表
 func (s *LangchaingoKnowledgeService) ListKnowledgeBases(ctx context.Context) ([]models.KnowledgeBase, error) {
 	utils.InfoWith("获取知识库列表")
 
-	// TODO: 实现 Qdrant 集合列表获取
-	// 这里需要从 Qdrant 获取所有集合（知识库）
-	// 暂时返回空列表
-	var knowledgeBases []models.KnowledgeBase
+	knowledgeBases, err := s.db.ListKnowledgeBases()
+	if err != nil {
+		return nil, fmt.Errorf("查询知识库列表失败: %w", err)
+	}
 
 	utils.InfoWith("获取知识库列表成功", "count", len(knowledgeBases))
 	return knowledgeBases, nil
@@ -49,25 +76,20 @@ func (s *LangchaingoKnowledgeService) CreateKnowledgeBase(ctx context.Context, r
 		"description", req.Desc,
 		"chunkSize", req.ChunkSize,
 		"vectorModel", req.VectorModel,
-		"agentModel", req.AgentModel)
+		"agentModel", req.AgentModel,
+		"chunkStrategy", req.ChunkStrategy)
 
-	// TODO: 实现 Qdrant 集合创建
-	// 这里需要在 Qdrant 中创建新的集合（知识库）
-	// 暂时返回模拟数据
-	kbID := 1 // 模拟ID
-
-	result := &models.KnowledgeBase{
-		ID:                  kbID,
-		KnowledgeBaseConfig: *req, // 直接使用请求的配置
-		FileCount:           0,
+	knowledgeBase, err := s.db.CreateKnowledgeBase(req)
+	if err != nil {
+		return nil, fmt.Errorf("创建知识库失败: %w", err)
 	}
 
-	utils.InfoWith("创建知识库成功", "id", result.ID, "name", result.Name)
-	return result, nil
+	utils.InfoWith("创建知识库成功", "id", knowledgeBase.ID, "name", knowledgeBase.Name)
+	return knowledgeBase, nil
 }
 
 // UpdateKnowledgeBase 更新知识库
-func (s *LangchaingoKnowledgeService) UpdateKnowledgeBase(ctx context.Context, id string, req *models.UpdateKnowledgeBaseRequest) (*models.KnowledgeBase, error) {
+func (s *LangchaingoKnowledgeService) UpdateKnowledgeBase(ctx context.Context, id int, req *models.UpdateKnowledgeBaseRequest) (*models.KnowledgeBase, error) {
 	utils.InfoWith("更新知识库",
 		"id", id,
 		"name", req.Name,
@@ -76,51 +98,62 @@ func (s *LangchaingoKnowledgeService) UpdateKnowledgeBase(ctx context.Context, i
 		"chunkStrategy", req.ChunkStrategy,
 		"chunkSize", req.ChunkSize)
 
-	// TODO: 实现 Qdrant 集合元数据更新
-	// 暂时返回模拟数据
-	kbID, err := strconv.Atoi(id)
+	knowledgeBase, err := s.db.UpdateKnowledgeBase(id, req)
 	if err != nil {
-		return nil, fmt.Errorf("无效的知识库ID: %w", err)
+		return nil, fmt.Errorf("更新知识库失败: %w", err)
 	}
 
-	result := &models.KnowledgeBase{
-		ID:                  kbID,
-		KnowledgeBaseConfig: *req, // 直接使用请求的配置
-	}
-
-	utils.InfoWith("更新知识库成功", "id", result.ID)
-	return result, nil
+	utils.InfoWith("更新知识库成功", "id", knowledgeBase.ID)
+	return knowledgeBase, nil
 }
 
 // DeleteKnowledgeBase 删除知识库
-func (s *LangchaingoKnowledgeService) DeleteKnowledgeBase(ctx context.Context, id string) error {
-	utils.LogInfo("删除知识库: %s", id)
+func (s *LangchaingoKnowledgeService) DeleteKnowledgeBase(ctx context.Context, id int) error {
+	utils.InfoWith("删除知识库", "id", id)
 
-	// TODO: 实现 Qdrant 集合删除
-	// 暂时只是记录日志
+	if err := s.db.DeleteKnowledgeBase(id); err != nil {
+		return fmt.Errorf("删除知识库失败: %w", err)
+	}
+
 	utils.InfoWith("删除知识库成功", "id", id)
 	return nil
 }
 
 // GetKnowledgeBaseFiles 获取知识库文件列表
-func (s *LangchaingoKnowledgeService) GetKnowledgeBaseFiles(ctx context.Context, id string) ([]models.KnowledgeFile, error) {
-	utils.LogInfo("获取知识库文件列表: %s", id)
+func (s *LangchaingoKnowledgeService) GetKnowledgeBaseFiles(ctx context.Context, id int) ([]models.KnowledgeFile, error) {
+	utils.InfoWith("获取知识库文件列表", "id", id)
 
-	// TODO: 实现 Qdrant 文件元数据获取
-	// 暂时返回空列表
-	var knowledgeFiles []models.KnowledgeFile
+	knowledgeFiles, err := s.db.GetKnowledgeBaseFiles(id)
+	if err != nil {
+		return nil, fmt.Errorf("查询知识库文件列表失败: %w", err)
+	}
 
 	utils.InfoWith("获取知识库文件列表成功", "id", id, "count", len(knowledgeFiles))
 	return knowledgeFiles, nil
 }
 
 // UploadFile 上传文件到知识库（文件流上传）
-func (s *LangchaingoKnowledgeService) UploadFile(ctx context.Context, id string, filename string, content []byte) (*models.KnowledgeFile, error) {
-	utils.LogInfo("上传文件到知识库: %s, 文件: %s", id, filename)
+func (s *LangchaingoKnowledgeService) UploadFile(ctx context.Context, id int, filename string, reader io.Reader) (*models.KnowledgeFile, error) {
+	utils.InfoWith("上传文件到知识库", "id", id, "filename", filename)
+
+	// 验证知识库是否存在
+	_, err := s.db.GetKnowledgeBaseByID(id)
+	if err != nil {
+		return nil, fmt.Errorf("知识库ID %d 不存在", id)
+	}
+
+	// 读取文件内容
+	content, err := io.ReadAll(reader)
+	if err != nil {
+		return nil, fmt.Errorf("读取文件内容失败: %w", err)
+	}
+
+	// 计算文件大小
+	fileSize := int64(len(content))
 
 	// TODO: 实现完整的文档分块和向量化流程
 	// 这里需要实现 KEY_PROCESS_AND_CODE.md 中的 chunkAndVectorize 流程
-	
+
 	// 1. 使用 Docling API 进行文档分块
 	chunks, err := s.chunkDocument(ctx, filename, content)
 	if err != nil {
@@ -128,28 +161,23 @@ func (s *LangchaingoKnowledgeService) UploadFile(ctx context.Context, id string,
 	}
 
 	// 2. 将分块向量化并存储到 Qdrant
-	err = s.vectorizeAndStore(ctx, id, chunks)
+	err = s.vectorizeAndStore(ctx, strconv.Itoa(id), chunks)
 	if err != nil {
 		return nil, fmt.Errorf("向量化和存储失败: %w", err)
 	}
 
-	result := &models.KnowledgeFile{
-		ID:           1, // 模拟ID
-		Name:         filename,
-		Size:         len(content),
-		Enable:       true,
-		Status:       1, // 完成
-		UploadedAt:   time.Now(),
-		IndexPercent: 100,
-		ErrorMessage: "",
+	// 插入文件记录到数据库
+	knowledgeFile, err := s.db.CreateKnowledgeBaseFile(id, filename, fileSize)
+	if err != nil {
+		return nil, fmt.Errorf("插入文件记录失败: %w", err)
 	}
 
-	utils.InfoWith("上传文件成功", "id", id, "filename", filename, "file_id", result.ID)
-	return result, nil
+	utils.InfoWith("上传文件成功", "id", id, "filename", filename, "file_id", knowledgeFile.ID)
+	return knowledgeFile, nil
 }
 
 // UploadFileFromPath 从文件路径上传文件到知识库
-func (s *LangchaingoKnowledgeService) UploadFileFromPath(ctx context.Context, id string, filePath string) (*models.KnowledgeFile, error) {
+func (s *LangchaingoKnowledgeService) UploadFileFromPath(ctx context.Context, id int, filePath string) (*models.KnowledgeFile, error) {
 	// 验证文件路径
 	if filePath == "" {
 		return nil, fmt.Errorf("文件路径不能为空")
@@ -172,7 +200,7 @@ func (s *LangchaingoKnowledgeService) UploadFileFromPath(ctx context.Context, id
 	// 获取文件名
 	filename := filepath.Base(filePath)
 
-	utils.LogInfo("从路径上传文件到知识库: %s, 路径: %s, 文件: %s", id, filePath, filename)
+	utils.InfoWith("从路径上传文件到知识库", "id", id, "path", filePath, "file", filename)
 
 	// 打开文件
 	file, err := os.Open(filePath)
@@ -181,23 +209,17 @@ func (s *LangchaingoKnowledgeService) UploadFileFromPath(ctx context.Context, id
 	}
 	defer file.Close()
 
-	// 读取文件内容
-	content, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("读取文件失败: %w", err)
-	}
-
-	// 调用文件上传方法
-	return s.UploadFile(ctx, id, filename, content)
+	// 调用文件上传方法，直接传递文件 reader
+	return s.UploadFile(ctx, id, filename, file)
 }
 
 // BatchUploadFilesFromPath 批量从文件路径上传文件到知识库
-func (s *LangchaingoKnowledgeService) BatchUploadFilesFromPath(ctx context.Context, id string, filePaths []string) (*models.BatchUploadResponse, error) {
+func (s *LangchaingoKnowledgeService) BatchUploadFilesFromPath(ctx context.Context, id int, filePaths []string) (*models.BatchUploadResponse, error) {
 	if len(filePaths) == 0 {
 		return nil, fmt.Errorf("文件路径列表不能为空")
 	}
 
-	utils.LogInfo("开始批量上传文件到知识库: %s, 文件数: %d", id, len(filePaths))
+	utils.InfoWith("开始批量上传文件到知识库", "id", id, "file_count", len(filePaths))
 
 	response := &models.BatchUploadResponse{
 		Total:   len(filePaths),
@@ -250,6 +272,10 @@ func (s *LangchaingoKnowledgeService) DeleteFile(ctx context.Context, fileID int
 		return fmt.Errorf("无效的文件ID: %d", fileID)
 	}
 
+	if err := s.db.DeleteKnowledgeBaseFile(fileID); err != nil {
+		return fmt.Errorf("删除知识库文件失败: %w", err)
+	}
+
 	// TODO: 实现 Qdrant 向量删除
 	// 暂时只是记录日志
 	utils.InfoWith("删除文件成功", "file_id", fileID)
@@ -263,6 +289,10 @@ func (s *LangchaingoKnowledgeService) ToggleFileEnable(ctx context.Context, file
 	if fileID == 0 {
 		utils.ErrorWith("无效的文件ID", "file_id", fileID)
 		return fmt.Errorf("无效的文件ID: %d", fileID)
+	}
+
+	if err := s.db.ToggleKnowledgeBaseFileEnable(fileID, enable); err != nil {
+		return fmt.Errorf("更新文件启用状态失败: %w", err)
 	}
 
 	// TODO: 实现 Qdrant 向量启用/禁用
@@ -328,7 +358,7 @@ func (s *LangchaingoKnowledgeService) chunkDocument(ctx context.Context, filenam
 
 	// 调用 Docling API
 	url := s.config.Docling.BaseURL + "/chunk/hybrid"
-	
+
 	jsonData, err := json.Marshal(req)
 	if err != nil {
 		return nil, fmt.Errorf("序列化请求失败: %w", err)

@@ -18,34 +18,34 @@ type EnvConfig struct {
 var defaultConfigs = map[string]string{
 	// 基础服务配置
 	"PORT":             "9090",
-	"SERVICE_TYPE":      "flowy", // flowy 或 langchaingo
+	"SERVICE_TYPE":     "flowy", // flowy 或 langchaingo
 	"SHORTCUT_API_URL": "http://10.18.13.157:26034",
-	
+
 	// Flowy SDK 配置
-	"FLOWY_BASE_URL":   "http://10.18.13.10:8888/api/v1",
-	"FLOWY_API_KEY":    "",
-	"FLOWY_TOKEN":      "Basic c3dvcmQ6c3dvcmRfc2VjcmV0",
-	
-	// Langchaingo - OpenAI 配置
-	"LANGCHAINO_OPENAI_BASE_URL":   "https://api.openai.com/v1",
-	"LANGCHAINO_OPENAI_API_KEY":    "",
-	"LANGCHAINO_OPENAI_MODEL":      "gpt-3.5-turbo",
-	
-	// Langchaingo - Ollama 配置
-	"LANGCHAINO_OLLAMA_URL":   "http://localhost:11434",
-	"LANGCHAINO_OLLAMA_MODEL": "bge-m3:latest",
-	
+	"FLOWY_BASE_URL": "http://10.18.13.10:8888/api/v1",
+	"FLOWY_API_KEY":  "",
+	"FLOWY_TOKEN":    "Basic c3dvcmQ6c3dvcmRfc2VjcmV0",
+
+	// Langchaingo - LLM 配置
+	"LANGCHAINO_LLM_BASE_URL": "https://api.openai.com/v1",
+	"LANGCHAINO_LLM_API_KEY":  "",
+	"LANGCHAINO_LLM_MODEL":    "gpt-3.5-turbo",
+
+	// Langchaingo - Embedding 配置
+	"LANGCHAINO_EMBEDDING_URL":   "http://localhost:11434",
+	"LANGCHAINO_EMBEDDING_MODEL": "bge-m3:latest",
+
 	// Langchaingo - Qdrant 配置
-	"LANGCHAINO_QDRANT_URL":       "http://localhost:6333",
-	"LANGCHAINO_QDRANT_API_KEY":    "",
+	"LANGCHAINO_QDRANT_URL":         "http://localhost:6333",
+	"LANGCHAINO_QDRANT_API_KEY":     "",
 	"LANGCHAINO_QDRANT_VECTOR_SIZE": "1024",
-	
+
 	// Langchaingo - Docling 配置
-	"LANGCHAINO_DOCLING_URL":   "http://localhost:8001",
+	"LANGCHAINO_DOCLING_URL":     "http://localhost:8001",
 	"LANGCHAINO_DOCLING_API_KEY": "",
-	
+
 	// Langchaingo - SQLite 配置
-	"LANGCHAINO_SQLITE_DB_PATH": "./chat_history.db",
+	"LANGCHAINO_SQLITE_DB_PATH":  "./chat_history.db",
 	"LANGCHAINO_SQLITE_PASSWORD": "",
 }
 
@@ -172,19 +172,19 @@ func (c *EnvConfig) ensureEnvFile() {
 		fmt.Fprintf(file, "# Langchaingo 配置 (当 SERVICE_TYPE=langchaingo 时使用)\n")
 		fmt.Fprintf(file, "# ========================================\n")
 
-		fmt.Fprintf(file, "# OpenAI 配置\n")
-		fmt.Fprintf(file, "# OpenAI API 基础 URL\n")
-		fmt.Fprintf(file, "LANGCHAINO_OPENAI_BASE_URL=%s\n", defaultConfigs["LANGCHAINO_OPENAI_BASE_URL"])
-		fmt.Fprintf(file, "# OpenAI API 密钥\n")
-		fmt.Fprintf(file, "LANGCHAINO_OPENAI_API_KEY=%s\n", defaultConfigs["LANGCHAINO_OPENAI_API_KEY"])
-		fmt.Fprintf(file, "# OpenAI 模型名称\n")
-		fmt.Fprintf(file, "LANGCHAINO_OPENAI_MODEL=%s\n\n", defaultConfigs["LANGCHAINO_OPENAI_MODEL"])
+		fmt.Fprintf(file, "# LLM 配置\n")
+		fmt.Fprintf(file, "# LLM API 基础 URL\n")
+		fmt.Fprintf(file, "LANGCHAINO_LLM_BASE_URL=%s\n", defaultConfigs["LANGCHAINO_LLM_BASE_URL"])
+		fmt.Fprintf(file, "# LLM API 密钥\n")
+		fmt.Fprintf(file, "LANGCHAINO_LLM_API_KEY=%s\n", defaultConfigs["LANGCHAINO_LLM_API_KEY"])
+		fmt.Fprintf(file, "# LLM 模型名称\n")
+		fmt.Fprintf(file, "LANGCHAINO_LLM_MODEL=%s\n\n", defaultConfigs["LANGCHAINO_LLM_MODEL"])
 
-		fmt.Fprintf(file, "# Ollama 配置\n")
-		fmt.Fprintf(file, "# Ollama 服务 URL\n")
-		fmt.Fprintf(file, "LANGCHAINO_OLLAMA_URL=%s\n", defaultConfigs["LANGCHAINO_OLLAMA_URL"])
-		fmt.Fprintf(file, "# Ollama 向量化模型\n")
-		fmt.Fprintf(file, "LANGCHAINO_OLLAMA_MODEL=%s\n\n", defaultConfigs["LANGCHAINO_OLLAMA_MODEL"])
+		fmt.Fprintf(file, "# Embedding 配置\n")
+		fmt.Fprintf(file, "# Embedding 服务 URL\n")
+		fmt.Fprintf(file, "LANGCHAINO_EMBEDDING_URL=%s\n", defaultConfigs["LANGCHAINO_EMBEDDING_URL"])
+		fmt.Fprintf(file, "# Embedding 向量化模型\n")
+		fmt.Fprintf(file, "LANGCHAINO_EMBEDDING_MODEL=%s\n\n", defaultConfigs["LANGCHAINO_EMBEDDING_MODEL"])
 
 		fmt.Fprintf(file, "# Qdrant 配置\n")
 		fmt.Fprintf(file, "# Qdrant 服务 URL\n")

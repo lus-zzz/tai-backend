@@ -11,8 +11,6 @@ import (
 	"chat-backend/services/interfaces"
 	"chat-backend/utils"
 
-	modelSvc "flowy-sdk/services/model"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -207,7 +205,7 @@ func (h *ModelHandler) ListAvailableVectorModels(c *gin.Context) {
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ModelHandler) SaveModel(c *gin.Context) {
-	var req modelSvc.ModelSaveRequest
+	var req models.ModelSaveRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		utils.RespondWithValidationError(c, err)
 		return

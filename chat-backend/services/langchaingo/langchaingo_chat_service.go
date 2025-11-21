@@ -66,7 +66,7 @@ func (s *LangchaingoChatService) CreateConversation(ctx context.Context, setting
 
 // SendMessage 发送消息并返回SSE流
 func (s *LangchaingoChatService) SendMessage(ctx context.Context, req *models.ChatRequest, eventChan chan<- models.SSEChatEvent) error {
-	utils.InfoWith("开始流式发送消息", "session_id", req.SessionID, "content", req.Content)
+	utils.InfoWith("开始流式发送消息", "conversation_id", req.ConversationID, "content", req.Content)
 
 	defer close(eventChan)
 
@@ -85,7 +85,7 @@ func (s *LangchaingoChatService) SendMessage(ctx context.Context, req *models.Ch
 		startEvent := models.SSEChatEvent{
 			Type:  "resp_splash",
 			Data:  "开始处理消息",
-			ID:    fmt.Sprintf("%d", req.SessionID),
+			ID:    fmt.Sprintf("%d", req.ConversationID),
 		}
 		eventChan <- startEvent
 
@@ -98,7 +98,7 @@ func (s *LangchaingoChatService) SendMessage(ctx context.Context, req *models.Ch
 			chunkEvent := models.SSEChatEvent{
 				Type:  "resp_increment",
 				Data:  string(char),
-				ID:    fmt.Sprintf("%d", req.SessionID),
+				ID:    fmt.Sprintf("%d", req.ConversationID),
 			}
 			eventChan <- chunkEvent
 			time.Sleep(50 * time.Millisecond) // 模拟流式延迟
@@ -108,12 +108,12 @@ func (s *LangchaingoChatService) SendMessage(ctx context.Context, req *models.Ch
 		endEvent := models.SSEChatEvent{
 			Type:  "resp_finish",
 			Data:  "处理完成",
-			ID:    fmt.Sprintf("%d", req.SessionID),
+			ID:    fmt.Sprintf("%d", req.ConversationID),
 		}
 		eventChan <- endEvent
 	}()
 
-	utils.InfoWith("流式消息发送完成", "session_id", req.SessionID)
+	utils.InfoWith("流式消息发送完成", "conversation_id", req.ConversationID)
 	return nil
 }
 
@@ -157,8 +157,8 @@ func (s *LangchaingoChatService) ListConversations(ctx context.Context, page, pa
 }
 
 // DeleteConversation 删除对话
-func (s *LangchaingoChatService) DeleteConversation(ctx context.Context, conversationID string) error {
-	utils.LogInfo("删除对话: %s", conversationID)
+func (s *LangchaingoChatService) DeleteConversation(ctx context.Context, conversationID int) error {
+	utils.InfoWith("删除对话", "conversation_id", conversationID)
 
 	// TODO: 实现 SQLite 对话记录删除
 	// 这里需要删除对话相关的所有记录
@@ -173,8 +173,8 @@ func (s *LangchaingoChatService) GetConversations(ctx context.Context, page, pag
 }
 
 // UpdateConversationSettings 更新对话设置
-func (s *LangchaingoChatService) UpdateConversationSettings(ctx context.Context, conversationID string, settings *models.ConversationSettings) error {
-	utils.LogInfo("更新对话设置: %s", conversationID)
+func (s *LangchaingoChatService) UpdateConversationSettings(ctx context.Context, conversationID int, settings *models.ConversationSettings) error {
+	utils.InfoWith("更新对话设置", "conversation_id", conversationID)
 
 	// TODO: 实现 SQLite 对话设置更新
 	// 这里需要更新对话的配置信息
@@ -184,8 +184,8 @@ func (s *LangchaingoChatService) UpdateConversationSettings(ctx context.Context,
 }
 
 // GetConversationSettings 获取对话设置
-func (s *LangchaingoChatService) GetConversationSettings(ctx context.Context, conversationID string) (*models.ConversationSettings, error) {
-	utils.LogInfo("获取对话设置: %s", conversationID)
+func (s *LangchaingoChatService) GetConversationSettings(ctx context.Context, conversationID int) (*models.ConversationSettings, error) {
+	utils.InfoWith("获取对话设置", "conversation_id", conversationID)
 
 	// TODO: 实现 SQLite 对话设置查询
 	// 暂时返回默认设置
@@ -198,8 +198,8 @@ func (s *LangchaingoChatService) GetConversationSettings(ctx context.Context, co
 }
 
 // GetConversationHistory 获取对话历史记录
-func (s *LangchaingoChatService) GetConversationHistory(ctx context.Context, conversationID string) (*models.ConversationHistoryResponse, error) {
-	utils.LogInfo("获取对话历史: %s", conversationID)
+func (s *LangchaingoChatService) GetConversationHistory(ctx context.Context, conversationID int) (*models.ConversationHistoryResponse, error) {
+	utils.InfoWith("获取对话历史", "conversation_id", conversationID)
 
 	// TODO: 实现 SQLite 对话历史查询
 	// 这里需要从 SQLite 中获取指定对话的消息历史
@@ -208,7 +208,7 @@ func (s *LangchaingoChatService) GetConversationHistory(ctx context.Context, con
 	var messages []models.MessageRecord // 使用正确的消息类型
 
 	response := &models.ConversationHistoryResponse{
-		ConversationID: conversationID,
+		ConversationID: fmt.Sprintf("%d", conversationID),
 		Messages:       messages,
 		Total:          len(messages),
 	}
@@ -221,9 +221,9 @@ func (s *LangchaingoChatService) GetConversationHistory(ctx context.Context, con
 func (s *LangchaingoChatService) initializeLLM(ctx context.Context) error {
 	// TODO: 实现 OpenAI LLM 初始化
 	// 使用 langchaingo 的 openai 包
-	// 配置: s.config.OpenAI.BaseURL, s.config.OpenAI.Token, s.config.OpenAI.Model
+	// 配置: s.config.LLM.BaseURL, s.config.LLM.Token, s.config.LLM.Model
 	
-	utils.InfoWith("LLM 初始化完成", "model", s.config.OpenAI.Model)
+	utils.InfoWith("LLM 初始化完成", "model", s.config.LLM.Model)
 	return nil
 }
 
@@ -231,9 +231,9 @@ func (s *LangchaingoChatService) initializeLLM(ctx context.Context) error {
 func (s *LangchaingoChatService) initializeEmbedder(ctx context.Context) error {
 	// TODO: 实现 Ollama 嵌入模型初始化
 	// 使用 langchaingo 的 ollama 包
-	// 配置: s.config.Ollama.BaseURL, s.config.Ollama.Model
+	// 配置: s.config.Embedding.BaseURL, s.config.Embedding.Model
 	
-	utils.InfoWith("嵌入模型初始化完成", "model", s.config.Ollama.Model)
+	utils.InfoWith("嵌入模型初始化完成", "model", s.config.Embedding.Model)
 	return nil
 }
 

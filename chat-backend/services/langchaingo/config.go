@@ -9,11 +9,11 @@ import (
 
 // LangchaingoConfig Langchaingo 配置结构
 type LangchaingoConfig struct {
-	// OpenAI 配置
-	OpenAI OpenAIConfig `json:"openai"`
+	// LLM 配置
+	LLM LLMConfig `json:"llm"`
 	
-	// Ollama 配置
-	Ollama OllamaConfig `json:"ollama"`
+	// Embedding 配置
+	Embedding EmbeddingConfig `json:"embedding"`
 	
 	// Qdrant 配置
 	Qdrant QdrantConfig `json:"qdrant"`
@@ -25,15 +25,15 @@ type LangchaingoConfig struct {
 	SQLite SQLiteConfig `json:"sqlite"`
 }
 
-// OpenAIConfig OpenAI 配置
-type OpenAIConfig struct {
+// LLMConfig LLM 配置
+type LLMConfig struct {
 	BaseURL string `json:"base_url"`
 	Token   string `json:"token"`
 	Model   string `json:"model"`
 }
 
-// OllamaConfig Ollama 配置
-type OllamaConfig struct {
+// EmbeddingConfig Embedding 配置
+type EmbeddingConfig struct {
 	BaseURL string `json:"base_url"`
 	Model   string `json:"model"`
 }
@@ -70,14 +70,14 @@ func GetLangchaingoConfig() *LangchaingoConfig {
 	}
 	
 	return &LangchaingoConfig{
-		OpenAI: OpenAIConfig{
-			BaseURL: envConfig.Get("LANGCHAINO_OPENAI_BASE_URL"),
-			Token:   envConfig.Get("LANGCHAINO_OPENAI_API_KEY"),
-			Model:   envConfig.Get("LANGCHAINO_OPENAI_MODEL"),
+		LLM: LLMConfig{
+			BaseURL: envConfig.Get("LANGCHAINO_LLM_BASE_URL"),
+			Token:   envConfig.Get("LANGCHAINO_LLM_API_KEY"),
+			Model:   envConfig.Get("LANGCHAINO_LLM_MODEL"),
 		},
-		Ollama: OllamaConfig{
-			BaseURL: envConfig.Get("LANGCHAINO_OLLAMA_URL"),
-			Model:   envConfig.Get("LANGCHAINO_OLLAMA_MODEL"),
+		Embedding: EmbeddingConfig{
+			BaseURL: envConfig.Get("LANGCHAINO_EMBEDDING_URL"),
+			Model:   envConfig.Get("LANGCHAINO_EMBEDDING_MODEL"),
 		},
 		Qdrant: QdrantConfig{
 			URL:       envConfig.Get("LANGCHAINO_QDRANT_URL"),
@@ -98,12 +98,12 @@ func GetLangchaingoConfig() *LangchaingoConfig {
 // ValidateConfig 验证配置
 func (c *LangchaingoConfig) ValidateConfig() error {
 	// 验证必需的配置项
-	if c.OpenAI.Token == "" {
-		return fmt.Errorf("LANGCHAINO_OPENAI_API_KEY 不能为空")
+	if c.LLM.Token == "" {
+		return fmt.Errorf("LANGCHAINO_LLM_API_KEY 不能为空")
 	}
 	
-	if c.Ollama.BaseURL == "" {
-		return fmt.Errorf("LANGCHAINO_OLLAMA_URL 不能为空")
+	if c.Embedding.BaseURL == "" {
+		return fmt.Errorf("LANGCHAINO_EMBEDDING_URL 不能为空")
 	}
 	
 	if c.Qdrant.URL == "" {
@@ -115,16 +115,16 @@ func (c *LangchaingoConfig) ValidateConfig() error {
 	}
 	
 	// 设置默认值
-	if c.OpenAI.BaseURL == "" {
-		c.OpenAI.BaseURL = "https://api.openai.com/v1"
+	if c.LLM.BaseURL == "" {
+		c.LLM.BaseURL = "https://api.openai.com/v1"
 	}
 	
-	if c.OpenAI.Model == "" {
-		c.OpenAI.Model = "gpt-3.5-turbo"
+	if c.LLM.Model == "" {
+		c.LLM.Model = "gpt-3.5-turbo"
 	}
 	
-	if c.Ollama.Model == "" {
-		c.Ollama.Model = "bge-m3:latest"
+	if c.Embedding.Model == "" {
+		c.Embedding.Model = "bge-m3:latest"
 	}
 	
 	if c.SQLite.DBPath == "" {

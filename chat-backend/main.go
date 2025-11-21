@@ -157,10 +157,10 @@ func printBanner() {
 	utils.LogInfo("服务类型: %s", serviceType)
 	
 	if serviceType == "langchaingo" {
-		utils.LogInfo("OpenAI URL: %s", envConfig.Get("LANGCHAINO_OPENAI_BASE_URL"))
-		utils.LogInfo("OpenAI Model: %s", envConfig.Get("LANGCHAINO_OPENAI_MODEL"))
-		utils.LogInfo("Ollama URL: %s", envConfig.Get("LANGCHAINO_OLLAMA_URL"))
-		utils.LogInfo("Ollama Model: %s", envConfig.Get("LANGCHAINO_OLLAMA_MODEL"))
+		utils.LogInfo("LLM URL: %s", envConfig.Get("LANGCHAINO_LLM_BASE_URL"))
+		utils.LogInfo("LLM Model: %s", envConfig.Get("LANGCHAINO_LLM_MODEL"))
+		utils.LogInfo("Embedding URL: %s", envConfig.Get("LANGCHAINO_EMBEDDING_URL"))
+		utils.LogInfo("Embedding Model: %s", envConfig.Get("LANGCHAINO_EMBEDDING_MODEL"))
 		utils.LogInfo("Qdrant URL: %s", envConfig.Get("LANGCHAINO_QDRANT_URL"))
 		utils.LogInfo("Docling URL: %s", envConfig.Get("LANGCHAINO_DOCLING_URL"))
 		utils.LogInfo("SQLite DB: %s", envConfig.Get("LANGCHAINO_SQLITE_DB_PATH"))

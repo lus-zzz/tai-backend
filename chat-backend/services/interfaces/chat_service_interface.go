@@ -18,17 +18,17 @@ type ChatServiceInterface interface {
 	ListConversations(ctx context.Context, page, pageSize int) (*models.ConversationListResponse, error)
 
 	// DeleteConversation 删除对话
-	DeleteConversation(ctx context.Context, conversationID string) error
+	DeleteConversation(ctx context.Context, conversationID int) error
 
 	// GetConversations 获取对话列表 (别名方法)
 	GetConversations(ctx context.Context, page, pageSize int) (*models.ConversationListResponse, error)
 
 	// UpdateConversationSettings 更新对话设置
-	UpdateConversationSettings(ctx context.Context, conversationID string, settings *models.ConversationSettings) error
+	UpdateConversationSettings(ctx context.Context, conversationID int, settings *models.ConversationSettings) error
 
 	// GetConversationSettings 获取对话设置
-	GetConversationSettings(ctx context.Context, conversationID string) (*models.ConversationSettings, error)
+	GetConversationSettings(ctx context.Context, conversationID int) (*models.ConversationSettings, error)
 
 	// GetConversationHistory 获取对话历史记录
-	GetConversationHistory(ctx context.Context, conversationID string) (*models.ConversationHistoryResponse, error)
+	GetConversationHistory(ctx context.Context, conversationID int) (*models.ConversationHistoryResponse, error)
 }

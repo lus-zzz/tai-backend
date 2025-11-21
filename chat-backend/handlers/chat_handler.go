@@ -166,9 +166,16 @@ func (h *ChatHandler) GetConversations(c *gin.Context) {
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ChatHandler) DeleteConversation(c *gin.Context) {
-	conversationID := c.Param("id")
-	if conversationID == "" {
+	conversationIDStr := c.Param("id")
+	if conversationIDStr == "" {
 		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少对话ID", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	conversationID, err := strconv.Atoi(conversationIDStr)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的对话ID", http.StatusBadRequest)
 		utils.RespondWithError(c, apiErr)
 		return
 	}
@@ -176,7 +183,7 @@ func (h *ChatHandler) DeleteConversation(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	err := h.chatService.DeleteConversation(ctx, conversationID)
+	err = h.chatService.DeleteConversation(ctx, conversationID)
 	if err != nil {
 		apiErr := utils.NewAPIError(utils.ErrConversationNotFound, "删除对话失败", http.StatusInternalServerError).WithCause(err)
 		utils.RespondWithError(c, apiErr)
@@ -225,7 +232,7 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 		return
 	}
 
-	if req.SessionID == 0 {
+	if req.ConversationID == 0 {
 		utils.RespondWithBadRequest(c, "会话ID不能为空")
 		return
 	}
@@ -326,9 +333,16 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ChatHandler) GetConversationSettings(c *gin.Context) {
-	conversationID := c.Param("id")
-	if conversationID == "" {
+	conversationIDStr := c.Param("id")
+	if conversationIDStr == "" {
 		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少对话ID", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	conversationID, err := strconv.Atoi(conversationIDStr)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的对话ID", http.StatusBadRequest)
 		utils.RespondWithError(c, apiErr)
 		return
 	}
@@ -378,9 +392,16 @@ func (h *ChatHandler) GetConversationSettings(c *gin.Context) {
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) {
-	conversationID := c.Param("id")
-	if conversationID == "" {
+	conversationIDStr := c.Param("id")
+	if conversationIDStr == "" {
 		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "缺少对话ID", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	conversationID, err := strconv.Atoi(conversationIDStr)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的对话ID", http.StatusBadRequest)
 		utils.RespondWithError(c, apiErr)
 		return
 	}
@@ -396,7 +417,7 @@ func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	err := h.chatService.UpdateConversationSettings(ctx, conversationID, &settings)
+	err = h.chatService.UpdateConversationSettings(ctx, conversationID, &settings)
 	if err != nil {
 		apiErr := utils.NewAPIError(utils.ErrSettingsUpdate, "更新对话设置失败", http.StatusInternalServerError).WithCause(err)
 		utils.RespondWithError(c, apiErr)
@@ -430,9 +451,16 @@ func (h *ChatHandler) UpdateConversationSettings(c *gin.Context) {
 //	400: ErrorResponse
 //	500: ErrorResponse
 func (h *ChatHandler) GetConversationHistory(c *gin.Context) {
-	conversationID := c.Param("id")
-	if conversationID == "" {
+	conversationIDStr := c.Param("id")
+	if conversationIDStr == "" {
 		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "对话ID不能为空", http.StatusBadRequest)
+		utils.RespondWithError(c, apiErr)
+		return
+	}
+
+	conversationID, err := strconv.Atoi(conversationIDStr)
+	if err != nil {
+		apiErr := utils.NewAPIError(utils.ErrInvalidRequest, "无效的对话ID", http.StatusBadRequest)
 		utils.RespondWithError(c, apiErr)
 		return
 	}

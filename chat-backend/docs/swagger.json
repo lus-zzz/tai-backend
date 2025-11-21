@@ -1215,9 +1215,9 @@
       "description": "ChatRequest 聊天请求",
       "type": "object",
       "required": [
-        "sessionId",
+        "conversationId",
         "content",
-        "model_id"
+        "requestId"
       ],
       "properties": {
         "content": {
@@ -1225,69 +1225,16 @@
           "type": "string",
           "x-go-name": "Content"
         },
-        "files": {
-          "description": "文件列表（可选）",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "x-go-name": "Files"
-        },
-        "frequency_penalty": {
-          "description": "频率惩罚",
-          "type": "number",
-          "format": "double",
-          "x-go-name": "FrequencyPenalty"
-        },
-        "knowledge_base_ids": {
-          "description": "知识库ID列表",
-          "type": "array",
-          "items": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "x-go-name": "KnowledgeBaseIDs"
-        },
-        "max_tokens": {
-          "description": "最大token数",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "MaxTokens"
-        },
-        "model_id": {
-          "description": "模型ID",
-          "type": "integer",
-          "format": "int64",
-          "x-go-name": "ModelID"
-        },
-        "presence_penalty": {
-          "description": "存在惩罚",
-          "type": "number",
-          "format": "double",
-          "x-go-name": "PresencePenalty"
-        },
-        "sessionId": {
+        "conversationId": {
           "description": "会话ID",
           "type": "integer",
           "format": "int64",
-          "x-go-name": "SessionID"
+          "x-go-name": "ConversationID"
         },
-        "stream": {
-          "description": "是否流式输出",
-          "type": "boolean",
-          "x-go-name": "Stream"
-        },
-        "temperature": {
-          "description": "温度参数",
-          "type": "number",
-          "format": "double",
-          "x-go-name": "Temperature"
-        },
-        "top_p": {
-          "description": "顶部P参数",
-          "type": "number",
-          "format": "double",
-          "x-go-name": "TopP"
+        "requestId": {
+          "description": "请求唯一uuid",
+          "type": "string",
+          "x-go-name": "RequestID"
         }
       },
       "x-go-package": "chat-backend/models"

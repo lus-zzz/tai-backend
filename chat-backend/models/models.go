@@ -4,44 +4,20 @@ import (
 	"time"
 )
 
-
 // ChatRequest 聊天请求
 // swagger:model
 type ChatRequest struct {
 	// 会话ID
 	// required: true
-	SessionID int `json:"sessionId" example:"123"`
+	ConversationID int `json:"conversationId" example:"123"`
 	// 消息内容
 	// required: true
 	Content string `json:"content" example:"你好"`
-	// 文件列表（可选）
-	// required: false
-	Files []string `json:"files" example:"[]"`
-	// 模型ID
+	// 请求唯一uuid
 	// required: true
-	ModelID int `json:"model_id"`
-	// 温度参数
-	// required: false
-	Temperature float64 `json:"temperature"`
-	// 顶部P参数
-	// required: false
-	TopP float64 `json:"top_p"`
-	// 存在惩罚
-	// required: false
-	PresencePenalty float64 `json:"presence_penalty"`
-	// 频率惩罚
-	// required: false
-	FrequencyPenalty float64 `json:"frequency_penalty"`
-	// 最大token数
-	// required: false
-	MaxTokens int `json:"max_tokens"`
-	// 是否流式输出
-	// required: false
-	Stream bool `json:"stream"`
-	// 知识库ID列表
-	// required: false
-	KnowledgeBaseIDs []int `json:"knowledge_base_ids"`
+	RequestID string `json:"requestId" example:"uuid-v4-string"`
 }
+
 
 // ChatMessageRequest 聊天消息请求（用于Swagger文档）
 // swagger:model
@@ -496,56 +472,6 @@ type FileToggleEnableRequest struct {
 	Enable *bool `json:"enable" example:"true"`
 }
 
-// ModelInfo 模型信息
-// swagger:model
-type ModelInfo struct {
-	// 模型ID
-	// required: true
-	ID int `json:"id"`
-	// 模型名称
-	// required: true
-	Name string `json:"name"`
-	// 模型类型
-	// required: true
-	Type string `json:"type"`
-	// 模型描述
-	// required: true
-	Description string `json:"description"`
-	// 是否启用
-	// required: true
-	Enabled bool `json:"enabled"`
-}
-
-// SupportedChatModel 支持的聊天模型
-// swagger:model
-type SupportedChatModel struct {
-	// 模型ID
-	// required: true
-	ID int `json:"id"`
-	// 模型名称
-	// required: true
-	Name string `json:"name"`
-	// 模型描述
-	// required: true
-	Description string `json:"description"`
-}
-
-// SupportedVectorModel 支持的向量模型
-// swagger:model
-type SupportedVectorModel struct {
-	// 模型ID
-	// required: true
-	ID int `json:"id"`
-	// 模型名称
-	// required: true
-	Name string `json:"name"`
-	// 模型描述
-	// required: true
-	Description string `json:"description"`
-	// 向量维度
-	// required: true
-	Dimensions int `json:"dimensions"`
-}
 
 // ModelID 模型ID响应数据
 // swagger:model
@@ -942,4 +868,61 @@ type SettingNameSuccessResponse struct {
 		// required: true
 		Timestamp string `json:"timestamp"`
 	}
+}
+
+// ====== 模型相关结构体（替换 flowy-sdk 结构体） ======
+
+// LLMProperty 聊天模型属性
+type LLMProperty struct {
+	MaxToken        int    `json:"maxToken"`        // 最大token数
+	ContextLength   int    `json:"contextLength"`   // 上下文长度
+	TokenProportion int    `json:"tokenProportion"` // token比例
+	Stream          bool   `json:"stream"`          // 是否支持流式输出
+	Model           string `json:"model"`           // 模型名称
+	SupportTool     bool   `json:"supportTool"`     // 是否支持工具调用
+	FixQwqThink     bool   `json:"fixQwqThink"`     // 是否修复Qwq思考模式
+}
+
+// EmbeddingProperty 向量模型属性
+type EmbeddingProperty struct {
+	EmbeddingMaxLength int    `json:"embeddingMaxLength"` // 最大嵌入长度
+	EmbeddingDimension int    `json:"embeddingDimension"` // 嵌入维度
+	BatchLimit         int    `json:"batchLimit"`         // 批处理限制
+	Model              string `json:"model"`              // 模型名称
+}
+
+// SupportedChatModel 支持的聊天模型
+type SupportedChatModel struct {
+	Name        string      `json:"name"`        // 模型名称：OpenAI, DeepSeek, Ollama
+	Identify    string      `json:"identify"`    // 模型标识：openai-chat, deepseek-chat, ollama-chat
+	LLMProperty LLMProperty `json:"llmProperty"` // LLM属性
+}
+
+// SupportedVectorModel 支持的向量模型
+type SupportedVectorModel struct {
+	Name             string             `json:"name"`             // 模型名称：Ollama
+	Identify         string             `json:"identify"`         // 模型标识：ollama-embedding
+	LLMProperty      EmbeddingProperty  `json:"llmProperty"`      // 嵌入属性
+}
+
+// ModelInfo 模型信息
+type ModelInfo struct {
+	ID       int    `json:"id"`       // 模型ID
+	Name     string `json:"name"`     // 模型名称
+	Symbol   string `json:"symbol"`   // 模型符号标识
+	Endpoint string `json:"endpoint"` // 模型服务端点
+	Enable   bool   `json:"enable"`   // 是否启用
+	Type     int    `json:"type"`     // 模型类型: 0=聊天模型, 1=嵌入模型
+	Role     string `json:"role"`     // 角色信息
+}
+
+// ModelSaveRequest 添加/修改模型请求
+type ModelSaveRequest struct {
+	ID          int    `json:"id"`          // 模型ID: 0=新建, >0=修改
+	Name        string `json:"name"`        // 模型名称
+	Type        int    `json:"type"`        // 模型类型: 0=聊天模型, 1=嵌入模型
+	Symbol      string `json:"symbol"`      // 模型编码
+	Endpoint    string `json:"endpoint"`    // 模型接入点
+	Enable      bool   `json:"enable"`      // 是否启用
+	Credentials string `json:"credentials"` // 模型鉴权信息
 }

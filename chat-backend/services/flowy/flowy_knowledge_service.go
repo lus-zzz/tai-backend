@@ -1,13 +1,11 @@
 package flowy
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"chat-backend/models"
@@ -125,7 +123,7 @@ func (s *FlowyKnowledgeService) CreateKnowledgeBase(ctx context.Context, req *mo
 }
 
 // UpdateKnowledgeBase 更新知识库
-func (s *FlowyKnowledgeService) UpdateKnowledgeBase(ctx context.Context, id string, req *models.UpdateKnowledgeBaseRequest) (*models.KnowledgeBase, error) {
+func (s *FlowyKnowledgeService) UpdateKnowledgeBase(ctx context.Context, id int, req *models.UpdateKnowledgeBaseRequest) (*models.KnowledgeBase, error) {
 	utils.InfoWith("更新知识库",
 		"id", id,
 		"name", req.Name,
@@ -134,14 +132,8 @@ func (s *FlowyKnowledgeService) UpdateKnowledgeBase(ctx context.Context, id stri
 		"chunkStrategy", req.ChunkStrategy,
 		"chunkSize", req.ChunkSize)
 
-	// 转换ID
-	kbID, err := strconv.Atoi(id)
-	if err != nil {
-		return nil, fmt.Errorf("无效的知识库ID: %w", err)
-	}
-
 	// 调用Flowy SDK更新知识库
-	updateReq := knowledgeSvc.NewDefaultKnowledgeBaseUpdateRequest(kbID, req.Name, req.Desc)
+	updateReq := knowledgeSvc.NewDefaultKnowledgeBaseUpdateRequest(id, req.Name, req.Desc)
 
 	// 使用前端传入的配置覆盖默认值（注意：VectorModel 不能更新）
 	updateReq.AgentModel = req.AgentModel
@@ -164,17 +156,11 @@ func (s *FlowyKnowledgeService) UpdateKnowledgeBase(ctx context.Context, id stri
 }
 
 // DeleteKnowledgeBase 删除知识库
-func (s *FlowyKnowledgeService) DeleteKnowledgeBase(ctx context.Context, id string) error {
-	utils.LogInfo("删除知识库: %s", id)
-
-	// 转换ID
-	kbID, err := strconv.Atoi(id)
-	if err != nil {
-		return fmt.Errorf("无效的知识库ID: %w", err)
-	}
+func (s *FlowyKnowledgeService) DeleteKnowledgeBase(ctx context.Context, id int) error {
+	utils.InfoWith("删除知识库", "id", id)
 
 	// 调用Flowy SDK删除知识库
-	err = s.sdk.Knowledge.DeleteKnowledgeBase(ctx, kbID)
+	err := s.sdk.Knowledge.DeleteKnowledgeBase(ctx, id)
 	if err != nil {
 		utils.ErrorWith("删除知识库失败", "id", id, "error", err)
 		return fmt.Errorf("删除知识库失败: %w", err)
@@ -185,17 +171,11 @@ func (s *FlowyKnowledgeService) DeleteKnowledgeBase(ctx context.Context, id stri
 }
 
 // GetKnowledgeBaseFiles 获取知识库文件列表
-func (s *FlowyKnowledgeService) GetKnowledgeBaseFiles(ctx context.Context, id string) ([]models.KnowledgeFile, error) {
-	utils.LogInfo("获取知识库文件列表: %s", id)
-
-	// 转换ID
-	kbID, err := strconv.Atoi(id)
-	if err != nil {
-		return nil, fmt.Errorf("无效的知识库ID: %w", err)
-	}
+func (s *FlowyKnowledgeService) GetKnowledgeBaseFiles(ctx context.Context, id int) ([]models.KnowledgeFile, error) {
+	utils.InfoWith("获取知识库文件列表", "id", id)
 
 	// 调用Flowy SDK获取文件列表
-	files, err := s.sdk.Knowledge.ListFiles(ctx, kbID, "zh")
+	files, err := s.sdk.Knowledge.ListFiles(ctx, id, "zh")
 	if err != nil {
 		utils.ErrorWith("获取知识库文件列表失败", "id", id, "error", err)
 		return nil, fmt.Errorf("获取知识库文件列表失败: %w", err)
@@ -222,20 +202,11 @@ func (s *FlowyKnowledgeService) GetKnowledgeBaseFiles(ctx context.Context, id st
 }
 
 // UploadFile 上传文件到知识库（文件流上传）
-func (s *FlowyKnowledgeService) UploadFile(ctx context.Context, id string, filename string, content []byte) (*models.KnowledgeFile, error) {
-	utils.LogInfo("上传文件到知识库: %s, 文件: %s", id, filename)
-
-	// 转换ID
-	kbID, err := strconv.Atoi(id)
-	if err != nil {
-		return nil, fmt.Errorf("无效的知识库ID: %w", err)
-	}
-
-	// 创建bytes.Reader
-	reader := bytes.NewReader(content)
+func (s *FlowyKnowledgeService) UploadFile(ctx context.Context, id int, filename string, reader io.Reader) (*models.KnowledgeFile, error) {
+	utils.InfoWith("上传文件到知识库", "id", id, "filename", filename)
 
 	// 调用Flowy SDK上传文件
-	uploadData, err := s.sdk.Knowledge.UploadFile(ctx, reader, filename, kbID, 0, "zh")
+	uploadData, err := s.sdk.Knowledge.UploadFile(ctx, reader, filename, id, 0, "zh")
 	if err != nil {
 		utils.ErrorWith("上传文件失败", "id", id, "filename", filename, "error", err)
 		return nil, fmt.Errorf("上传文件失败: %w", err)
@@ -257,7 +228,7 @@ func (s *FlowyKnowledgeService) UploadFile(ctx context.Context, id string, filen
 }
 
 // UploadFileFromPath 从文件路径上传文件到知识库
-func (s *FlowyKnowledgeService) UploadFileFromPath(ctx context.Context, id string, filePath string) (*models.KnowledgeFile, error) {
+func (s *FlowyKnowledgeService) UploadFileFromPath(ctx context.Context, id int, filePath string) (*models.KnowledgeFile, error) {
 	// 验证文件路径
 	if filePath == "" {
 		return nil, fmt.Errorf("文件路径不能为空")
@@ -280,7 +251,7 @@ func (s *FlowyKnowledgeService) UploadFileFromPath(ctx context.Context, id strin
 	// 获取文件名
 	filename := filepath.Base(filePath)
 
-	utils.LogInfo("从路径上传文件到知识库: %s, 路径: %s, 文件: %s", id, filePath, filename)
+	utils.LogInfo("从路径上传文件到知识库: %d, 路径: %s, 文件: %s", id, filePath, filename)
 
 	// 打开文件
 	file, err := os.Open(filePath)
@@ -289,23 +260,8 @@ func (s *FlowyKnowledgeService) UploadFileFromPath(ctx context.Context, id strin
 	}
 	defer file.Close()
 
-	// 读取文件内容
-	content, err := io.ReadAll(file)
-	if err != nil {
-		return nil, fmt.Errorf("读取文件失败: %w", err)
-	}
-
-	// 转换ID
-	kbID, err := strconv.Atoi(id)
-	if err != nil {
-		return nil, fmt.Errorf("无效的知识库ID: %w", err)
-	}
-
-	// 创建bytes.Reader
-	reader := bytes.NewReader(content)
-
-	// 调用Flowy SDK上传文件
-	uploadData, err := s.sdk.Knowledge.UploadFile(ctx, reader, filename, kbID, 0, "zh")
+	// 调用Flowy SDK上传文件，直接传递文件 reader
+	uploadData, err := s.sdk.Knowledge.UploadFile(ctx, file, filename, id, 0, "zh")
 	if err != nil {
 		utils.ErrorWith("从路径上传文件失败", "id", id, "path", filePath, "filename", filename, "error", err)
 		return nil, fmt.Errorf("上传文件失败: %w", err)
@@ -327,12 +283,12 @@ func (s *FlowyKnowledgeService) UploadFileFromPath(ctx context.Context, id strin
 }
 
 // BatchUploadFilesFromPath 批量从文件路径上传文件到知识库
-func (s *FlowyKnowledgeService) BatchUploadFilesFromPath(ctx context.Context, id string, filePaths []string) (*models.BatchUploadResponse, error) {
+func (s *FlowyKnowledgeService) BatchUploadFilesFromPath(ctx context.Context, id int, filePaths []string) (*models.BatchUploadResponse, error) {
 	if len(filePaths) == 0 {
 		return nil, fmt.Errorf("文件路径列表不能为空")
 	}
 
-	utils.LogInfo("开始批量上传文件到知识库: %s, 文件数: %d", id, len(filePaths))
+	utils.LogInfo("开始批量上传文件到知识库: %d, 文件数: %d", id, len(filePaths))
 
 	response := &models.BatchUploadResponse{
 		Total:   len(filePaths),
